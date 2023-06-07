@@ -1,14 +1,14 @@
 package ru.practicum.shareit.item.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.request.ItemRequest;
-import ru.practicum.shareit.user.User;
 
 /**
  * TODO Sprint add-controllers.
  */
 @Data
+//@AllArgsConstructor
 public class Item {
     //id — уникальный идентификатор вещи;
     //name — краткое название;
@@ -20,7 +20,14 @@ public class Item {
     private long id;
     private String name;
     private String description;
-    private Booking available;
-    private User owner;
+    private boolean available;
+    private long owner;
     private ItemRequest request;
+
+    public Item(String name, String description, boolean available) {
+        this.name = name;
+        this.description = description;
+        this.available = available;
+    }
 }
+
