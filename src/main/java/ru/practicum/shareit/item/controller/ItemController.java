@@ -8,7 +8,11 @@ import ru.practicum.shareit.exceptions.ValidateException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.validation.ValidationService;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 import static ru.practicum.shareit.item.mapper.ItemMapper.toItem;
@@ -25,18 +29,16 @@ public class ItemController {
     private final ItemService itemService;
     private final UserService userService;
 
+    private final ValidationService validationService;
+
     //Добавление новой вещи. Будет происходить по эндпойнту POST /items. На вход поступает объект ItemDto.
     // userId в заголовке X-Sharer-User-Id — это идентификатор пользователя, который добавляет вещь.
     // Именно этот пользователь — владелец вещи. Идентификатор владельца будет поступать на вход в каждом из запросов,
     // рассмотренных далее.
     @PostMapping
-    public ItemDto addItem(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
-                           @RequestBody ItemDto itemDto) {
-        if (ownerId == null) {
-            log.info("Ошибка 400. Неообходимо передать ID хозяина вещи.");
-            throw new ValidateException("Неообходимо передать ID хозяина вещи.");
-        }
-        //userService.getUserById(ownerId);
+    public ItemDto addItem(@Valid @Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
+                           @Valid @RequestBody ItemDto itemDto) {
+        userService.getUserById(ownerId);
         log.info("Добавляем вещь: " + itemDto.getName());
         return toItemDto(itemService.addItem(toItem(itemDto), ownerId));
     }
@@ -44,8 +46,8 @@ public class ItemController {
     //Редактирование вещи. Эндпойнт PATCH /items/{itemId}. Изменить можно название, описание и статус доступа к аренде.
     // Редактировать вещь может только её владелец.
     @PatchMapping("/{itemId}")
-    public ItemDto editItem(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
-                            @PathVariable Long itemId, @Validated @RequestBody ItemDto itemDto) {
+    public ItemDto updateItem(@Valid @Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
+                              @Valid @Min(1) @NotNull @PathVariable Long itemId, @Validated @RequestBody ItemDto itemDto) {
         itemService.getItemById(itemId);
         log.info("Обновляем вещь: " + itemDto.getName());
         //Item item = toItem(itemDto);

@@ -13,23 +13,20 @@ import javax.validation.constraints.NotBlank;
  * TODO Sprint add-controllers.
  */
 @Data
-//@RequiredArgsConstructor
+@AllArgsConstructor
 @Validated
 public class User {
     //id — уникальный идентификатор пользователя;
     //name — имя или логин пользователя;
     //email — адрес электронной почты (учтите, что два пользователя не могут
     //иметь одинаковый адрес электронной почты).
+
     @Min(1)
-    private long id;
+    private Long id;
     @NotBlank
     private String name;
     @NotBlank
     @Email
     private String email;
 
-    public User(String name, String email) {
-        this.name = name;
-        this.email = email;
-    }
 }

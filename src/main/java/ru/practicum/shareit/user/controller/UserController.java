@@ -14,6 +14,9 @@ import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.validation.ValidationService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
+
+import java.util.List;
 
 import static ru.practicum.shareit.item.mapper.ItemMapper.toItem;
 import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
@@ -38,19 +41,35 @@ public class UserController {
     //Также реализуйте сохранение данных о пользователях в памяти.
     @PostMapping
     public UserDto addUser(@Valid @RequestBody UserDto userDto) {
-        validationService.checkUniqueEmailUser(toUser(userDto));
+        validationService.checkUniqueEmailUserAdd(toUser(userDto));
         log.info("Добавляем пользователя по имени: " + userDto.getName());
         return toUserDto(userService.addUser(toUser(userDto)));
     }
 
     @PatchMapping("/{userId}")
-    public UserDto updateUser(@PathVariable Long userId, @Valid @RequestBody UserDto userDto) {
-        validationService.checkIdUser(userId);
+    public UserDto updateUser(@Valid @Min(1) @PathVariable Long userId, @Valid @RequestBody UserDto userDto) {
         userService.getUserById(userId);
-
-        //validationService.checkUniqueEmailUser(toUser(userDto));
-
+        userDto.setId(userId);
+        validationService.checkUniqueEmailUserUpdate(toUser(userDto));
         log.info("Обновляем пользователя по Id=" + userId);
-        return toUserDto(userService.updateUser(toUser(userDto), userId));
+        return toUserDto(userService.updateUser(toUser(userDto)));
+    }
+
+    @GetMapping("/{userId}")
+    public UserDto updateUser(@Valid @Min(1) @PathVariable Long userId) {
+        log.info("Получаем пользователя по Id=" + userId);
+        return toUserDto(userService.getUserById(userId));
+    }
+
+    @DeleteMapping("/{userId}")
+    public void deleteUser(@Valid @Min(1) @PathVariable Long userId) {
+        log.info("Удалаяем пользователя по Id=" + userId);
+        userService.deleteUser(userId);
+    }
+
+    @GetMapping
+    public List<User> getListUsers() {
+        log.info("Получаем список всех пользователей");
+        return userService.getListUsers();
     }
 }
