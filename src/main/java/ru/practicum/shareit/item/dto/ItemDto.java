@@ -15,15 +15,15 @@ import javax.validation.constraints.NotBlank;
 //@AllArgsConstructor
 public class ItemDto {
 
-    private long id;
+    private Long id;
     @NotBlank
     private String name;
     @NotBlank
     private String description;
     @AssertTrue
-    private Boolean available;
-    private long request;
-    private long ownerId;
+    private boolean available;
+    private Long request;
+    private Long ownerId;
 
     public ItemDto(long id, String name, String description, boolean available) {
         this.id = id;

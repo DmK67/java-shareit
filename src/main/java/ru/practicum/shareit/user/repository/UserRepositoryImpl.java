@@ -62,18 +62,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public List<User> getListUsers() {
-        //List<User> listUser= new ArrayList<>(userMap.values());
         return new ArrayList<>(userMap.values());
     }
-
-//    @Override
-//    public User searchUserByEmail(String email) {
-//        for (User value : userMap.values()) {
-//            if (value.getEmail().equals(email)) {
-//                return value;
-//            }
-//        }
-//        throw new NotFoundException("Пользователь с e-mail: " + email + " отсутствует");
-//    }
 
 }

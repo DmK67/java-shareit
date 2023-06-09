@@ -20,4 +20,9 @@ public class ItemServiceImpl implements ItemService {
     public Item getItemById(long id) {
         return repository.getItemById(id);
     }
+
+    @Override
+    public Item updateItem(Item item) {
+        return repository.updateItem(item);
+    }
 }

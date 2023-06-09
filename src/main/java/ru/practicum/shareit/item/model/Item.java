@@ -2,13 +2,17 @@ package ru.practicum.shareit.item.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.springframework.validation.annotation.Validated;
 import ru.practicum.shareit.request.ItemRequest;
+
+import javax.validation.constraints.Min;
 
 /**
  * TODO Sprint add-controllers.
  */
 @Data
 //@AllArgsConstructor
+@Validated
 public class Item {
     //id — уникальный идентификатор вещи;
     //name — краткое название;
@@ -17,14 +21,17 @@ public class Item {
     //owner — владелец вещи;
     //request — если вещь была создана по запросу другого пользователя, то в этом
     //поле будет храниться ссылка на соответствующий запрос.
-    private long id;
+
+    //@Min(1)
+    private Long id;
     private String name;
     private String description;
     private boolean available;
-    private long owner;
+    private Long owner;
     private ItemRequest request;
 
-    public Item(String name, String description, boolean available) {
+    public Item(Long id, String name, String description, boolean available) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.available = available;

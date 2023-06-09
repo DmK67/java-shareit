@@ -6,12 +6,15 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.exceptions.ValidateException;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.validation.ValidationService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -25,6 +28,7 @@ import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
 @Slf4j
 @RequestMapping("/items")
 @AllArgsConstructor
+@Validated
 public class ItemController {
     private final ItemService itemService;
     private final UserService userService;
@@ -36,7 +40,7 @@ public class ItemController {
     // Именно этот пользователь — владелец вещи. Идентификатор владельца будет поступать на вход в каждом из запросов,
     // рассмотренных далее.
     @PostMapping
-    public ItemDto addItem(@Valid @Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
+    public ItemDto addItem(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
                            @Valid @RequestBody ItemDto itemDto) {
         userService.getUserById(ownerId);
         log.info("Добавляем вещь: " + itemDto.getName());
@@ -46,13 +50,14 @@ public class ItemController {
     //Редактирование вещи. Эндпойнт PATCH /items/{itemId}. Изменить можно название, описание и статус доступа к аренде.
     // Редактировать вещь может только её владелец.
     @PatchMapping("/{itemId}")
-    public ItemDto updateItem(@Valid @Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
-                              @Valid @Min(1) @NotNull @PathVariable Long itemId, @Validated @RequestBody ItemDto itemDto) {
+    public ItemDto updateItem(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
+                              @Valid @Min(1) @NotNull @PathVariable Long itemId, @RequestBody ItemDto itemDto) {
         itemService.getItemById(itemId);
+        itemDto.setId(itemId);
+        userService.getUserById(ownerId);
+        validationService.checkOwnerItem(itemId, ownerId);
         log.info("Обновляем вещь: " + itemDto.getName());
-        //Item item = toItem(itemDto);
-
-        return null;
+        return toItemDto(itemService.updateItem(toItem(itemDto)));
     }
 
     //Просмотр информации о конкретной вещи по её идентификатору. Эндпойнт GET /items/{itemId}.

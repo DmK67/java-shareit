@@ -15,9 +15,10 @@ public class ItemMapper {
 
     public static Item toItem(ItemDto itemDto) {
         return new Item(
+                itemDto.getId() != null ? itemDto.getId() : null,
                 itemDto.getName(),
                 itemDto.getDescription(),
-                itemDto.getAvailable()
+                itemDto.isAvailable()
         );
     }
 
