@@ -24,7 +24,7 @@ public class ValidationService {
             throw new ValidateException("Ошибка! Пользователь с пустым e-mail не может быть добавлен!");
         }
         for (User listUser : userRepository.getListUsers()) {
-            if (listUser.getEmail().equals(user.getEmail()) && listUser.getId() != user.getId()) {
+            if (listUser.getEmail().equals(user.getEmail()) && !listUser.getId().equals(user.getId())) {
                 log.error("Ошибка! Пользователь с e-mail: {} уже существует!", user.getEmail());
                 throw new ConflictException("Ошибка! Пользователь с e-mail " + user.getEmail() + " уже существует!");
             }
@@ -33,7 +33,7 @@ public class ValidationService {
 
     public void checkUniqueEmailUserUpdate(User user) { // Метод проверки уникальности e-mail при обновлении
         for (User u : userRepository.getListUsers()) {
-            if (u.getEmail().equals(user.getEmail()) && u.getId() != user.getId()) {
+            if (u.getEmail().equals(user.getEmail()) && !u.getId().equals(user.getId())) {
                 log.error("Ошибка! Пользователь с e-mail: {} уже существует!", user.getEmail());
                 throw new ConflictException("Ошибка! Пользователь с e-mail " + user.getEmail() + " уже существует!");
             }
@@ -41,7 +41,7 @@ public class ValidationService {
     }
 
     public void checkOwnerItem(Long itemId, Long ownerId) { // Метод проверки соответствия владельца вещи
-        if (itemRepository.getItemMap().get(itemId).getOwner() != ownerId) {
+        if (!itemRepository.getItemMap().get(itemId).getOwner().equals(ownerId)) {
             log.error("Ошибка! Пользователь по Id: {} не является владельцем вещи! " +
                     "Изменение вещи ЗАПРЕЩЕНО!", ownerId);
             throw new ForbiddenException("Вносить изменения в параметры вещи может только владелец!");

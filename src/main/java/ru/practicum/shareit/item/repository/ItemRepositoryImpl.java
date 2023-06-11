@@ -61,7 +61,7 @@ public class ItemRepositoryImpl implements ItemRepository {
         if (updateItem.getAvailable() != item.getAvailable()) {
             updateItem.setAvailable(item.getAvailable());
         }
-        if (updateItem.getOwner() != item.getOwner()) {
+        if (!updateItem.getOwner().equals(item.getOwner())) {
             updateItem.setOwner(item.getOwner());
         }
         itemMap.put(updateItem.getId(), updateItem);
