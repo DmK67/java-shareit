@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user.repository;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.user.model.User;
@@ -10,33 +11,32 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
+@Slf4j
 public class UserRepositoryImpl implements UserRepository {
     Map<Long, User> userMap = new HashMap<>();
     private Long count = 0L;
 
     @Override
-    public User addUser(User user) {
+    public User addUser(User user) { // Метод добавления пользователя
         user.setId(++count);
         userMap.put(user.getId(), user);
+        log.info("Пользователь {} успешно добавлен!", userMap.get(user.getId()));
         return userMap.get(user.getId());
     }
 
     @Override
-    public User getUserById(long id) {
+    public User getUserById(long id) { // Метод получения пользователя по id
         if (userMap.containsKey(id)) {
+            log.info("Вывод пользователя по id={}.", id);
             return userMap.get(id);
         } else {
-            throw new NotFoundException("Пользователь по id=" + id + " не существует");
+            log.error("Ошибка! Пользователь по id={} отсутствует в памяти.", id);
+            throw new NotFoundException("Пользователь по id=" + id + " не существует!");
         }
     }
 
     @Override
-    public Map<Long, User> getUserMap() {
-        return userMap;
-    }
-
-    @Override
-    public User updateUser(User user) {
+    public User updateUser(User user) { // Метод обновления пользователя
         User updateUser = userMap.get(user.getId());
         if (user.getName() == null) {
             user.setName(updateUser.getName());
@@ -50,18 +50,20 @@ public class UserRepositoryImpl implements UserRepository {
         if (!user.getEmail().isBlank() && !updateUser.getEmail().equals(user.getEmail())) {
             updateUser.setEmail(user.getEmail());
         }
-        userMap.remove(user.getId());
         userMap.put(updateUser.getId(), updateUser);
+        log.info("Пользователь по id={} успешно обновлен!", user.getId());
         return userMap.get(updateUser.getId());
     }
 
     @Override
-    public void deleteUser(Long id) {
+    public void deleteUser(Long id) { // Метод удаления пользователя по id
         userMap.remove(id);
+        log.info("Пользователь по id={} успешно удален!", id);
     }
 
     @Override
-    public List<User> getListUsers() {
+    public List<User> getListUsers() { // Метод получения списка всех пользователей
+        log.info("Выводим список всех пользователей.");
         return new ArrayList<>(userMap.values());
     }
 

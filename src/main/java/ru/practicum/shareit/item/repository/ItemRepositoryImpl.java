@@ -1,38 +1,47 @@
 package ru.practicum.shareit.item.repository;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
 
 @Repository
 @Data
+@Slf4j
 public class ItemRepositoryImpl implements ItemRepository {
     Map<Long, Item> itemMap = new HashMap<>();
     private Long count = 0L;
 
     @Override
-    public Item add(Item item) {
+    public Item add(Item item) { // Метод добавление вещи
         item.setId(++count);
+        log.info("Вещь: {} под id={} успешно добавлена!", item.getName(), item.getId());
         itemMap.put(item.getId(), item);
         return itemMap.get(item.getId());
     }
 
     @Override
-    public Item getItemById(long id) {
+    public Item getItemById(long id) { // Метод получения вещи по id
         if (itemMap.containsKey(id)) {
+            log.info("Вывод вещи по id={}", id);
             return itemMap.get(id);
         } else {
+            log.error("Вещь по id={} отсутствует в памяти.", id);
             throw new NotFoundException("Вещь по id=" + id + " не существует");
         }
     }
 
     @Override
-    public Item updateItem(Item item) {
+    public Item updateItem(Item item) { // Метод обновления вещи
         Item updateItem = itemMap.get(item.getId());
         if (item.getName() == null) {
             item.setName(updateItem.getName());
@@ -46,25 +55,43 @@ public class ItemRepositoryImpl implements ItemRepository {
         if (!item.getDescription().isBlank() && !updateItem.getDescription().equals(item.getDescription())) {
             updateItem.setDescription(item.getDescription());
         }
-        if (updateItem.isAvailable() != item.isAvailable()) {
-            updateItem.setAvailable(item.isAvailable());
+        if (item.getAvailable() == null) {
+            item.setAvailable(updateItem.getAvailable());
+        }
+        if (updateItem.getAvailable() != item.getAvailable()) {
+            updateItem.setAvailable(item.getAvailable());
         }
         if (updateItem.getOwner() != item.getOwner()) {
             updateItem.setOwner(item.getOwner());
         }
-
-        itemMap.remove(item.getId());
         itemMap.put(updateItem.getId(), updateItem);
+        log.info("Вещь: {} успешно обновлена", itemMap.get(updateItem.getId()));
         return itemMap.get(updateItem.getId());
+    }
 
-//        if (user.getEmail() == null) {
-//            user.setEmail(updateUser.getEmail());
-//        }
-//        if (!user.getEmail().isBlank() && !updateUser.getEmail().equals(user.getEmail())) {
-//            updateUser.setEmail(user.getEmail());
-//        }
-//        userMap.remove(user.getId());
-//        userMap.put(updateUser.getId(), updateUser);
-//        return userMap.get(updateUser.getId());
+    @Override
+    public List<ItemDto> getListItemsUserById(Long ownerId) { // Метод получения списка вещей пользователя по id
+        List<ItemDto> listItemsDtoUser = new ArrayList<>();
+        for (Item item : itemMap.values()) {
+            if (item.getOwner().equals(ownerId)) {
+                listItemsDtoUser.add(toItemDto(item));
+            }
+        }
+        log.info("Вывод вещей поьзователя по id={}", ownerId);
+        return listItemsDtoUser;
+    }
+
+    @Override
+    public List<ItemDto> getSearchItems(String text) { // Метод поиска вещей по строке
+        text = text.toLowerCase();
+        List<ItemDto> listItemDtoResult = new ArrayList<>();
+        for (Item item : itemMap.values()) {
+            if ((item.getName().toLowerCase().indexOf(text) != -1 && item.getAvailable() == true)
+                    || (item.getDescription().toLowerCase().indexOf(text) != -1 && item.getAvailable() == true)) {
+                listItemDtoResult.add(toItemDto(item));
+            }
+        }
+        log.info("Вывод списка вещей удовлетворяющих поиску");
+        return listItemDtoResult;
     }
 }

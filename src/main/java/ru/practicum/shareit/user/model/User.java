@@ -2,7 +2,6 @@ package ru.practicum.shareit.user.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.Email;
@@ -16,10 +15,11 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @Validated
 public class User {
-    //id — уникальный идентификатор пользователя;
-    //name — имя или логин пользователя;
-    //email — адрес электронной почты (учтите, что два пользователя не могут
-    //иметь одинаковый адрес электронной почты).
+    /**
+     * id — уникальный идентификатор пользователя;
+     * name — имя или логин пользователя;
+     * email — адрес электронной почты (учтите, что два пользователя не могут иметь одинаковый адрес электронной почты).
+     */
 
     @Min(1)
     private Long id;

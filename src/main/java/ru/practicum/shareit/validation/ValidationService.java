@@ -18,48 +18,43 @@ public class ValidationService {
     UserRepository userRepository;
     ItemRepository itemRepository;
 
-    public void checkUniqueEmailUserAdd(User user) {
+    public void checkUniqueEmailUserAdd(User user) { // Метод проверки уникальности e-mail при добавлении
         if (user.getEmail() == null || user.getEmail().isBlank()) {
             log.error("Ошибка! Пользователь с пустым e-mail не может быть добавлен!");
             throw new ValidateException("Ошибка! Пользователь с пустым e-mail не может быть добавлен!");
         }
-        if (!userRepository.getUserMap().containsKey(user.getId())) {
-            for (User u : userRepository.getUserMap().values()) {
-                if (u.getEmail().equals(user.getEmail())) {
-                    log.error("Ошибка! Пользователь с e-mail: " + user.getEmail() + " уже существует!");
-                    throw new ConflictException("Ошибка! Пользователь с e-mail " + user.getEmail() + " уже существует!");
-                }
-            }
-        } else {
-            for (User u : userRepository.getUserMap().values()) {
-                if (u.getEmail().equals(user.getEmail()) && u.getId() != user.getId()) {
-                    log.error("Ошибка! Пользователь с e-mail: " + user.getEmail() + " уже существует!");
-                    throw new ConflictException("Ошибка! Пользователь с e-mail " + user.getEmail() + " уже существует!");
-                }
-            }
-        }
-    }
-
-    public void checkUniqueEmailUserUpdate(User user) {
-        for (User u : userRepository.getUserMap().values()) {
-            if (u.getEmail().equals(user.getEmail()) && u.getId() != user.getId()) {
-                log.error("Ошибка! Пользователь с e-mail: " + user.getEmail() + " уже существует!");
+        for (User listUser : userRepository.getListUsers()) {
+            if (listUser.getEmail().equals(user.getEmail()) && listUser.getId() != user.getId()) {
+                log.error("Ошибка! Пользователь с e-mail: {} уже существует!", user.getEmail());
                 throw new ConflictException("Ошибка! Пользователь с e-mail " + user.getEmail() + " уже существует!");
             }
         }
     }
 
-    public void checkOwnerItem(Long itemId, Long ownerId) {
+    public void checkUniqueEmailUserUpdate(User user) { // Метод проверки уникальности e-mail при обновлении
+        for (User u : userRepository.getListUsers()) {
+            if (u.getEmail().equals(user.getEmail()) && u.getId() != user.getId()) {
+                log.error("Ошибка! Пользователь с e-mail: {} уже существует!", user.getEmail());
+                throw new ConflictException("Ошибка! Пользователь с e-mail " + user.getEmail() + " уже существует!");
+            }
+        }
+    }
+
+    public void checkOwnerItem(Long itemId, Long ownerId) { // Метод проверки соответствия владельца вещи
         if (itemRepository.getItemMap().get(itemId).getOwner() != ownerId) {
-            log.error("Ошибка! Пользователь по Id: " + ownerId + " не является владельцем вещи! " +
-                    "Изменение вещи ЗАПРЕЩЕНО!");
+            log.error("Ошибка! Пользователь по Id: {} не является владельцем вещи! " +
+                    "Изменение вещи ЗАПРЕЩЕНО!", ownerId);
             throw new ForbiddenException("Вносить изменения в параметры вещи может только владелец!");
         }
     }
 
-//    public void checkItemDtoAvailable(boolean available, Long id, ItemDto itemDto) {
-//        if (!available == itemRepository.getItemById(id).isAvailable()) {
-//            itemDto.setAvailable(itemRepository.getItemById(id).isAvailable());
-//        }
-//    }
+    public void checkItemDtoWhenAdd(ItemDto itemDto) { // Метод проверки полей объекта itemDto перед добавлением
+        if (itemDto.getAvailable() == null
+                || itemDto.getName() == null || itemDto.getName().isBlank()
+                || itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
+            log.error("Ошибка! Вещь с пустыми полями не может быть добавлена!");
+            throw new ValidateException("Ошибка! Вещь с пустыми полями не может быть добавлена!");
+        }
+    }
+
 }
