@@ -11,25 +11,30 @@ import java.time.LocalDateTime;
  */
 @Data
 public class Booking {
-    //id — уникальный идентификатор бронирования;
-    //start — дата и время начала бронирования;
-    //end — дата и время конца бронирования;
-    //item — вещь, которую пользователь бронирует;
-    //booker — пользователь, который осуществляет бронирование;
-    //status — статус бронирования. Может принимать одно из следующих
-    //значений: WAITING — новое бронирование, ожидает одобрения, APPROVED —
-    //бронирование подтверждено владельцем, REJECTED — бронирование
-    //отклонено владельцем, CANCELED — бронирование отменено создателем.
-    private long id;
+    /**
+     * id — уникальный идентификатор бронирования;
+     * start — дата и время начала бронирования;
+     * end — дата и время конца бронирования;
+     * item — вещь, которую пользователь бронирует;
+     * booker — пользователь, который осуществляет бронирование;
+     * status — статус бронирования. Может принимать одно из следующих значений:
+     * WAITING — новое бронирование, ожидает одобрения,
+     * APPROVED — бронирование подтверждено владельцем,
+     * REJECTED — бронирование отклонено владельцем,
+     * CANCELED — бронирование отменено создателем.
+     */
+    private Long id;
     private LocalDateTime start;
     private LocalDateTime end;
     private Item item;
     private User booker;
     private Status status;
+
+    enum Status {
+        WAITING,
+        APPROVED,
+        REJECTED,
+        CANCELED
+    }
 }
-enum Status {
-    WAITING,
-    APPROVED,
-    REJECTED,
-    CANCELED
-}
+
