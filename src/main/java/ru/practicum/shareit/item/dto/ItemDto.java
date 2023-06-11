@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.validation.annotation.Validated;
 
@@ -22,13 +23,14 @@ public class ItemDto {
     private String description;
     @AssertTrue
     private boolean available;
-    private Long request;
     private Long ownerId;
+    private Long request;
 
-    public ItemDto(long id, String name, String description, boolean available) {
+    public ItemDto(Long id, String name, String description, boolean available, Long ownerId) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.available = available;
+        this.ownerId = ownerId;
     }
 }

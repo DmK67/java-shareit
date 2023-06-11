@@ -43,6 +43,7 @@ public class ItemController {
     public ItemDto addItem(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
                            @Valid @RequestBody ItemDto itemDto) {
         userService.getUserById(ownerId);
+        itemDto.setOwnerId(ownerId);
         log.info("Добавляем вещь: " + itemDto.getName());
         return toItemDto(itemService.addItem(toItem(itemDto), ownerId));
     }
@@ -55,8 +56,13 @@ public class ItemController {
         itemService.getItemById(itemId);
         itemDto.setId(itemId);
         userService.getUserById(ownerId);
+        itemDto.setOwnerId(ownerId);
         validationService.checkOwnerItem(itemId, ownerId);
-        log.info("Обновляем вещь: " + itemDto.getName());
+//        ItemDto itemDto1 = itemDto;
+//        Item item1 = toItem(itemDto);
+
+        //validationService.checkItemDtoAvailable(itemDto.isAvailable(), itemId, itemDto);
+        log.info("Обновляем вещь по Id: " + itemId);
         return toItemDto(itemService.updateItem(toItem(itemDto)));
     }
 

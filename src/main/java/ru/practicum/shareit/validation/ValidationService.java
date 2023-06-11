@@ -56,4 +56,10 @@ public class ValidationService {
             throw new ForbiddenException("Вносить изменения в параметры вещи может только владелец!");
         }
     }
+
+//    public void checkItemDtoAvailable(boolean available, Long id, ItemDto itemDto) {
+//        if (!available == itemRepository.getItemById(id).isAvailable()) {
+//            itemDto.setAvailable(itemRepository.getItemById(id).isAvailable());
+//        }
+//    }
 }

@@ -40,6 +40,9 @@ public class ItemRepositoryImpl implements ItemRepository {
         if (!item.getName().isBlank() && !updateItem.getName().equals(item.getName())) {
             updateItem.setName(item.getName());
         }
+        if (item.getDescription() == null) {
+            item.setDescription(updateItem.getDescription());
+        }
         if (!item.getDescription().isBlank() && !updateItem.getDescription().equals(item.getDescription())) {
             updateItem.setDescription(item.getDescription());
         }

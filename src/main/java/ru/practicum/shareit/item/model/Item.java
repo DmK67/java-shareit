@@ -11,7 +11,7 @@ import javax.validation.constraints.Min;
  * TODO Sprint add-controllers.
  */
 @Data
-//@AllArgsConstructor
+@AllArgsConstructor
 @Validated
 public class Item {
     //id — уникальный идентификатор вещи;
@@ -22,7 +22,7 @@ public class Item {
     //request — если вещь была создана по запросу другого пользователя, то в этом
     //поле будет храниться ссылка на соответствующий запрос.
 
-    //@Min(1)
+
     private Long id;
     private String name;
     private String description;
@@ -30,11 +30,12 @@ public class Item {
     private Long owner;
     private ItemRequest request;
 
-    public Item(Long id, String name, String description, boolean available) {
+    public Item(Long id, String name, String description, boolean available, Long owner) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.available = available;
+        this.owner = owner;
     }
 }
 
