@@ -6,8 +6,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.user.service.UserService;
-import ru.practicum.shareit.validation.ValidationService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -27,8 +25,6 @@ import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
 @Validated
 public class ItemController {
     private final ItemService itemService;
-    private final UserService userService;
-    private final ValidationService validationService;
 
     /**
      * Добавление новой вещи. Будет происходить по эндпойнту POST /items. На вход поступает объект ItemDto.
@@ -39,9 +35,6 @@ public class ItemController {
     @PostMapping // Метод добавления вещи
     public ItemDto addItem(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
                            @RequestBody ItemDto itemDto) {
-        userService.getUserById(ownerId); // // Проверяем владельца вещи по id на существование в памяти
-        itemDto.setOwnerId(ownerId);
-        validationService.checkItemDtoWhenAdd(itemDto); // Проверяем поля объекта itemDto перед добавлением
         log.info("Добавляем вещь: {}", itemDto.getName());
         return toItemDto(itemService.addItem(toItem(itemDto), ownerId));
     }
@@ -53,13 +46,8 @@ public class ItemController {
     @PatchMapping("/{itemId}") // Метод обновления вещи по id
     public ItemDto updateItem(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
                               @Valid @Min(1) @NotNull @PathVariable Long itemId, @RequestBody ItemDto itemDto) {
-        itemService.getItemById(itemId); // Проверяем вещь по id на существование в памяти
-        itemDto.setId(itemId);
-        userService.getUserById(ownerId); // Проверяем владельца вещи по id на существование в памяти
-        itemDto.setOwnerId(ownerId);
-        validationService.checkOwnerItem(itemId, ownerId); // Проверяем соответствие владельца вещи
         log.info("Обновляем вещь по Id={}", itemId);
-        return toItemDto(itemService.updateItem(toItem(itemDto)));
+        return toItemDto(itemService.updateItem(toItem(itemDto), itemId, ownerId));
     }
 
     /**
@@ -69,10 +57,8 @@ public class ItemController {
     @GetMapping("/{itemId}") // Метод получения вещи по ее id
     public ItemDto getItemById(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
                                @Valid @Min(1) @NotNull @PathVariable Long itemId) {
-        itemService.getItemById(itemId); // Проверяем вещь по id на существование в памяти
-        userService.getUserById(ownerId); // Проверяем владельца вещи по id на существование в памяти
         log.info("Просмотр вещи по Id={}", itemId);
-        return toItemDto(itemService.getItemById(itemId));
+        return toItemDto(itemService.getItemById(itemId, ownerId));
     }
 
     /**
@@ -80,7 +66,6 @@ public class ItemController {
      */
     @GetMapping //Метод получения списка вещей владельца
     public List<ItemDto> getListItems(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId) {
-        userService.getUserById(ownerId); // Проверяем владельца вещи по id на существование в памяти
         log.info("Просмотр вещей пользователя по Id={}", ownerId);
         return itemService.getListItemsUserById(ownerId);
     }

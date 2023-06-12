@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.booking.model;
 
 import lombok.Data;
 import ru.practicum.shareit.item.model.Item;
@@ -30,11 +30,5 @@ public class Booking {
     private User booker;
     private Status status;
 
-    enum Status {
-        WAITING,
-        APPROVED,
-        REJECTED,
-        CANCELED
-    }
 }
 

@@ -18,7 +18,7 @@ import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
 @Data
 @Slf4j
 public class ItemRepositoryImpl implements ItemRepository {
-    Map<Long, Item> itemMap = new HashMap<>();
+    private Map<Long, Item> itemMap = new HashMap<>();
     private Long count = 0L;
 
     @Override
@@ -42,31 +42,9 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     @Override
     public Item updateItem(Item item) { // Метод обновления вещи
-        Item updateItem = itemMap.get(item.getId());
-        if (item.getName() == null) {
-            item.setName(updateItem.getName());
-        }
-        if (!item.getName().isBlank() && !updateItem.getName().equals(item.getName())) {
-            updateItem.setName(item.getName());
-        }
-        if (item.getDescription() == null) {
-            item.setDescription(updateItem.getDescription());
-        }
-        if (!item.getDescription().isBlank() && !updateItem.getDescription().equals(item.getDescription())) {
-            updateItem.setDescription(item.getDescription());
-        }
-        if (item.getAvailable() == null) {
-            item.setAvailable(updateItem.getAvailable());
-        }
-        if (updateItem.getAvailable() != item.getAvailable()) {
-            updateItem.setAvailable(item.getAvailable());
-        }
-        if (!updateItem.getOwner().equals(item.getOwner())) {
-            updateItem.setOwner(item.getOwner());
-        }
-        itemMap.put(updateItem.getId(), updateItem);
-        log.info("Вещь: {} успешно обновлена", itemMap.get(updateItem.getId()));
-        return itemMap.get(updateItem.getId());
+        itemMap.put(item.getId(), item);
+        log.info("Вещь: {} успешно обновлена", itemMap.get(item.getId()));
+        return itemMap.get(item.getId());
     }
 
     @Override
@@ -86,8 +64,8 @@ public class ItemRepositoryImpl implements ItemRepository {
         text = text.toLowerCase();
         List<ItemDto> listItemDtoResult = new ArrayList<>();
         for (Item item : itemMap.values()) {
-            if ((item.getName().toLowerCase().indexOf(text) != -1 && item.getAvailable() == true)
-                    || (item.getDescription().toLowerCase().indexOf(text) != -1 && item.getAvailable() == true)) {
+            if ((item.getName().toLowerCase().contains(text) && item.getAvailable())
+                    || (item.getDescription().toLowerCase().contains(text) && item.getAvailable())) {
                 listItemDtoResult.add(toItemDto(item));
             }
         }

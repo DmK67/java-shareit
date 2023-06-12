@@ -8,9 +8,9 @@ import java.util.List;
 public interface ItemService {
     Item addItem(Item item, Long ownerId);
 
-    Item getItemById(long id);
+    Item getItemById(Long id, Long ownerId);
 
-    Item updateItem(Item item);
+    Item updateItem(Item item, Long id, Long ownerId);
 
     List<ItemDto> getListItemsUserById(Long ownerId);
 

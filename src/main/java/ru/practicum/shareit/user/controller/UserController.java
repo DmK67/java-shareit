@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
-import ru.practicum.shareit.validation.ValidationService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -26,7 +25,6 @@ import static ru.practicum.shareit.user.mapper.UserMapper.toUserDto;
 @RequestMapping(path = "/users")
 public class UserController {
     private final UserService userService;
-    private final ValidationService validationService;
 
     /**
      * Создайте класс UserController и методы в нём для основных CRUD-операций.
@@ -34,18 +32,14 @@ public class UserController {
      */
     @PostMapping // Метод добавления пользователя
     public UserDto addUser(@Valid @RequestBody UserDto userDto) {
-        validationService.checkUniqueEmailUserAdd(toUser(userDto)); // Проверка объекта userDto на уникальность e-mail
         log.info("Добавляем пользователя по имени: {}.", userDto.getName());
         return toUserDto(userService.addUser(toUser(userDto)));
     }
 
     @PatchMapping("/{userId}") // Метод обновления пользователя по его id
     public UserDto updateUser(@Valid @Min(1) @PathVariable Long userId, @Valid @RequestBody UserDto userDto) {
-        userService.getUserById(userId); // Проверка пользователя по его id на существование в памяти
-        userDto.setId(userId);
-        validationService.checkUniqueEmailUserUpdate(toUser(userDto)); // Проверка объекта userDto на уникальность e-mail
         log.info("Обновляем пользователя по Id={}.", userId);
-        return toUserDto(userService.updateUser(toUser(userDto)));
+        return toUserDto(userService.updateUser(toUser(userDto), userId));
     }
 
     @GetMapping("/{userId}") // Метод получения пользователя по его id

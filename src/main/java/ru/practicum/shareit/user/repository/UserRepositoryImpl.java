@@ -13,7 +13,7 @@ import java.util.Map;
 @Repository
 @Slf4j
 public class UserRepositoryImpl implements UserRepository {
-    Map<Long, User> userMap = new HashMap<>();
+    private Map<Long, User> userMap = new HashMap<>();
     private Long count = 0L;
 
     @Override
@@ -37,22 +37,9 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User updateUser(User user) { // Метод обновления пользователя
-        User updateUser = userMap.get(user.getId());
-        if (user.getName() == null) {
-            user.setName(updateUser.getName());
-        }
-        if (!user.getName().isBlank() && !updateUser.getName().equals(user.getName())) {
-            updateUser.setName(user.getName());
-        }
-        if (user.getEmail() == null) {
-            user.setEmail(updateUser.getEmail());
-        }
-        if (!user.getEmail().isBlank() && !updateUser.getEmail().equals(user.getEmail())) {
-            updateUser.setEmail(user.getEmail());
-        }
-        userMap.put(updateUser.getId(), updateUser);
+        userMap.put(user.getId(), user);
         log.info("Пользователь по id={} успешно обновлен!", user.getId());
-        return userMap.get(updateUser.getId());
+        return userMap.get(user.getId());
     }
 
     @Override

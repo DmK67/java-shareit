@@ -15,8 +15,8 @@ import ru.practicum.shareit.user.repository.UserRepository;
 @AllArgsConstructor
 @Slf4j
 public class ValidationService {
-    UserRepository userRepository;
-    ItemRepository itemRepository;
+    private final UserRepository userRepository;
+    private final ItemRepository itemRepository;
 
     public void checkUniqueEmailUserAdd(User user) { // Метод проверки уникальности e-mail при добавлении
         if (user.getEmail() == null || user.getEmail().isBlank()) {
