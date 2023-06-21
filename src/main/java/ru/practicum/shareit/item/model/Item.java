@@ -1,9 +1,10 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 import org.springframework.validation.annotation.Validated;
 import ru.practicum.shareit.request.ItemRequest;
+
+import javax.persistence.*;
 
 /**
  * TODO Sprint add-controllers.
@@ -11,6 +12,8 @@ import ru.practicum.shareit.request.ItemRequest;
 @Data
 @AllArgsConstructor
 @Validated
+@Entity
+@Table(name = "items", schema = "public")
 public class Item {
     /**
      * id — уникальный идентификатор вещи;
@@ -21,11 +24,21 @@ public class Item {
      * на соответствующий запрос.
      */
 
+    //@Entity, @Table, @Column, @Id. Для поля status в классе Booking вам также пригодится @Enumerated.
+    // Добавьте соответствующие аннотации для сущностей.
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column()
     private String name;
+    @Column()
     private String description;
+    @Column()
     private Boolean available;
+    @Column()
     private Long owner;
+    @Transient
     private ItemRequest request;
 
     public Item(Long id, String name, String description, Boolean available, Long owner) {
