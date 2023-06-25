@@ -12,7 +12,8 @@ import java.util.Map;
 
 @Repository
 @Slf4j
-public class UserRepositoryImpl implements UserRepository {
+public class UserRepositoryImpl {
+    /*
     private Map<Long, User> userMap = new HashMap<>();
     private Long count = 0L;
 
@@ -53,5 +54,5 @@ public class UserRepositoryImpl implements UserRepository {
         log.info("Выводим список всех пользователей.");
         return new ArrayList<>(userMap.values());
     }
-
+*/
 }

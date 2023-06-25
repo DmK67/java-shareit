@@ -23,7 +23,7 @@ public class ValidationService {
             log.error("Ошибка! Пользователь с пустым e-mail не может быть добавлен!");
             throw new ValidateException("Ошибка! Пользователь с пустым e-mail не может быть добавлен!");
         }
-        for (User listUser : userRepository.getListUsers()) {
+        for (User listUser : userRepository.findAll()) {
             if (listUser.getEmail().equals(user.getEmail()) && !listUser.getId().equals(user.getId())) {
                 log.error("Ошибка! Пользователь с e-mail: {} уже существует!", user.getEmail());
                 throw new ConflictException("Ошибка! Пользователь с e-mail " + user.getEmail() + " уже существует!");
@@ -32,7 +32,7 @@ public class ValidationService {
     }
 
     public void checkUniqueEmailUserUpdate(User user) { // Метод проверки уникальности e-mail при обновлении
-        for (User u : userRepository.getListUsers()) {
+        for (User u : userRepository.findAll()) {
             if (u.getEmail().equals(user.getEmail()) && !u.getId().equals(user.getId())) {
                 log.error("Ошибка! Пользователь с e-mail: {} уже существует!", user.getEmail());
                 throw new ConflictException("Ошибка! Пользователь с e-mail " + user.getEmail() + " уже существует!");

@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 
 import javax.persistence.*;
@@ -14,6 +15,7 @@ import javax.validation.constraints.NotBlank;
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @Validated
 @Entity
 @Table(name = "users", schema = "public")

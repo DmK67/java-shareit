@@ -18,12 +18,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public User addUser(User user) {
         validationService.checkUniqueEmailUserAdd(user); // Проверка объекта user на уникальность e-mail
-        return repository.addUser(user);
+        //return repository.addUser(user);
+        return repository.save(user);
     }
 
     @Override
     public User getUserById(long id) {
-        return repository.getUserById(id);
+        //return repository.getUserById(id);
+        return repository.findById(id).get();
     }
 
     @Override
@@ -31,7 +33,7 @@ public class UserServiceImpl implements UserService {
         getUserById(userId); // Проверка пользователя по его id на существование в памяти
         user.setId(userId);
         validationService.checkUniqueEmailUserUpdate(user); // Проверка объекта userDto на уникальность e-mail
-        User updateUser = repository.getUserById(user.getId());
+        User updateUser = repository.getById(user.getId());
         if (user.getName() == null) {
             user.setName(updateUser.getName());
         }
@@ -44,17 +46,20 @@ public class UserServiceImpl implements UserService {
         if (!user.getEmail().isBlank() && !updateUser.getEmail().equals(user.getEmail())) {
             updateUser.setEmail(user.getEmail());
         }
-        return repository.updateUser(updateUser);
+        //return repository.updateUser(updateUser);
+        return repository.save(updateUser);
     }
 
     @Override
     public void deleteUser(Long id) {
-        repository.deleteUser(id);
+        //repository.deleteUser(id);
+        repository.deleteById(id);
     }
 
     @Override
     public List<User> getListUsers() {
-        return repository.getListUsers();
+        //return repository.getListUsers();
+        return repository.findAll();
     }
 
 }
