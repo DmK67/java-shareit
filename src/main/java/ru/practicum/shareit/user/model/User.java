@@ -34,7 +34,6 @@ public class User {
     private String name;
     @NotBlank
     @Email
-    @Column
+    @Column(name = "email", unique = true) // установлен параметр уникальности поля email
     private String email;
-
 }

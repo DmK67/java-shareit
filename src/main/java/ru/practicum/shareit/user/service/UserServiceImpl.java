@@ -17,23 +17,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User addUser(User user) {
-        validationService.checkUniqueEmailUserAdd(user); // Проверка объекта user на уникальность e-mail
-        //return repository.addUser(user);
+        validationService.checkUniqueEmailUserAdd(user); // Проверка поля email объекта user на пустые строки и пробелы
         return repository.save(user);
     }
 
     @Override
     public User getUserById(long id) {
-        //return repository.getUserById(id);
+        validationService.existsIdUser(id); // Проверка пользователя по его id на существование в БД
         return repository.findById(id).get();
     }
 
     @Override
     public User updateUser(User user, Long userId) {
-        getUserById(userId); // Проверка пользователя по его id на существование в памяти
+        getUserById(userId); // Проверка пользователя по его id на существование в БД
         user.setId(userId);
-        validationService.checkUniqueEmailUserUpdate(user); // Проверка объекта userDto на уникальность e-mail
-        User updateUser = repository.getById(user.getId());
+        User updateUser = getUserById(user.getId());
         if (user.getName() == null) {
             user.setName(updateUser.getName());
         }
@@ -46,7 +44,6 @@ public class UserServiceImpl implements UserService {
         if (!user.getEmail().isBlank() && !updateUser.getEmail().equals(user.getEmail())) {
             updateUser.setEmail(user.getEmail());
         }
-        //return repository.updateUser(updateUser);
         return repository.save(updateUser);
     }
 
