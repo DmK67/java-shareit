@@ -7,6 +7,7 @@ import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.validation.ValidationService;
 
@@ -25,27 +26,24 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item addItem(Item item, Long ownerId) {
+        validationService.checkItemDtoWhenAdd(toItemDto(item)); // Проверяем поля объекта itemDto перед добавлением
         userService.getUserById(ownerId); // Проверяем владельца вещи по id на существование в памяти
         item.setOwner(ownerId);
-        validationService.checkItemDtoWhenAdd(toItemDto(item)); // Проверяем поля объекта itemDto перед добавлением
-        return repository.add(item);
+        return repository.save(item);
     }
 
     @Override
-    public Item getItemById(Long id, Long ownerId) {
-        if (!repository.getItemMap().containsKey(id)) { // Проверяем вещь по id на существование в памяти
-            log.error("Вещь по id={} отсутствует в памяти.", id);
-            throw new NotFoundException("Вещь по id=" + id + " не существует");
-        }
-        userService.getUserById(ownerId); // Проверяем владельца вещи по id на существование в памяти
-        return repository.getItemById(id);
+    public Item getItemById(Long id, Long ownerId) { // Метод получения вещи по id
+        Item item = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Вещь по id=" + id + " не существует!"));
+        userService.getUserById(ownerId); // Проверяем владельца вещи по id на существование в БД
+        return item;
     }
 
     @Override
     public Item updateItem(Item item, Long itemId, Long ownerId) {
-        getItemById(itemId, ownerId); // Проверяем вещь по id на существование в памяти
+        getItemById(itemId, ownerId); // Проверяем вещь и пользователя по id на существование в памяти
         item.setId(itemId);
-        userService.getUserById(ownerId); // Проверяем владельца вещи по id на существование в памяти
         item.setOwner(ownerId);
         validationService.checkOwnerItem(itemId, ownerId); // Проверяем соответствие владельца вещи
 
@@ -71,13 +69,14 @@ public class ItemServiceImpl implements ItemService {
         if (!updateItem.getOwner().equals(item.getOwner())) {
             updateItem.setOwner(item.getOwner());
         }
-        return repository.updateItem(updateItem);
+        return repository.save(updateItem);
     }
 
     @Override
     public List<ItemDto> getListItemsUserById(Long ownerId) {
         userService.getUserById(ownerId); // Проверяем владельца вещи по id на существование в памяти
-        return repository.getListItemsUserById(ownerId);
+        //return repository.getListItemsUserById(ownerId);
+        return repository.findByOwner(ownerId);
     }
 
     @Override
@@ -87,7 +86,8 @@ public class ItemServiceImpl implements ItemService {
             return Collections.emptyList();
         }
         log.info("Осуществляем поиск вещи содержащее текст: {}.", text);
-        return repository.getSearchItems(text);
+        //return repository.getSearchItems(text);
+    return null;
     }
 
 }

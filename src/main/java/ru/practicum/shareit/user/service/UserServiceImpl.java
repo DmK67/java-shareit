@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.validation.ValidationService;
@@ -22,9 +23,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserById(long id) {
-        validationService.existsIdUser(id); // Проверка пользователя по его id на существование в БД
-        return repository.findById(id).get();
+    public User getUserById(long id) { // Метод получения пользователя по id
+        User user = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь по id=" + id + " не существует!"));
+        return user;
     }
 
     @Override
@@ -49,13 +51,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(Long id) {
-        //repository.deleteUser(id);
         repository.deleteById(id);
     }
 
     @Override
     public List<User> getListUsers() {
-        //return repository.getListUsers();
         return repository.findAll();
     }
 

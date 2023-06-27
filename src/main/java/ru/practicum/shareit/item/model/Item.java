@@ -11,6 +11,7 @@ import javax.persistence.*;
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @Validated
 @Entity
 @Table(name = "items", schema = "public")
