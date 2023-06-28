@@ -58,7 +58,7 @@ public class ItemController {
     public ItemDto getItemById(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
                                @Valid @Min(1) @NotNull @PathVariable Long itemId) {
         log.info("Просмотр вещи по Id={}", itemId);
-        return toItemDto(itemService.getItemById(itemId, ownerId));
+        return toItemDto(itemService.getItemById(itemId));
     }
 
     /**
