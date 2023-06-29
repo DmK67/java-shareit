@@ -39,7 +39,6 @@ public class ItemServiceImpl implements ItemService {
     public Item getItemById(Long id) { // Метод получения вещи по id
         Item item = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Вещь по id=" + id + " не существует!"));
-        //userService.getUserById(ownerId); // Проверяем владельца вещи по id на существование в БД
         return item;
     }
 

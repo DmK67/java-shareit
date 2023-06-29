@@ -14,5 +14,9 @@ public interface BookingService {
 
     void deleteBooking(Long id);
 
-    List<Booking> getListAllBooking();
+    List<Booking> getListBookingsUserById(Long userId);
+
+    Booking getBookingByIdAndStatus(Long ownerId, Long bookingId);
+
+    Booking updateStatusBooking(Long ownerId, Boolean approved, Long bookingId);
 }

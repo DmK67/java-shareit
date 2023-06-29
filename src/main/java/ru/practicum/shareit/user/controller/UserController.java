@@ -30,32 +30,32 @@ public class UserController {
      * Создайте класс UserController и методы в нём для основных CRUD-операций.
      * Также реализуйте сохранение данных о пользователях в памяти.
      */
-    @PostMapping // Метод добавления пользователя
+    @PostMapping // Эндпоинт добавления пользователя
     public UserDto addUser(@Valid @RequestBody UserDto userDto) {
         log.info("Добавляем пользователя по имени: {}.", userDto.getName());
         return toUserDto(userService.addUser(toUser(userDto)));
     }
 
-    @PatchMapping("/{userId}") // Метод обновления пользователя по его id
+    @PatchMapping("/{userId}") // Эндпоинт обновления пользователя по его id
     public UserDto updateUser(@Valid @Min(1) @PathVariable Long userId, @Valid @RequestBody UserDto userDto) {
         log.info("Обновляем пользователя по Id={}.", userId);
         return toUserDto(userService.updateUser(toUser(userDto), userId));
     }
 
-    @GetMapping("/{userId}") // Метод получения пользователя по его id
+    @GetMapping("/{userId}") // Эндпоинт получения пользователя по его id
     public UserDto updateUser(@Valid @Min(1) @PathVariable Long userId) {
         log.info("Получаем пользователя по Id={}.", userId);
         return toUserDto(userService.getUserById(userId));
     }
 
-    @DeleteMapping("/{userId}") // Метод удаления пользователя по id
+    @DeleteMapping("/{userId}") // Эндпоинт удаления пользователя по id
     public void deleteUser(@Valid @Min(1) @PathVariable Long userId) {
         log.info("Удалаяем пользователя по Id={}.", userId);
         userService.deleteUser(userId);
     }
 
     @GetMapping
-    public List<User> getListUsers() { // Метод получения списка всех пользователей
+    public List<User> getListUsers() { // Эндпоинт получения списка всех пользователей
         log.info("Получаем список всех пользователей.");
         return userService.getListUsers();
     }

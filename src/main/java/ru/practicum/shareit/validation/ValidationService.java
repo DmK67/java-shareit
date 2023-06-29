@@ -4,9 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.ConflictException;
 import ru.practicum.shareit.exceptions.ForbiddenException;
-import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidateException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
@@ -14,7 +15,6 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 
 @Service
@@ -23,6 +23,8 @@ import java.time.LocalDateTime;
 public class ValidationService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
+
+    private final BookingRepository bookingRepository;
 
     public void checkUniqueEmailUserAdd(User user) { // Метод проверки поля e-mail на пустые строки и пробелы при добавлении
         if (user.getEmail() == null || user.getEmail().isBlank()) {
@@ -49,6 +51,21 @@ public class ValidationService {
         }
     }
 
+    public void checkBookerOrOwner(Long userId, Long bookingId) {
+        // Метод проверки владельца вещи и клиента бронирования перед просмотром
+        Booking booking = bookingRepository.findById(bookingId).get();
+        Item item = booking.getItem();
+        if (item.getOwner().getId().equals(userId)) {
+            return;
+        }else if (booking.getBooker().getId().equals(userId)) {
+            return;
+        }
+        log.error("Просмотр запрещен! Пользователь по Id: {} не является ни владельцем вещи ни клиентом " +
+                    "бронирования!", userId);
+            throw new ForbiddenException("Просматривать информацию о бронированнии вещи может только владелец " +
+                    "или клиент бронирования!");
+    }
+
     public void checkItemDtoWhenAdd(ItemDto itemDto) { // Метод проверки полей объекта ItemDto перед добавлением
         if (itemDto.getAvailable() == null
                 || itemDto.getName() == null || itemDto.getName().isBlank()
@@ -64,15 +81,15 @@ public class ValidationService {
             throw new ValidateException("Ошибка! Поля начала и окончания бронирования не могут быть пустыми!");
         }
         if (bookingDto.getEnd().isBefore(bookingDto.getStart())) {
-            log.error("Ошибка! Указано неправильно дата или время бронирования!");
+            log.error("Ошибка! Дата и время окончания бронирования не может предшествовать дате и времени начала бронирования!");
             throw new ValidateException("Ошибка! Указано неправильно дата или время бронирования!");
         }
-        if (bookingDto.getEnd().equals(bookingDto.getStart())) {
-            log.error("Ошибка! Указано неправильно дата/время бронирования!");
+        if (bookingDto.getStart().isEqual(bookingDto.getEnd())) {
+            log.error("Ошибка! Дата и время начала бронирования равно дате и времени окончания бронирования!");
             throw new ValidateException("Ошибка! Дата и время начала бронирования должно отличатся " +
                     "от даты и времени окончания бронирования!");
         }
-        if (bookingDto.getStart().isAfter(LocalDateTime.now()) || bookingDto.getEnd().isAfter(LocalDateTime.now())) {
+        if (bookingDto.getStart().isBefore(LocalDateTime.now()) || bookingDto.getEnd().isBefore(LocalDateTime.now())) {
             log.error("Ошибка! Указано неправильно дата/время бронирования!");
             throw new ValidateException("Ошибка! Дата и время начала бронирования или окончания бронирования должно " +
                     "быть позже точного времени!");
