@@ -5,9 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.StatusState;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.ConflictException;
 import ru.practicum.shareit.exceptions.ForbiddenException;
+import ru.practicum.shareit.exceptions.StateStatusValidateException;
 import ru.practicum.shareit.exceptions.ValidateException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
@@ -23,7 +25,6 @@ import java.time.LocalDateTime;
 public class ValidationService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
-
     private final BookingRepository bookingRepository;
 
     public void checkUniqueEmailUserAdd(User user) { // Метод проверки поля e-mail на пустые строки и пробелы при добавлении
@@ -57,13 +58,13 @@ public class ValidationService {
         Item item = booking.getItem();
         if (item.getOwner().getId().equals(userId)) {
             return;
-        }else if (booking.getBooker().getId().equals(userId)) {
+        } else if (booking.getBooker().getId().equals(userId)) {
             return;
         }
         log.error("Просмотр запрещен! Пользователь по Id: {} не является ни владельцем вещи ни клиентом " +
-                    "бронирования!", userId);
-            throw new ForbiddenException("Просматривать информацию о бронированнии вещи может только владелец " +
-                    "или клиент бронирования!");
+                "бронирования!", userId);
+        throw new ForbiddenException("Просматривать информацию о бронированнии вещи может только владелец " +
+                "или клиент бронирования!");
     }
 
     public void checkItemDtoWhenAdd(ItemDto itemDto) { // Метод проверки полей объекта ItemDto перед добавлением
@@ -96,4 +97,27 @@ public class ValidationService {
         }
     }
 
+    public void checkStatusState(String state) {
+        if (state.equalsIgnoreCase(StatusState.ALL.name())) {
+            return;
+        }
+        if (state.equalsIgnoreCase(StatusState.CURRENT.name())) {
+            return;
+        }
+        if (state.equalsIgnoreCase(StatusState.PAST.name())) {
+            return;
+        }
+        if (state.equalsIgnoreCase(StatusState.FUTURE.name())) {
+            return;
+        }
+        if (state.equalsIgnoreCase(StatusState.WAITING.name())) {
+            return;
+        }
+        if (state.equalsIgnoreCase(StatusState.REJECTED.name())) {
+            return;
+        }
+        log.error("Ошибка! Указан неправильно статус бронирования!");
+        throw new StateStatusValidateException();
+    }
 }
+

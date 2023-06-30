@@ -1,27 +1,21 @@
 package ru.practicum.shareit.booking.controller;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.StatusState;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-import static ru.practicum.shareit.booking.mapper.BookingMapper.toBooking;
 import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingDto;
-import static ru.practicum.shareit.user.mapper.UserMapper.toUser;
-import static ru.practicum.shareit.user.mapper.UserMapper.toUserDto;
 
 /**
  * TODO Sprint add-bookings.
@@ -73,20 +67,41 @@ public class BookingController {
         return toBookingDto(bookingService.getBookingByIdAndStatus(ownerId, bookingId));
     }
 
+    /**
+     * Получение списка всех бронирований текущего пользователя. Эндпоинт — GET /bookings?state={state}.
+     * Параметр state необязательный и по умолчанию равен ALL (англ. «все»).
+     * Также он может принимать значения CURRENT (англ. «текущие»), **PAST** (англ. «завершённые»),
+     * FUTURE (англ. «будущие»), WAITING (англ. «ожидающие подтверждения»),
+     * REJECTED (англ. «отклонённые»).
+     * Бронирования должны возвращаться отсортированными по дате от более новых к более старым.
+     */
     @GetMapping // Эндпоинт получения списка всех бронирований пользователя по id
     public List<Booking> getListBookingsUserById(@Min(1) @NotNull
-                                                 @RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId) {
+                                                 @RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
+                                                 @RequestParam(value = "state", required = false,
+                                                         defaultValue = "ALL")
+                                                 String state) {
         log.info("Получаем список всех бронирований пользователя по id={}", userId);
-        return bookingService.getListBookingsUserById(userId);
+        return bookingService.getListBookingsUserById(userId, state);
     }
 
     @GetMapping("/owner") // Эндпоинт получения списка всех бронирований пользователя по id
     public List<Booking> getListBookingsOwnerById(@Min(1) @NotNull
-                                                 @RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId) {
+                                                  @RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
+                                                  @NotNull @NotBlank @RequestParam(value = "state", required = false,
+                                                          defaultValue = "ALL") String state) {
         log.info("Получаем список всех бронирований пользователя по id={}", userId);
-        return bookingService.getListBookingsUserById(userId);
+        return bookingService.getListBookingsUserById(userId, state);
     }
 
+
+//    @GetMapping // Эндпоинт получение списка всех бронирований текущего пользователя
+//    public List<Booking> updateStatusBooking(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
+//                                          @RequestParam(value = "approved", required = false) Boolean approved,
+//                                          @PathVariable Long bookingId) {
+//        log.info("Выполняем подтверждение или отклонение запроса на бронирование владельцем вещи по Id={}.", ownerId);
+//        return toBookingDto(bookingService.updateStatusBooking(ownerId, approved, bookingId));
+//    }
     /*
     @GetMapping("/{userId}") // Метод получения пользователя по его id
     public UserDto updateUser(@Valid @Min(1) @PathVariable Long userId) {

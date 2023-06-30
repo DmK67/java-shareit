@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import ru.practicum.shareit.booking.model.Status;
+import ru.practicum.shareit.booking.model.StatusState;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -27,4 +28,6 @@ public class BookingDto {
 
     private Status status;
     private Item item;
+
+    private StatusState statusState;
 }

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
+import ru.practicum.shareit.booking.model.StatusState;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
@@ -14,10 +15,11 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.validation.ValidationService;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static ru.practicum.shareit.booking.mapper.BookingMapper.toBooking;
-import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingDto;
 
 @Service
 @AllArgsConstructor
@@ -37,6 +39,7 @@ public class BookingServiceImpl implements BookingService {
         User bookerDB = userService.getUserById(bookerId); // Получение и проверка на наличии пользователя в БД
         validationService.checkBookingDtoWhenAdd(bookingDto);
         bookingDto.setStatus(Status.WAITING);
+        bookingDto.setStatusState(StatusState.ALL);
         Booking booking = toBooking(bookingDto);
         booking.setBooker(userService.getUserById(bookerId));
         booking.setItem(itemService.getItemById(bookingDto.getItemId()));
@@ -60,9 +63,12 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getListBookingsUserById(Long userId) { // Метод получения списка всех бронированний пользователя по id
+    public List<Booking> getListBookingsUserById(Long userId, String state) { // Метод получения списка всех бронированний пользователя по id
         userService.getUserById(userId); // Проверяем существование пользователя в БД
-        return bookingRepository.findAll();
+        validationService.checkStatusState(state); // Проверка statusState
+        List<Booking> reverseList = new ArrayList<>(bookingRepository.findAll());
+        Collections.reverse(reverseList);
+        return reverseList;
     }
 
     @Override
@@ -82,8 +88,10 @@ public class BookingServiceImpl implements BookingService {
         validationService.checkOwnerItem(bookingFromBD.getItem().getId(), ownerId); // Проверяем соответствие владельца вещи
         if (approved) {
             bookingFromBD.setStatus(Status.APPROVED);
+            bookingRepository.save(bookingFromBD);
         } else {
             bookingFromBD.setStatus(Status.REJECTED);
+            bookingRepository.save(bookingFromBD);
         }
         return bookingFromBD;
     }
