@@ -85,6 +85,9 @@ public class BookingController {
         return bookingService.getListBookingsUserById(userId, state);
     }
 
+    /**Получение списка бронирований для всех вещей текущего пользователя. Эндпоинт — GET /bookings/owner?state={state}.
+     * Этот запрос имеет смысл для владельца хотя бы одной вещи.
+     * Работа параметра state аналогична его работе в предыдущем сценарии.*/
     @GetMapping("/owner") // Эндпоинт получения списка всех бронирований пользователя по id
     public List<Booking> getListBookingsOwnerById(@Min(1) @NotNull
                                                   @RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
@@ -94,32 +97,4 @@ public class BookingController {
         return bookingService.getListBookingsUserById(userId, state);
     }
 
-
-//    @GetMapping // Эндпоинт получение списка всех бронирований текущего пользователя
-//    public List<Booking> updateStatusBooking(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
-//                                          @RequestParam(value = "approved", required = false) Boolean approved,
-//                                          @PathVariable Long bookingId) {
-//        log.info("Выполняем подтверждение или отклонение запроса на бронирование владельцем вещи по Id={}.", ownerId);
-//        return toBookingDto(bookingService.updateStatusBooking(ownerId, approved, bookingId));
-//    }
-    /*
-    @GetMapping("/{userId}") // Метод получения пользователя по его id
-    public UserDto updateUser(@Valid @Min(1) @PathVariable Long userId) {
-        log.info("Получаем пользователя по Id={}.", userId);
-        return toUserDto(userService.getUserById(userId));
-    }
-
-    @DeleteMapping("/{userId}") // Метод удаления пользователя по id
-    public void deleteUser(@Valid @Min(1) @PathVariable Long userId) {
-        log.info("Удалаяем пользователя по Id={}.", userId);
-        userService.deleteUser(userId);
-    }
-
-    @GetMapping
-    public List<User> getListUsers() { // Метод получения списка всех пользователей
-        log.info("Получаем список всех пользователей.");
-        return userService.getListUsers();
-    }
-
-     */
 }

@@ -7,10 +7,7 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.StatusState;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.exceptions.ConflictException;
-import ru.practicum.shareit.exceptions.ForbiddenException;
-import ru.practicum.shareit.exceptions.StateStatusValidateException;
-import ru.practicum.shareit.exceptions.ValidateException;
+import ru.practicum.shareit.exceptions.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -43,12 +40,50 @@ public class ValidationService {
         }
     }
 
+    public void checkOwnerItemAndBooker(Long itemId, Long ownerId, Long bookingId) { // Метод проверки соответствия владельца вещи
+        Item item = itemRepository.findById(itemId).get();
+        Booking booking = bookingRepository.findById(bookingId).get();
+        if (item.getOwner().getId().equals(ownerId)) {
+            return;
+        }
+        if (booking.getBooker().getId().equals(ownerId)) {
+            log.error("Ошибка! Пользователь по Id: {} является арендатором вещи! " +
+                    "Изменение статуса вещи ЗАПРЕЩЕНО!", ownerId);
+            throw new NotFoundException("Вносить изменения в параметры вещи может только владелец!");
+        }
+        if (!item.getOwner().getId().equals(ownerId)) {
+            log.error("Ошибка! Пользователь по Id: {} не является владельцем вещи! " +
+                    "Изменение вещи ЗАПРЕЩЕНО!", ownerId);
+            throw new ValidateException("Вносить изменения в параметры вещи может только владелец!");
+        }
+    }
+
+    public void checkStatusBooking(Boolean approved, Long bookingId) { // Метод проверки статуса бронирования
+        Booking booking = bookingRepository.findById(bookingId).get();
+        if (booking.getStatus().name().equals("APPROVED") && approved) {
+            log.error("Ошибка! Статус бронирования установлен APPROVED, повторно изменить статус на APPROVED не возможно!");
+            throw new ValidateException("Статус APPROVED был установлен ранее.");
+        }
+        if (booking.getStatus().name().equals("REJECTED") && !approved) {
+            log.error("Ошибка! Статус бронирования установлен REJECTED, повторно изменить статус на REJECTED не возможно!");
+            throw new ValidateException("Статус REJECTED был установлен ранее.");
+        }
+    }
+
     public void checkOwnerItem(Long itemId, Long ownerId) { // Метод проверки соответствия владельца вещи
         Item item = itemRepository.findById(itemId).get();
         if (!item.getOwner().getId().equals(ownerId)) {
             log.error("Ошибка! Пользователь по Id: {} не является владельцем вещи! " +
                     "Изменение вещи ЗАПРЕЩЕНО!", ownerId);
             throw new ForbiddenException("Вносить изменения в параметры вещи может только владелец!");
+        }
+    }
+
+    public void checkBookerIsTheOwner(Item itemDB, Long bookerId) { // Метод проверки: является ли арендодатель - владельцем вещи
+        if (itemDB.getOwner().getId().equals(bookerId)) {
+            log.error("Ошибка! Невозможно добавить бронирование, пользователь по id={} " +
+                    "является владельцем вещи", bookerId );
+            throw new NotFoundException("Ошибка! Невозможно добавить бронирование!");
         }
     }
 
@@ -63,7 +98,7 @@ public class ValidationService {
         }
         log.error("Просмотр запрещен! Пользователь по Id: {} не является ни владельцем вещи ни клиентом " +
                 "бронирования!", userId);
-        throw new ForbiddenException("Просматривать информацию о бронированнии вещи может только владелец " +
+        throw new NotFoundException("Просматривать информацию о бронированнии вещи может только владелец " +
                 "или клиент бронирования!");
     }
 

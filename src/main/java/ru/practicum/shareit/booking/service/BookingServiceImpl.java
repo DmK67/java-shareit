@@ -36,8 +36,9 @@ public class BookingServiceImpl implements BookingService {
     public Booking addBooking(BookingDto bookingDto, Long bookerId) { // Метод добавления бронирования
         Item itemDB = itemService.getItemById(bookingDto.getItemId()); // Получение и проверка на наличии вещи в БД
         itemService.checkingIsAvailable(itemDB); // Проверка доступности к бронированию
-        User bookerDB = userService.getUserById(bookerId); // Получение и проверка на наличии пользователя в БД
-        validationService.checkBookingDtoWhenAdd(bookingDto);
+        userService.getUserById(bookerId); // Получение и проверка на наличии пользователя в БД
+        validationService.checkBookingDtoWhenAdd(bookingDto); // Проверка полей объекта BookingDto перед добавлением
+        validationService.checkBookerIsTheOwner(itemDB, bookerId); // Проверка является ли арендодатель - владельцем вещи
         bookingDto.setStatus(Status.WAITING);
         bookingDto.setStatusState(StatusState.ALL);
         Booking booking = toBooking(bookingDto);
@@ -85,7 +86,8 @@ public class BookingServiceImpl implements BookingService {
         // Метод подтверждения или отклонения запроса на бронирование
         userService.getUserById(ownerId); // Проверяем существование пользователя в БД
         Booking bookingFromBD = getBookingById(bookingId); // Получаем и проверяем существование бронирования в БД
-        validationService.checkOwnerItem(bookingFromBD.getItem().getId(), ownerId); // Проверяем соответствие владельца вещи
+        validationService.checkOwnerItemAndBooker(bookingFromBD.getItem().getId(), ownerId, bookingId); // Проверяем соответствие владельца вещи
+        validationService.checkStatusBooking(approved, bookingId); // Проверяем статус бронирования на изменение
         if (approved) {
             bookingFromBD.setStatus(Status.APPROVED);
             bookingRepository.save(bookingFromBD);
