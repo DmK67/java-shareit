@@ -37,7 +37,7 @@ public class BookingServiceImpl implements BookingService {
         Item itemDB = itemService.getItemById(bookingDto.getItemId()); // Получение и проверка на наличии вещи в БД
         itemService.checkingIsAvailable(itemDB); // Проверка доступности к бронированию
         userService.getUserById(bookerId); // Получение и проверка на наличии пользователя в БД
-        validationService.checkBookingDtoWhenAdd(bookingDto); // Проверка полей объекта BookingDto перед добавлением
+        //validationService.checkBookingDtoWhenAdd(bookingDto); // Проверка полей объекта BookingDto перед добавлением
         validationService.checkBookerIsTheOwner(itemDB, bookerId); // Проверка является ли арендодатель - владельцем вещи
         bookingDto.setStatus(Status.WAITING);
         bookingDto.setStatusState(StatusState.ALL);

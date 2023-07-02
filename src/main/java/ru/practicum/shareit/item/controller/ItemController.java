@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemWithBookingDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
@@ -14,6 +15,7 @@ import java.util.List;
 
 import static ru.practicum.shareit.item.mapper.ItemMapper.toItem;
 import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
+import static ru.practicum.shareit.item.mapper.ItemWithBookingDtoMapper.toItemWithBookingDto;
 
 /**
  * TODO Sprint add-controllers.
@@ -58,11 +60,18 @@ public class ItemController {
      * Просмотр информации о конкретной вещи по её идентификатору. Эндпойнт GET /items/{itemId}.
      * Информацию о вещи может просмотреть любой пользователь.
      */
+//    @GetMapping("/{itemId}") // Эндпоинт получения вещи по ее id
+//    public ItemDto getItemById(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
+//                               @Valid @Min(1) @NotNull @PathVariable Long itemId) {
+//        log.info("Просмотр вещи по Id={}", itemId);
+//        return toItemDto(itemService.getItemById(itemId));
+//    }
     @GetMapping("/{itemId}") // Эндпоинт получения вещи по ее id
-    public ItemDto getItemById(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
-                               @Valid @Min(1) @NotNull @PathVariable Long itemId) {
-        log.info("Просмотр вещи по Id={}", itemId);
-        return toItemDto(itemService.getItemById(itemId));
+    public ItemWithBookingDto getItemByIdWithBooking(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id",
+            required = false) Long ownerId, @Valid @Min(1) @NotNull @PathVariable Long itemId) {
+        log.info("Просмотр вещи по Id={} с информацией о бронировании", itemId);
+        //return toItemWithBookingDto(itemService.getItemByIdWithBooking(itemId, ownerId));
+        return itemService.getItemByIdWithBooking(itemId, ownerId);
     }
 
     /**

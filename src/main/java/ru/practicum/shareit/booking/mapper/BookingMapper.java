@@ -4,8 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingForItemDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.ItemWithBooking;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
@@ -40,6 +42,16 @@ public class BookingMapper {
                 .item(item)
                 .status(bookingDto.getStatus())
                 .statusState(bookingDto.getStatusState())
+                .build();
+    }
+
+    public static BookingForItemDto toBookingForItemDto(Booking booking) {
+
+        return BookingForItemDto.builder()
+                .id(booking.getId())
+                .startTime(booking.getStart())
+                .bookerId(booking.getBooker().getId())
+                .status(booking.getStatus())
                 .build();
     }
 }

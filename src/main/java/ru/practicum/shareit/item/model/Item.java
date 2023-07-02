@@ -1,9 +1,14 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
+import java.util.List;
 
 /**
  * TODO Sprint add-controllers.
@@ -41,6 +46,11 @@ public class Item {
     @Column
     private Long request;
 
+    @OneToMany(mappedBy = "item")
+    private List<Booking> bookings;
+
+//    @OneToMany(mappedBy = "item")
+//    private List<Comment> comments;
 
 }
 
