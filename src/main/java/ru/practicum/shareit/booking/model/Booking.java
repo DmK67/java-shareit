@@ -40,7 +40,7 @@ public class Booking {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column
+    @Column(nullable = false, updatable = false, unique = true)
     private Long id;
     @Column(name = "start_booking")
     //@NotNull
@@ -48,10 +48,10 @@ public class Booking {
     @Column(name = "end_booking")
     //@NotNull
     private LocalDateTime end;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
     private Item item;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booker_id")
     private User booker;
     @Column(name = "booking_status")

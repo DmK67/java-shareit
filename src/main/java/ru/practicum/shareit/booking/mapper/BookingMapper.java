@@ -13,6 +13,9 @@ import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
+import static ru.practicum.shareit.item.mapper.ItemMapper.itemWithItemDtoForBooking;
+import static ru.practicum.shareit.user.mapper.UserMapper.userWithUserDtoForBooking;
+
 @Component
 @AllArgsConstructor
 
@@ -24,14 +27,16 @@ public class BookingMapper {
                 .start(booking.getStart())
                 .end(booking.getEnd())
                 .itemId(booking.getItem().getId())
-                .booker(booking.getBooker())
+                //.booker(userWithUserDtoForBooking(booking.getBooker()))
+                .booker(User.builder().id(booking.getBooker().getId()).build())
                 .status(booking.getStatus())
                 .statusState((booking.getStatusState()))
-                .item(booking.getItem())
+                //.item(itemWithItemDtoForBooking(booking.getItem()))
+                .item(Item.builder().id(booking.getItem().getId()).name(booking.getItem().getName()).build())
                 .build();
     }
 
-    public static Booking toBooking(BookingDto bookingDto) {// Метод перевода объекта userDto в объект user
+    public static Booking toBooking(BookingDto bookingDto) {// Метод перевода объекта bookingDto в объект booking
         Item item = Item.builder()
                 .id(bookingDto.getItemId())
                 .build();

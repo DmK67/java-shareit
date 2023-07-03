@@ -1,5 +1,7 @@
 package ru.practicum.shareit.booking.controller;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -23,6 +25,8 @@ import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingDto;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
+//@AllArgsConstructor
+//@NoArgsConstructor
 @Validated
 @RequestMapping(path = "/bookings")
 public class BookingController {
@@ -94,7 +98,7 @@ public class BookingController {
                                                   @NotNull @NotBlank @RequestParam(value = "state", required = false,
                                                           defaultValue = "ALL") String state) {
         log.info("Получаем список всех бронирований пользователя по id={}", userId);
-        return bookingService.getListBookingsUserById(userId, state);
+        return bookingService.getListBookingsOwnerById(userId, state);
     }
 
 }

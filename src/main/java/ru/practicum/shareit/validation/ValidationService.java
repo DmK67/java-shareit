@@ -125,11 +125,17 @@ public class ValidationService {
             throw new ValidateException("Ошибка! Дата и время начала бронирования должно отличатся " +
                     "от даты и времени окончания бронирования!");
         }
-        if (bookingDto.getStart().isBefore(LocalDateTime.now()) || bookingDto.getEnd().isBefore(LocalDateTime.now())) {
-            log.error("Ошибка! Указано неправильно дата/время бронирования!");
-            throw new ValidateException("Ошибка! Дата и время начала бронирования или окончания бронирования должно " +
+        if (bookingDto.getStart().isBefore(LocalDateTime.now())) {
+            log.error("Ошибка! Указано неправильно дата/время начала бронирования!");
+            throw new ValidateException("Ошибка! Дата и время начала бронирования должно " +
                     "быть позже точного времени!");
         }
+        if (bookingDto.getEnd().isBefore(LocalDateTime.now())) {
+            log.error("Ошибка! Указано неправильно дата/время окончания бронирования!");
+            throw new ValidateException("Ошибка! Дата и время окончания бронирования должно " +
+                    "быть позже точного времени!");
+        }
+
     }
 
     public void checkStatusState(String state) {
