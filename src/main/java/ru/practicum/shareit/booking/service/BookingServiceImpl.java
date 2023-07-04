@@ -15,7 +15,6 @@ import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.validation.ValidationService;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static ru.practicum.shareit.booking.mapper.BookingMapper.toBooking;
@@ -37,7 +36,6 @@ public class BookingServiceImpl implements BookingService {
         validationService.checkBookingDtoWhenAdd(bookingDto); // Проверка полей объекта BookingDto перед добавлением
         validationService.checkBookerIsTheOwner(itemDB, bookerId); // Проверка является ли арендодатель - владельцем вещи
         bookingDto.setStatus(Status.WAITING);
-        bookingDto.setStatusState(StatusState.ALL);
         Booking booking = toBooking(bookingDto);
         booking.setBooker(booker);
         booking.setItem(Item.builder()
@@ -56,21 +54,40 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking updateBooking(Booking booking, Long userId) {
-        return null;
-    }
-
-    @Override
     public void deleteBooking(Long id) {
     }
 
     @Override
-    public List<Booking> getListBookingsUserById(Long userId, String state) { // Метод получения списка всех бронированний пользователя по id
+    public List<Booking> getListBookingsUserById(Long userId, String state) {
+        // Метод получения списка всех бронированний пользователя по id
         userService.getUserById(userId); // Проверяем существование пользователя в БД
         validationService.checkStatusState(state); // Проверка statusState
-        List<Booking> listResult = new ArrayList<>(bookingRepository.findAll());
+//        List<Booking> listResult = new ArrayList<>(bookingRepository.findAll());
+//        List<Booking> newListResult = listResultAddItemAndAddBooker(listResult);
+//        Collections.reverse(newListResult);
+        StatusState statusState = StatusState.valueOf(state);
+        List<Booking> listResult = new ArrayList<>();
+        switch (statusState) {
+            case CURRENT:
+                listResult = bookingRepository.findAllByBookerIdAndStateCurrent(userId);
+                break;
+            case PAST:
+                listResult = bookingRepository.findAllByBookerIdAndStatePast(userId, Status.APPROVED);
+                break;
+            case FUTURE:
+                listResult = bookingRepository.findAllByBookerIdAndStateFuture(userId);
+                break;
+            case WAITING:
+                listResult = bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING);
+                break;
+            case REJECTED:
+                listResult = bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED);
+                break;
+            case ALL:
+                listResult = bookingRepository.findAllByBookerIdOrderByStartDesc(userId);
+                break;
+        }
         List<Booking> newListResult = listResultAddItemAndAddBooker(listResult);
-        Collections.reverse(newListResult);
         return newListResult;
     }
 
@@ -84,8 +101,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking updateStatusBooking(Long ownerId, Boolean approved, Long bookingId) {
-        // Метод подтверждения или отклонения запроса на бронирование
+    public Booking updateBooking(Long ownerId, Boolean approved, Long bookingId) { // Метод обновления бронирования
         userService.getUserById(ownerId); // Проверяем существование пользователя в БД
         Booking bookingFromBD = getBookingById(bookingId); // Получаем и проверяем существование бронирования в БД
         validationService.checkOwnerItemAndBooker(bookingFromBD.getItem().getId(), ownerId, bookingId); // Проверяем соответствие владельца вещи
@@ -120,7 +136,6 @@ public class BookingServiceImpl implements BookingService {
                 break;
             }
             case FUTURE: {
-                //listResult = bookingRepository.findAllByItemOwnerIdAndStatusStateFuture(owner, Status.REJECTED);
                 listResult = bookingRepository.findAllByBookerIdAndStateFuture(owner);
                 break;
             }

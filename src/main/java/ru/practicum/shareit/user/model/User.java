@@ -4,10 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.comments.model.Comment;
+import ru.practicum.shareit.item.model.Item;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 /**
  * TODO Sprint add-controllers.
@@ -36,4 +40,11 @@ public class User {
     @Email
     @Column(name = "email", unique = true) // установлен параметр уникальности поля email
     private String email;
+
+//    @OneToMany(mappedBy = "owner")
+//    private List<Item> items;
+//    @OneToMany(mappedBy = "booker")
+//    private List<Booking> bookings;
+//    @OneToMany(mappedBy = "author")
+//    private List<Comment> comments;
 }

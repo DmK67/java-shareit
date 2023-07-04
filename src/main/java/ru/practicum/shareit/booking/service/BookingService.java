@@ -11,15 +11,13 @@ public interface BookingService {
 
     Booking getBookingById(Long id);
 
-    Booking updateBooking(Booking booking, Long userId);
-
     void deleteBooking(Long id);
 
     List<Booking> getListBookingsUserById(Long userId, String state);
 
     Booking getBookingByIdAndStatus(Long ownerId, Long bookingId);
 
-    Booking updateStatusBooking(Long ownerId, Boolean approved, Long bookingId);
+    Booking updateBooking(Long ownerId, Boolean approved, Long bookingId);
 
     List<Booking> getListBookingsOwnerById(Long owner, String state);
 }

@@ -1,11 +1,13 @@
 package ru.practicum.shareit.booking.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 /**
@@ -29,14 +31,6 @@ public class Booking {
      * APPROVED — бронирование подтверждено владельцем,
      * REJECTED — бронирование отклонено владельцем,
      * CANCELED — бронирование отменено создателем.
-     *
-     * statusState — статус бронирования. Может принимать одно из следующих значений:
-     * ALL (англ. «все»),
-     * CURRENT (англ. «текущие»),
-     * PAST (англ. «завершённые»),
-     * FUTURE (англ. «будущие»),
-     * WAITING (англ. «ожидающие подтверждения»),
-     * REJECTED (англ. «отклонённые»).
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -57,9 +51,7 @@ public class Booking {
     @Column(name = "booking_status")
     @Enumerated(EnumType.STRING)
     private Status status;
-    @Column(name = "booking_status_state")
-    @Enumerated(EnumType.STRING)
-    private StatusState statusState;
+
 
 }
 

@@ -25,8 +25,6 @@ import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingDto;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-//@AllArgsConstructor
-//@NoArgsConstructor
 @Validated
 @RequestMapping(path = "/bookings")
 public class BookingController {
@@ -50,12 +48,12 @@ public class BookingController {
      * Эндпоинт — PATCH /bookings/{bookingId}?approved={approved},
      * параметр approved может принимать значения true или false.
      */
-    @PatchMapping("/{bookingId}") // Эндпоинт подтверждения или отклонения запроса на бронирование
-    public BookingDto updateStatusBooking(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
+    @PatchMapping("/{bookingId}") // Эндпоинт обновления бронирования
+    public BookingDto updateBooking(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
                                           @RequestParam(value = "approved", required = false) Boolean approved,
                                           @PathVariable Long bookingId) {
         log.info("Выполняем подтверждение или отклонение запроса на бронирование владельцем вещи по Id={}.", ownerId);
-        return toBookingDto(bookingService.updateStatusBooking(ownerId, approved, bookingId));
+        return toBookingDto(bookingService.updateBooking(ownerId, approved, bookingId));
     }
 
     /**
