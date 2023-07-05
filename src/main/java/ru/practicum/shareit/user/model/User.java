@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.comments.model.Comment;
+import ru.practicum.shareit.item.comment.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 
 import javax.persistence.*;
@@ -30,7 +30,6 @@ public class User {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    //@Column(name = "user_id", nullable = false, updatable = false, unique = true)
     @Column(name = "user_id")
     private Long id;
     @NotBlank

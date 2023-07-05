@@ -5,6 +5,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import ru.practicum.shareit.booking.dto.BookingForItemDto;
+import ru.practicum.shareit.item.comment.dto.CommentDto;
+import ru.practicum.shareit.item.comment.model.Comment;
+
+import java.util.List;
 
 @Data
 @RequiredArgsConstructor
@@ -16,19 +20,16 @@ public class ItemWithBookingDto {
     private String description;
     private Boolean available;
 
+//    private Long bookerId;
+//    private Long bookingId;
+
+
     private BookingForItemDto lastBooking;
     private BookingForItemDto nextBooking;
     private Long requestId;
 
-    public void addLastAndNextBooking(BookingForItemDto lastBookingNew, BookingForItemDto nextBookingNew) {
-        if (lastBookingNew == null) {
-            lastBooking = nextBookingNew;
-            nextBookingNew = null;
-        } else {
-            lastBooking = lastBookingNew;
-            nextBooking = nextBookingNew;
-        }
-    }
+    private List<CommentDto> comments;
+
 
 }
 

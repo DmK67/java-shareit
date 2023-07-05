@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.comment.dto.CommentDto;
+import ru.practicum.shareit.item.comment.model.Comment;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemWithBookingDto;
 import ru.practicum.shareit.item.service.ItemService;
@@ -13,6 +15,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
+import static ru.practicum.shareit.item.comment.mapper.CommentMapper.toCommentDto;
 import static ru.practicum.shareit.item.mapper.ItemMapper.toItem;
 import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
 import static ru.practicum.shareit.item.mapper.ItemWithBookingDtoMapper.toItemWithBookingDto;
@@ -60,17 +63,10 @@ public class ItemController {
      * Просмотр информации о конкретной вещи по её идентификатору. Эндпойнт GET /items/{itemId}.
      * Информацию о вещи может просмотреть любой пользователь.
      */
-//    @GetMapping("/{itemId}") // Эндпоинт получения вещи по ее id
-//    public ItemDto getItemById(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
-//                               @Valid @Min(1) @NotNull @PathVariable Long itemId) {
-//        log.info("Просмотр вещи по Id={}", itemId);
-//        return toItemDto(itemService.getItemById(itemId));
-//    }
     @GetMapping("/{itemId}") // Эндпоинт получения вещи по ее id
     public ItemWithBookingDto getItemByIdWithBooking(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id",
             required = false) Long ownerId, @Valid @Min(1) @NotNull @PathVariable Long itemId) {
         log.info("Просмотр вещи по Id={} с информацией о бронировании", itemId);
-        //return toItemWithBookingDto(itemService.getItemByIdWithBooking(itemId, ownerId));
         return itemService.getItemByIdWithBooking(itemId, ownerId);
     }
 
@@ -78,7 +74,7 @@ public class ItemController {
      * Просмотр владельцем списка всех его вещей с указанием названия и описания для каждой. Эндпойнт GET /items.
      */
     @GetMapping //Эндпоинт получения списка вещей владельца
-    public List<ItemDto> getListItems(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId) {
+    public List<ItemWithBookingDto> getListItems(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId) {
         log.info("Просмотр вещей пользователя по Id={}", ownerId);
         return itemService.getListItemsUserById(ownerId);
     }
@@ -94,4 +90,14 @@ public class ItemController {
         return itemService.getSearchItems(text);
     }
 
+    /**Теперь дайте пользователям возможность оставлять отзыв на вещь. Отзыв может
+     оставить только тот пользователь, который брал эту вещь в аренду, и только после
+     окончания срока аренды. Так комментарии будут честными. Добавление
+     комментария будет происходить по эндпоинту POST /items/{itemId}/comment */
+    @PostMapping ("/{itemId}/comment")// Эндпоинт добавления комментария
+    public CommentDto addComment(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
+                                 @RequestBody Comment comment, @Valid @Min(1) @NotNull @PathVariable Long itemId) {
+        //log.info("Добавляем комментарий: {}", itemDto.getName());
+        return toCommentDto(itemService.addComment(comment, ownerId, itemId));
+    }
 }

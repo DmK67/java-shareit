@@ -8,6 +8,9 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidateException;
+import ru.practicum.shareit.item.comment.dto.CommentDto;
+import ru.practicum.shareit.item.comment.model.Comment;
+import ru.practicum.shareit.item.comment.repositiry.CommentRepository;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemWithBookingDto;
 import ru.practicum.shareit.item.model.Item;
@@ -23,8 +26,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingForItemDto;
-import static ru.practicum.shareit.item.mapper.ItemMapper.itemWithBooking;
-import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
+import static ru.practicum.shareit.item.comment.mapper.CommentMapper.toCommentDto;
+import static ru.practicum.shareit.item.mapper.ItemMapper.*;
 import static ru.practicum.shareit.item.mapper.ItemWithBookingDtoMapper.toItemWithBookingDto;
 
 @Service
@@ -34,6 +37,7 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository repository;
     private final UserService userService;
     private final ValidationService validationService;
+    private final CommentRepository commentRepository;
 
     @Override
     public Item addItem(Item item, Long ownerId) {
@@ -52,36 +56,44 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemWithBookingDto getItemByIdWithBooking(Long itemId, Long owner) { // Метод получения вещи по id с бронированием
         Item itemFromBD = getItemById(itemId);
-        User ownerFromBD = userService.getUserById(owner);
-
+        userService.getUserById(owner);
         ItemWithBooking itemWithBooking = itemWithBooking(itemFromBD);
         List<Booking> allBookings = itemFromBD.getBookings();
         Booking lastBooking = null;
         Booking nextBooking = null;
         LocalDateTime now = LocalDateTime.now();
-        Long ownerIdFromItemFromBD = itemFromBD.getOwner().getId();      //ID хозяина вещи из БД.
+        Long ownerIdFromItemFromBD = itemFromBD.getOwner().getId();
+
         if (ownerIdFromItemFromBD.equals(owner) && allBookings != null) {
             nextBooking = findNextBookingByDate(allBookings, now);
             lastBooking = findLastBookingByDate(allBookings, now);
         }
+        ItemWithBookingDto itemWithBookingDto = toItemWithBookingDto(itemWithBooking);
+
         if (nextBooking == null || lastBooking == null) {
-            ItemWithBookingDto itemWithBookingDto = toItemWithBookingDto(itemWithBooking);
+            List<Comment> listComments = itemFromBD.getComments();
+            List<CommentDto> commentDtoList = convertListCommentsToListCommentsDto(listComments);
+            itemWithBookingDto.setComments(commentDtoList);
             return itemWithBookingDto;
+
         } else {
-            ItemWithBookingDto itemWithBookingDto = toItemWithBookingDto(itemWithBooking);
             BookingForItemDto nextBookingForItemDto = toBookingForItemDto(nextBooking);
             BookingForItemDto lastBookingForItemDto = toBookingForItemDto(lastBooking);
             itemWithBookingDto.setNextBooking(nextBookingForItemDto);
             itemWithBookingDto.setLastBooking(lastBookingForItemDto);
+            List<Comment> listComments = itemFromBD.getComments();
+            List<CommentDto> commentDtoList = convertListCommentsToListCommentsDto(listComments);
+            itemWithBookingDto.setComments(commentDtoList);
             return itemWithBookingDto;
         }
+
     }
 
     @Override
     public Item updateItem(Item item, Long itemId, Long ownerId) { // Метод обновления вещи
         getItemById(itemId); // Проверяем вещь по id на существование в БД
-        userService.getUserById(ownerId); // Проверяем пользователя по id на существование в БД
-        item.setOwner(userService.getUserById(ownerId));
+        User owner = userService.getUserById(ownerId); // Проверяем пользователя по id на существование в БД
+        item.setOwner(owner);
         validationService.checkOwnerItem(itemId, ownerId); // Проверяем соответствие владельца вещи
 
         Item updateItem = getItemById(itemId);
@@ -110,9 +122,15 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getListItemsUserById(Long ownerId) { // Метод получения списка вещей по id пользователя
-        User owner = userService.getUserById(ownerId); // Проверяем владельца вещи по id на существование в памяти
-        return convertListItemsToListItemsDto(repository.findAllByOwnerOrderById(owner));
+    public List<ItemWithBookingDto> getListItemsUserById(Long ownerId) { // Метод получения списка вещей по id пользователя
+        userService.getUserById(ownerId); // Проверяем владельца вещи по id на существование в памяти
+        List<ItemDto> itemDtoList = convertListItemsToListItemsDto(repository.findAllByOwnerId(ownerId));
+        List<Item> itemList = convertListItemsDtoToListItems(itemDtoList);
+        List<ItemWithBookingDto> itemWithBookingDtoList = new ArrayList<>();
+        for (Item item : itemList) {
+            itemWithBookingDtoList.add(getItemByIdWithBooking(item.getId(), ownerId));
+        }
+        return itemWithBookingDtoList;
     }
 
     @Override
@@ -132,12 +150,40 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
+    @Override
+    public Comment addComment(Comment comment, Long ownerId, Long itemId) { // Метод добавления комментария
+        Item item = getItemById(itemId); // Проверяем вещь по id на существование в БД
+        User user = userService.getUserById(ownerId); // Проверяем пользователя по id на существование в БД
+        validationService.checkCommentText(comment.getText()); // Проверяем поле text
+        validationService.checkTheUserRentedTheItem(ownerId, item); // Проверяем что пользователь действительно брал вещь в аренду
+        comment.setItem(item);
+        comment.setAuthor(user);
+        comment.setCreated(LocalDateTime.now());
+        return commentRepository.save(comment);
+    }
+
     private List<ItemDto> convertListItemsToListItemsDto(List<Item> listItems) {
         List<ItemDto> itemDtoList = new ArrayList<>();
         for (Item item : listItems) {
             itemDtoList.add(toItemDto(item));
         }
         return itemDtoList;
+    }
+
+    public static List<CommentDto> convertListCommentsToListCommentsDto(List<Comment> listComments) {
+        List<CommentDto> commentDtoList = new ArrayList<>();
+        for (Comment comment : listComments) {
+            commentDtoList.add(toCommentDto(comment));
+        }
+        return commentDtoList;
+    }
+
+    private List<Item> convertListItemsDtoToListItems(List<ItemDto> itemDtoList) {
+        List<Item> itemList = new ArrayList<>();
+        for (ItemDto itemDto : itemDtoList) {
+            itemList.add(toItem(itemDto));
+        }
+        return itemList;
     }
 
     private Booking findNextBookingByDate(List<Booking> bookings, LocalDateTime now) {

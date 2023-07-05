@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import ru.practicum.shareit.booking.dto.BookingForItemDto;
+import ru.practicum.shareit.item.comment.model.Comment;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -23,23 +26,6 @@ public class ItemWithBooking {
 
     private BookingForItemDto nextBooking;
 
-    //private List<CommentReceiving> comments;
+    private List<Comment> comments;
 
-//    public void addBooking(SmallBooking lastBookingNew, SmallBooking nextBookingNew) {
-//        if (lastBookingNew == null) {
-//            lastBooking = nextBookingNew;
-//            nextBooking = null;
-//        } else {
-//            lastBooking = lastBookingNew;
-//            nextBooking = nextBookingNew;
-//        }
-//    }
-//
-//    public void addComments(List<CommentReceiving> list) {
-//        if (list.isEmpty()) {
-//            comments = List.of();
-//        } else {
-//            comments = list;
-//        }
-//    }
 }

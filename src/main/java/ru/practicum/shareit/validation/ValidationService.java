@@ -15,6 +15,7 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -82,7 +83,7 @@ public class ValidationService {
     public void checkBookerIsTheOwner(Item itemDB, Long bookerId) { // Метод проверки: является ли арендодатель - владельцем вещи
         if (itemDB.getOwner().getId().equals(bookerId)) {
             log.error("Ошибка! Невозможно добавить бронирование, пользователь по id={} " +
-                    "является владельцем вещи", bookerId );
+                    "является владельцем вещи", bookerId);
             throw new NotFoundException("Ошибка! Невозможно добавить бронирование!");
         }
     }
@@ -159,6 +160,28 @@ public class ValidationService {
         }
         log.error("Ошибка! Указан неправильно статус бронирования!");
         throw new StateStatusValidateException();
+    }
+
+    public void checkTheUserRentedTheItem(Long userId, Item item) {
+        List<Booking> bookings = item.getBookings();
+        boolean isBooker = false;
+        for (Booking booking : bookings) {
+            Long bookerIdFromBooking = booking.getBooker().getId();
+            if (bookerIdFromBooking.equals(userId) && booking.getEnd().isBefore(LocalDateTime.now())) {
+                isBooker = true;
+                break;
+            }
+        }
+        if (!isBooker) {
+            log.error("Ошибка! Cохранение комментария к вещи с id ={}", item.getId());
+            throw new ValidateException("Пользователь по id=" + userId + " не арендовал эту вещь");
+        }
+    }
+
+    public void checkCommentText(String text) { // Метод проверки поля text
+        if (text == null || text.isBlank()) {
+            throw new ValidateException("Текст комментария не может быть пустым.");
+        }
     }
 }
 

@@ -42,8 +42,7 @@ public class BookingServiceImpl implements BookingService {
                 .id(itemDB.getId())
                 .name(itemDB.getName())
                 .build());
-        Booking b = bookingRepository.save(booking);
-        return b;
+        return bookingRepository.save(booking);
     }
 
     @Override
@@ -62,9 +61,6 @@ public class BookingServiceImpl implements BookingService {
         // Метод получения списка всех бронированний пользователя по id
         userService.getUserById(userId); // Проверяем существование пользователя в БД
         validationService.checkStatusState(state); // Проверка statusState
-//        List<Booking> listResult = new ArrayList<>(bookingRepository.findAll());
-//        List<Booking> newListResult = listResultAddItemAndAddBooker(listResult);
-//        Collections.reverse(newListResult);
         StatusState statusState = StatusState.valueOf(state);
         List<Booking> listResult = new ArrayList<>();
         switch (statusState) {
@@ -136,7 +132,7 @@ public class BookingServiceImpl implements BookingService {
                 break;
             }
             case FUTURE: {
-                listResult = bookingRepository.findAllByBookerIdAndStateFuture(owner);
+                listResult = bookingRepository.findAllByItemOwnerIdAndStateFuture(owner, Status.REJECTED);
                 break;
             }
             case WAITING: {

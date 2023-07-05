@@ -4,6 +4,10 @@ import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.dto.ItemWithBookingDto;
 import ru.practicum.shareit.item.model.ItemWithBooking;
 
+import java.util.ArrayList;
+
+import static ru.practicum.shareit.item.service.ItemServiceImpl.convertListCommentsToListCommentsDto;
+
 @Component
 public class ItemWithBookingDtoMapper {
 
@@ -15,6 +19,8 @@ public class ItemWithBookingDtoMapper {
                 .available(itemWithBooking.getAvailable())
                 .lastBooking(itemWithBooking.getLastBooking())
                 .nextBooking(itemWithBooking.getNextBooking())
+                .comments(itemWithBooking.getComments() != null ?
+                        convertListCommentsToListCommentsDto(itemWithBooking.getComments()) : new ArrayList<>())
                 .build();
     }
 
@@ -29,13 +35,3 @@ public class ItemWithBookingDtoMapper {
                 .build();
     }
 }
-///**
-//     * Из объекта для ответа в вещь.
-//     */
-//
-//    Item mapToModel(ItemWithBookingDto itemWithBookingDto);
-//
-//    /**
-//     * Из вещи в объект для ответа.
-//     */
-//    ItemWithBookingDto mapToDto(Item item);

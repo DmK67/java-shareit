@@ -15,9 +15,9 @@ import java.time.LocalDateTime;
 @Builder
 public class BookingForItemDto {
     private Long id;
-    @JsonAlias({"start"})
+    //@JsonAlias({"start"})
     private LocalDateTime startTime;
-    @JsonAlias({"end"})
+    //@JsonAlias({"end"})
     private LocalDateTime endTime;
     private Long bookerId;
     private Status status;
