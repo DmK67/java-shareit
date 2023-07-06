@@ -69,24 +69,21 @@ public class ItemServiceImpl implements ItemService {
             lastBooking = findLastBookingByDate(allBookings, now);
         }
         ItemWithBookingDto itemWithBookingDto = toItemWithBookingDto(itemWithBooking);
-
-        if (nextBooking == null || lastBooking == null) {
-            List<Comment> listComments = itemFromBD.getComments();
+        List<Comment> listComments = itemFromBD.getComments();
+        if (nextBooking == null && lastBooking == null) {
             List<CommentDto> commentDtoList = convertListCommentsToListCommentsDto(listComments);
             itemWithBookingDto.setComments(commentDtoList);
             return itemWithBookingDto;
-
         } else {
             BookingForItemDto nextBookingForItemDto = toBookingForItemDto(nextBooking);
             BookingForItemDto lastBookingForItemDto = toBookingForItemDto(lastBooking);
             itemWithBookingDto.setNextBooking(nextBookingForItemDto);
             itemWithBookingDto.setLastBooking(lastBookingForItemDto);
-            List<Comment> listComments = itemFromBD.getComments();
             List<CommentDto> commentDtoList = convertListCommentsToListCommentsDto(listComments);
             itemWithBookingDto.setComments(commentDtoList);
+
             return itemWithBookingDto;
         }
-
     }
 
     @Override

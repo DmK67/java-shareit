@@ -39,12 +39,15 @@ public class BookingMapper {
     }
 
     public static BookingForItemDto toBookingForItemDto(Booking booking) {
-
-        return BookingForItemDto.builder()
-                .id(booking.getId())
-                .startTime(booking.getStart())
-                .bookerId(booking.getBooker().getId())
-                .status(booking.getStatus())
-                .build();
-    }
+        if(booking!=null) {
+            return BookingForItemDto.builder()
+                    .id(booking.getId())
+                    .startTime(booking.getStart())
+                    .bookerId(booking.getBooker().getId())
+                    .status(booking.getStatus())
+                    .build();
+        }else {
+            return null;
+        }
+        }
 }
