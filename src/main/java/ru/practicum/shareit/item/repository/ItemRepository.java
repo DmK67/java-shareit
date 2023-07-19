@@ -7,7 +7,6 @@ import ru.practicum.shareit.item.model.Item;
 import java.util.List;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
-    //List<Item> findAllByOwnerOrderById(User owner); // Метод поиска списка вещей по id владельца
 
     List<Item> findAllByOwnerId(Long owner); // Метод поиска списка вещей по id владельца
 

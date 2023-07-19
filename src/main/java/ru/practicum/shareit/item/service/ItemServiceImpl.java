@@ -54,7 +54,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemWithBookingDto getItemByIdWithBooking(Long itemId, Long owner) { // Метод получения вещи по id с бронированием
+    public ItemWithBookingDto getItemByIdWithBooking(Long itemId, Long owner) {
+        // Метод получения вещи по id с бронированием
         Item itemFromBD = getItemById(itemId);
         userService.getUserById(owner);
         ItemWithBooking itemWithBooking = itemWithBooking(itemFromBD);
@@ -119,7 +120,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemWithBookingDto> getListItemsUserById(Long ownerId) { // Метод получения списка вещей по id пользователя
+    public List<ItemWithBookingDto> getListItemsUserById(Long ownerId) {
+        // Метод получения списка вещей по id пользователя
         userService.getUserById(ownerId); // Проверяем владельца вещи по id на существование в памяти
         List<ItemDto> itemDtoList = convertListItemsToListItemsDto(repository.findAllByOwnerId(ownerId));
         List<Item> itemList = convertListItemsDtoToListItems(itemDtoList);
@@ -152,7 +154,8 @@ public class ItemServiceImpl implements ItemService {
         Item item = getItemById(itemId); // Проверяем вещь по id на существование в БД
         User user = userService.getUserById(ownerId); // Проверяем пользователя по id на существование в БД
         validationService.checkCommentText(comment.getText()); // Проверяем поле text
-        validationService.checkTheUserRentedTheItem(ownerId, item); // Проверяем что пользователь действительно брал вещь в аренду
+        validationService.checkTheUserRentedTheItem(ownerId, item); // Проверяем что пользователь действительно брал
+        // вещь в аренду
         comment.setItem(item);
         comment.setAuthor(user);
         comment.setCreated(LocalDateTime.now());
@@ -188,15 +191,21 @@ public class ItemServiceImpl implements ItemService {
         Booking first = null;
         if (bookings != null && !bookings.isEmpty()) {
             for (Booking b : bookings) {
+                Long itemId = b.getItem().getId();
+                b.setItem(Item.builder().id(itemId).build());
+                Long bookerId = b.getBooker().getId();
+                b.setBooker(User.builder().id(bookerId).build());
                 if (b.getEnd().isAfter(now)) {
-                    if (first == null && (b.getStatus().equals(Status.APPROVED)
-                            || b.getStatus().equals(Status.WAITING))) {
+                    if (first == null && (b.getStatus().equals(Status.APPROVED) || b.getStatus().equals(Status.WAITING))) {
                         first = b;
                     } else if (first == null) {
-                        first = b;
+                        first = null;
                     } else if (b.getStart().isBefore(first.getStart())) {
                         first = b;
                     }
+                }
+                if (b.getStart().isBefore(now) && b.getEnd().isAfter(now)) {
+                    first = null;
                 }
             }
         }
@@ -208,6 +217,10 @@ public class ItemServiceImpl implements ItemService {
         Booking last = null;
         if (bookings != null && !bookings.isEmpty()) {
             for (Booking b : bookings) {
+                Long itemId = b.getItem().getId();
+                b.setItem(Item.builder().id(itemId).build());
+                Long bookerId = b.getBooker().getId();
+                b.setBooker(User.builder().id(bookerId).build());
                 if (b.getEnd().isBefore(now)) {
                     if (last == null && (b.getStatus().equals(Status.APPROVED))) {
                         last = b;
@@ -216,6 +229,9 @@ public class ItemServiceImpl implements ItemService {
                     } else if (b.getEnd().isAfter(last.getEnd())) {
                         last = b;
                     }
+                }
+                if (b.getStart().isBefore(now) && b.getEnd().isAfter(now)) {
+                    last = b;
                 }
             }
         }

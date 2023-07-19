@@ -11,7 +11,8 @@ import static ru.practicum.shareit.item.service.ItemServiceImpl.convertListComme
 @Component
 public class ItemWithBookingDtoMapper {
 
-    public static ItemWithBookingDto toItemWithBookingDto(ItemWithBooking itemWithBooking) { // Метод перевода объекта item в объект itemDto
+    public static ItemWithBookingDto toItemWithBookingDto(ItemWithBooking itemWithBooking) {
+        // Метод перевода объекта item в объект itemDto
         return ItemWithBookingDto.builder()
                 .id(itemWithBooking.getId())
                 .name(itemWithBooking.getName())
@@ -24,7 +25,8 @@ public class ItemWithBookingDtoMapper {
                 .build();
     }
 
-    public static ItemWithBooking toItemWithBooking(ItemWithBookingDto itemWithBookingDto) { // Метод перевода объекта itemDto в объект item
+    public static ItemWithBooking toItemWithBooking(ItemWithBookingDto itemWithBookingDto) {
+        // Метод перевода объекта itemDto в объект item
         return ItemWithBooking.builder()
                 .id(itemWithBookingDto.getId())
                 .name(itemWithBookingDto.getName())

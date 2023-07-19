@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.time.LocalDateTime;
+
 @Getter
 @Setter
 public class CustomErrorResponse extends ResponseEntityExceptionHandler {

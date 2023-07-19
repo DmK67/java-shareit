@@ -34,7 +34,7 @@ public class BookingServiceImpl implements BookingService {
         itemService.checkingIsAvailable(itemDB); // Проверка доступности к бронированию
         User booker = userService.getUserById(bookerId); // Получение и проверка на наличии пользователя в БД
         validationService.checkBookingDtoWhenAdd(bookingDto); // Проверка полей объекта BookingDto перед добавлением
-        validationService.checkBookerIsTheOwner(itemDB, bookerId); // Проверка является ли арендодатель - владельцем вещи
+        validationService.checkBookerIsTheOwner(itemDB, bookerId); // Проверка является ли арендодатель-владельцем вещи
         bookingDto.setStatus(Status.WAITING);
         Booking booking = toBooking(bookingDto);
         booking.setBooker(booker);
@@ -92,7 +92,8 @@ public class BookingServiceImpl implements BookingService {
         // Метод получение данных о конкретном бронировании (включая его статус)
         userService.getUserById(ownerId); // Проверяем существование пользователя в БД
         getBookingById(bookingId); // Проверяем существование бронирования в БД
-        validationService.checkBookerOrOwner(ownerId, bookingId); // Проверяем владельца вещи и клиента бронирования на соответствие
+        validationService.checkBookerOrOwner(ownerId, bookingId); // Проверяем владельца вещи
+        // и клиента бронирования на соответствие
         return getBookingById(bookingId);
     }
 
@@ -100,7 +101,8 @@ public class BookingServiceImpl implements BookingService {
     public Booking updateBooking(Long ownerId, Boolean approved, Long bookingId) { // Метод обновления бронирования
         userService.getUserById(ownerId); // Проверяем существование пользователя в БД
         Booking bookingFromBD = getBookingById(bookingId); // Получаем и проверяем существование бронирования в БД
-        validationService.checkOwnerItemAndBooker(bookingFromBD.getItem().getId(), ownerId, bookingId); // Проверяем соответствие владельца вещи
+        validationService.checkOwnerItemAndBooker(bookingFromBD.getItem().getId(), ownerId, bookingId);
+        // Проверяем соответствие владельца вещи
         validationService.checkStatusBooking(approved, bookingId); // Проверяем статус бронирования на изменение
         if (approved) {
             bookingFromBD.setStatus(Status.APPROVED);

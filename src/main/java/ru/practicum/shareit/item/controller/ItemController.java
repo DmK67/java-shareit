@@ -18,7 +18,6 @@ import java.util.List;
 import static ru.practicum.shareit.item.comment.mapper.CommentMapper.toCommentDto;
 import static ru.practicum.shareit.item.mapper.ItemMapper.toItem;
 import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
-import static ru.practicum.shareit.item.mapper.ItemWithBookingDtoMapper.toItemWithBookingDto;
 
 /**
  * TODO Sprint add-controllers.
@@ -37,10 +36,7 @@ public class ItemController {
      * Именно этот пользователь — владелец вещи. Идентификатор владельца будет поступать на вход в каждом из запросов,
      * рассмотренных далее.
      */
-    //Добавление дат бронирования при просмотре вещей
-    //Осталось пара штрихов. Итак, вы добавили возможность бронировать вещи.
-    // Теперь нужно, чтобы владелец видел даты последнего и ближайшего следующего бронирования для каждой вещи,
-    // когда просматривает список (GET /items).
+
     @PostMapping // Эндпоинт добавления вещи
     public ItemDto addItem(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
                            @RequestBody ItemDto itemDto) {
@@ -53,7 +49,8 @@ public class ItemController {
      * Редактировать вещь может только её владелец.
      */
     @PatchMapping("/{itemId}") // Эндпоинт обновления вещи по id
-    public ItemDto updateItem(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
+    public ItemDto updateItem(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false)
+                              Long ownerId,
                               @Valid @Min(1) @NotNull @PathVariable Long itemId, @RequestBody ItemDto itemDto) {
         log.info("Обновляем вещь по Id={}", itemId);
         return toItemDto(itemService.updateItem(toItem(itemDto), itemId, ownerId));
@@ -74,7 +71,8 @@ public class ItemController {
      * Просмотр владельцем списка всех его вещей с указанием названия и описания для каждой. Эндпойнт GET /items.
      */
     @GetMapping //Эндпоинт получения списка вещей владельца
-    public List<ItemWithBookingDto> getListItems(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId) {
+    public List<ItemWithBookingDto> getListItems(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id",
+            required = false) Long ownerId) {
         log.info("Просмотр вещей пользователя по Id={}", ownerId);
         return itemService.getListItemsUserById(ownerId);
     }
@@ -85,19 +83,22 @@ public class ItemController {
      * в text передаётся текст для поиска. Проверьте, что поиск возвращает только доступные для аренды вещи.
      */
     @GetMapping("/search") // Эндпоинт поиска по подстроке
-    public List<ItemDto> getSearchItems(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
+    public List<ItemDto> getSearchItems(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false)
+                                        Long ownerId,
                                         @RequestParam(value = "text", required = false) String text) {
         return itemService.getSearchItems(text);
     }
 
-    /**Теперь дайте пользователям возможность оставлять отзыв на вещь. Отзыв может
-     оставить только тот пользователь, который брал эту вещь в аренду, и только после
-     окончания срока аренды. Так комментарии будут честными. Добавление
-     комментария будет происходить по эндпоинту POST /items/{itemId}/comment */
-    @PostMapping ("/{itemId}/comment")// Эндпоинт добавления комментария
-    public CommentDto addComment(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
+    /**
+     * Теперь дайте пользователям возможность оставлять отзыв на вещь. Отзыв может
+     * оставить только тот пользователь, который брал эту вещь в аренду, и только после
+     * окончания срока аренды. Так комментарии будут честными. Добавление
+     * комментария будет происходить по эндпоинту POST /items/{itemId}/comment
+     */
+    @PostMapping("/{itemId}/comment")// Эндпоинт добавления комментария
+    public CommentDto addComment(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false)
+                                 Long ownerId,
                                  @RequestBody Comment comment, @Valid @Min(1) @NotNull @PathVariable Long itemId) {
-        //log.info("Добавляем комментарий: {}", itemDto.getName());
         return toCommentDto(itemService.addComment(comment, ownerId, itemId));
     }
 }

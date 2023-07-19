@@ -25,7 +25,8 @@ public class ValidationService {
     private final ItemRepository itemRepository;
     private final BookingRepository bookingRepository;
 
-    public void checkUniqueEmailUserAdd(User user) { // Метод проверки поля e-mail на пустые строки и пробелы при добавлении
+    public void checkUniqueEmailUserAdd(User user) { // Метод проверки поля e-mail на пустые строки
+        // и пробелы при добавлении
         if (user.getEmail() == null || user.getEmail().isBlank()) {
             log.error("Ошибка! Пользователь с пустым e-mail не может быть добавлен!");
             throw new ValidateException("Ошибка! Пользователь с пустым e-mail не может быть добавлен!");
@@ -41,7 +42,8 @@ public class ValidationService {
         }
     }
 
-    public void checkOwnerItemAndBooker(Long itemId, Long ownerId, Long bookingId) { // Метод проверки соответствия владельца вещи
+    public void checkOwnerItemAndBooker(Long itemId, Long ownerId, Long bookingId) {
+        // Метод проверки соответствия владельца вещи
         Item item = itemRepository.findById(itemId).get();
         Booking booking = bookingRepository.findById(bookingId).get();
         if (item.getOwner().getId().equals(ownerId)) {
@@ -62,11 +64,13 @@ public class ValidationService {
     public void checkStatusBooking(Boolean approved, Long bookingId) { // Метод проверки статуса бронирования
         Booking booking = bookingRepository.findById(bookingId).get();
         if (booking.getStatus().name().equals("APPROVED") && approved) {
-            log.error("Ошибка! Статус бронирования установлен APPROVED, повторно изменить статус на APPROVED не возможно!");
+            log.error("Ошибка! Статус бронирования установлен APPROVED, повторно изменить статус на APPROVED " +
+                    "не возможно!");
             throw new ValidateException("Статус APPROVED был установлен ранее.");
         }
         if (booking.getStatus().name().equals("REJECTED") && !approved) {
-            log.error("Ошибка! Статус бронирования установлен REJECTED, повторно изменить статус на REJECTED не возможно!");
+            log.error("Ошибка! Статус бронирования установлен REJECTED, повторно изменить статус на REJECTED " +
+                    "не возможно!");
             throw new ValidateException("Статус REJECTED был установлен ранее.");
         }
     }
@@ -80,7 +84,8 @@ public class ValidationService {
         }
     }
 
-    public void checkBookerIsTheOwner(Item itemDB, Long bookerId) { // Метод проверки: является ли арендодатель - владельцем вещи
+    public void checkBookerIsTheOwner(Item itemDB, Long bookerId) { // Метод проверки: является ли арендодатель
+        // - владельцем вещи
         if (itemDB.getOwner().getId().equals(bookerId)) {
             log.error("Ошибка! Невозможно добавить бронирование, пользователь по id={} " +
                     "является владельцем вещи", bookerId);
@@ -112,13 +117,15 @@ public class ValidationService {
         }
     }
 
-    public void checkBookingDtoWhenAdd(BookingDto bookingDto) { // Метод проверки полей объекта BookingDto перед добавлением
+    public void checkBookingDtoWhenAdd(BookingDto bookingDto) {
+        // Метод проверки полей объекта BookingDto перед добавлением
         if (bookingDto.getStart() == null || bookingDto.getEnd() == null) {
             log.error("Ошибка! Поля начала и окончания бронирования не могут быть пустыми!");
             throw new ValidateException("Ошибка! Поля начала и окончания бронирования не могут быть пустыми!");
         }
         if (bookingDto.getEnd().isBefore(bookingDto.getStart())) {
-            log.error("Ошибка! Дата и время окончания бронирования не может предшествовать дате и времени начала бронирования!");
+            log.error("Ошибка! Дата и время окончания бронирования не может предшествовать дате и времени начала " +
+                    "бронирования!");
             throw new ValidateException("Ошибка! Указано неправильно дата или время бронирования!");
         }
         if (bookingDto.getStart().isEqual(bookingDto.getEnd())) {
