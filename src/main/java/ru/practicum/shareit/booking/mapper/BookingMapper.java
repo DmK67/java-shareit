@@ -25,7 +25,7 @@ public class BookingMapper {
                 .build();
     }
 
-    public static Booking toBooking(BookingDto bookingDto) {// Метод перевода объекта bookingDto в объект booking
+    public static Booking toBooking(BookingDto bookingDto) { // Метод перевода объекта bookingDto в объект booking
         Item item = Item.builder()
                 .id(bookingDto.getItemId())
                 .build();
