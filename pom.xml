@@ -118,11 +118,7 @@
                                     <goals>
                                         <goal>check</goal>
                                     </goals>
-
-                                    <id>checkstyle-validation</id>
-                                    <phase>none</phase>
-
-                                    <!--<phase>compile</phase>-->
+                                    <phase>compile</phase>
                                 </execution>
                             </executions>
                             <dependencies>
