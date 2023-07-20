@@ -5,8 +5,12 @@ import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingForItemDto;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
+
+import java.util.List;
 
 @Component
 @AllArgsConstructor
@@ -19,9 +23,9 @@ public class BookingMapper {
                 .start(booking.getStart())
                 .end(booking.getEnd())
                 .itemId(booking.getItem().getId())
-                .booker(User.builder().id(booking.getBooker().getId()).build())
+                .booker(UserDto.builder().id(booking.getBooker().getId()).build())
                 .status(booking.getStatus())
-                .item(Item.builder().id(booking.getItem().getId()).name(booking.getItem().getName()).build())
+                .item(ItemDto.builder().id(booking.getItem().getId()).name(booking.getItem().getName()).build())
                 .build();
     }
 
@@ -49,5 +53,18 @@ public class BookingMapper {
         } else {
             return null;
         }
+    }
+
+    public static List<Booking> listResultAddItemAndAddBooker(List<Booking> listResult) {
+        for (Booking booking : listResult) {
+            Item item = booking.getItem();
+            booking.setItem(Item.builder()
+                    .id(item.getId())
+                    .name(item.getName())
+                    .build());
+            User user = booking.getBooker();
+            booking.setBooker(User.builder().id(user.getId()).build());
+        }
+        return listResult;
     }
 }

@@ -5,6 +5,9 @@ import ru.practicum.shareit.item.comment.dto.CommentDto;
 import ru.practicum.shareit.item.comment.model.Comment;
 import ru.practicum.shareit.user.model.User;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 public class CommentMapper {
     public static CommentDto toCommentDto(Comment comment) { // Метод перевода объекта item в объект itemDto
@@ -26,5 +29,13 @@ public class CommentMapper {
                 .author(user)
                 .created(commentDto.getCreated())
                 .build();
+    }
+
+    public static List<CommentDto> convertListCommentsToListCommentsDto(List<Comment> listComments) {
+        List<CommentDto> commentDtoList = new ArrayList<>();
+        for (Comment comment : listComments) {
+            commentDtoList.add(toCommentDto(comment));
+        }
+        return commentDtoList;
     }
 }

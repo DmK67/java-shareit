@@ -1,9 +1,6 @@
 package ru.practicum.shareit.booking.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -13,7 +10,8 @@ import java.time.LocalDateTime;
 /**
  * TODO Sprint add-bookings.
  */
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -37,10 +35,8 @@ public class Booking {
     @Column(nullable = false, updatable = false, unique = true)
     private Long id;
     @Column(name = "start_booking")
-    //@NotNull
     private LocalDateTime start;
     @Column(name = "end_booking")
-    //@NotNull
     private LocalDateTime end;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")

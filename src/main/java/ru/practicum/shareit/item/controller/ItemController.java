@@ -10,7 +10,6 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemWithBookingDto;
 import ru.practicum.shareit.item.service.ItemService;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -51,7 +50,7 @@ public class ItemController {
     @PatchMapping("/{itemId}") // Эндпоинт обновления вещи по id
     public ItemDto updateItem(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false)
                               Long ownerId,
-                              @Valid @Min(1) @NotNull @PathVariable Long itemId, @RequestBody ItemDto itemDto) {
+                              @Min(1) @NotNull @PathVariable Long itemId, @RequestBody ItemDto itemDto) {
         log.info("Обновляем вещь по Id={}", itemId);
         return toItemDto(itemService.updateItem(toItem(itemDto), itemId, ownerId));
     }
@@ -62,7 +61,7 @@ public class ItemController {
      */
     @GetMapping("/{itemId}") // Эндпоинт получения вещи по ее id
     public ItemWithBookingDto getItemByIdWithBooking(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id",
-            required = false) Long ownerId, @Valid @Min(1) @NotNull @PathVariable Long itemId) {
+            required = false) Long ownerId, @Min(1) @NotNull @PathVariable Long itemId) {
         log.info("Просмотр вещи по Id={} с информацией о бронировании", itemId);
         return itemService.getItemByIdWithBooking(itemId, ownerId);
     }
@@ -98,7 +97,7 @@ public class ItemController {
     @PostMapping("/{itemId}/comment")// Эндпоинт добавления комментария
     public CommentDto addComment(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false)
                                  Long ownerId,
-                                 @RequestBody Comment comment, @Valid @Min(1) @NotNull @PathVariable Long itemId) {
+                                 @RequestBody Comment comment, @Min(1) @NotNull @PathVariable Long itemId) {
         return toCommentDto(itemService.addComment(comment, ownerId, itemId));
     }
 }

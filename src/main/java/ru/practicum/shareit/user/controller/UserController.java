@@ -37,19 +37,19 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}") // Эндпоинт обновления пользователя по его id
-    public UserDto updateUser(@Valid @Min(1) @PathVariable Long userId, @Valid @RequestBody UserDto userDto) {
+    public UserDto updateUser(@Min(1) @PathVariable Long userId, @RequestBody UserDto userDto) {
         log.info("Обновляем пользователя по Id={}.", userId);
         return toUserDto(userService.updateUser(toUser(userDto), userId));
     }
 
     @GetMapping("/{userId}") // Эндпоинт получения пользователя по его id
-    public UserDto updateUser(@Valid @Min(1) @PathVariable Long userId) {
+    public UserDto updateUser(@Min(1) @PathVariable Long userId) {
         log.info("Получаем пользователя по Id={}.", userId);
         return toUserDto(userService.getUserById(userId));
     }
 
     @DeleteMapping("/{userId}") // Эндпоинт удаления пользователя по id
-    public void deleteUser(@Valid @Min(1) @PathVariable Long userId) {
+    public void deleteUser(@Min(1) @PathVariable Long userId) {
         log.info("Удалаяем пользователя по Id={}.", userId);
         userService.deleteUser(userId);
     }

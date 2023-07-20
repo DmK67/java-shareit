@@ -2,10 +2,13 @@ package ru.practicum.shareit.item.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingForItemDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
+import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exceptions.ForbiddenException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidateException;
 import ru.practicum.shareit.item.comment.dto.CommentDto;
@@ -20,13 +23,14 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.validation.ValidationService;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingForItemDto;
-import static ru.practicum.shareit.item.comment.mapper.CommentMapper.toCommentDto;
+import static ru.practicum.shareit.item.comment.mapper.CommentMapper.convertListCommentsToListCommentsDto;
 import static ru.practicum.shareit.item.mapper.ItemMapper.*;
 import static ru.practicum.shareit.item.mapper.ItemWithBookingDtoMapper.toItemWithBookingDto;
 
@@ -39,6 +43,9 @@ public class ItemServiceImpl implements ItemService {
     private final ValidationService validationService;
     private final CommentRepository commentRepository;
 
+    private final BookingRepository bookingRepository;
+
+    @Transactional
     @Override
     public Item addItem(Item item, Long ownerId) {
         validationService.checkItemDtoWhenAdd(toItemDto(item)); // Проверяем поля объекта itemDto перед добавлением
@@ -46,6 +53,7 @@ public class ItemServiceImpl implements ItemService {
         return repository.save(item);
     }
 
+    @Transactional
     @Override
     public Item getItemById(Long id) { // Метод получения вещи по id
         Item item = repository.findById(id)
@@ -53,6 +61,7 @@ public class ItemServiceImpl implements ItemService {
         return item;
     }
 
+    @Transactional
     @Override
     public ItemWithBookingDto getItemByIdWithBooking(Long itemId, Long owner) {
         // Метод получения вещи по id с бронированием
@@ -62,12 +71,10 @@ public class ItemServiceImpl implements ItemService {
         List<Booking> allBookings = itemFromBD.getBookings();
         Booking lastBooking = null;
         Booking nextBooking = null;
-        LocalDateTime now = LocalDateTime.now();
         Long ownerIdFromItemFromBD = itemFromBD.getOwner().getId();
-
         if (ownerIdFromItemFromBD.equals(owner) && allBookings != null) {
-            nextBooking = findNextBookingByDate(allBookings, now);
-            lastBooking = findLastBookingByDate(allBookings, now);
+            nextBooking = findNextBookingByDate(itemId);
+            lastBooking = findLastBookingByDate(itemId);
         }
         ItemWithBookingDto itemWithBookingDto = toItemWithBookingDto(itemWithBooking);
         List<Comment> listComments = itemFromBD.getComments();
@@ -87,14 +94,17 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
+    @Transactional
     @Override
     public Item updateItem(Item item, Long itemId, Long ownerId) { // Метод обновления вещи
-        getItemById(itemId); // Проверяем вещь по id на существование в БД
+        Item updateItem = getItemById(itemId); // Проверяем вещь по id на существование в БД
         User owner = userService.getUserById(ownerId); // Проверяем пользователя по id на существование в БД
         item.setOwner(owner);
-        validationService.checkOwnerItem(itemId, ownerId); // Проверяем соответствие владельца вещи
-
-        Item updateItem = getItemById(itemId);
+        if (!updateItem.getOwner().getId().equals(ownerId)) { // Проверяем соответствие владельца вещи
+            log.error("Ошибка! Пользователь по Id: {} не является владельцем вещи! " +
+                    "Изменение вещи ЗАПРЕЩЕНО!", ownerId);
+            throw new ForbiddenException("Вносить изменения в параметры вещи может только владелец!");
+        }
         if (item.getName() == null) {
             item.setName(updateItem.getName());
         }
@@ -119,19 +129,41 @@ public class ItemServiceImpl implements ItemService {
         return repository.save(updateItem);
     }
 
+    @Transactional
     @Override
     public List<ItemWithBookingDto> getListItemsUserById(Long ownerId) {
         // Метод получения списка вещей по id пользователя
         userService.getUserById(ownerId); // Проверяем владельца вещи по id на существование в памяти
-        List<ItemDto> itemDtoList = convertListItemsToListItemsDto(repository.findAllByOwnerId(ownerId));
-        List<Item> itemList = convertListItemsDtoToListItems(itemDtoList);
+        List<Item> itemList = repository.findAllByOwnerId(ownerId);
         List<ItemWithBookingDto> itemWithBookingDtoList = new ArrayList<>();
         for (Item item : itemList) {
-            itemWithBookingDtoList.add(getItemByIdWithBooking(item.getId(), ownerId));
+            ItemWithBooking itemWithBooking = itemWithBooking(item);
+            Booking lastBooking = null;
+            Booking nextBooking = null;
+            if (item.getOwner().getId().equals(ownerId) && item.getBookings() != null) {
+                nextBooking = findNextBookingByDate(item.getId());
+                lastBooking = findLastBookingByDate(item.getId());
+            }
+            List<Comment> listComments = item.getComments();
+            ItemWithBookingDto itemWithBookingDto = toItemWithBookingDto(itemWithBooking);
+            if (nextBooking == null && lastBooking == null) {
+                List<CommentDto> commentDtoList = convertListCommentsToListCommentsDto(listComments);
+                itemWithBookingDto.setComments(commentDtoList);
+                itemWithBookingDtoList.add(itemWithBookingDto);
+            } else {
+                BookingForItemDto nextBookingForItemDto = toBookingForItemDto(nextBooking);
+                BookingForItemDto lastBookingForItemDto = toBookingForItemDto(lastBooking);
+                itemWithBookingDto.setNextBooking(nextBookingForItemDto);
+                itemWithBookingDto.setLastBooking(lastBookingForItemDto);
+                List<CommentDto> commentDtoList = convertListCommentsToListCommentsDto(listComments);
+                itemWithBookingDto.setComments(commentDtoList);
+                itemWithBookingDtoList.add(itemWithBookingDto);
+            }
         }
         return itemWithBookingDtoList;
     }
 
+    @Transactional
     @Override
     public List<ItemDto> getSearchItems(String text) { // Метод поиска вещей по подстроке
         if (text == null || text.isBlank()) { // Проверка на пустою строку и на null
@@ -142,6 +174,7 @@ public class ItemServiceImpl implements ItemService {
         return convertListItemsToListItemsDto(repository.searchItemsByNameContaining(text));
     }
 
+    @Transactional
     @Override
     public void checkingIsAvailable(Item item) { // Метод проверки статуса бронирования
         if (!item.getAvailable()) {
@@ -149,6 +182,7 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
+    @Transactional
     @Override
     public Comment addComment(Comment comment, Long ownerId, Long itemId) { // Метод добавления комментария
         Item item = getItemById(itemId); // Проверяем вещь по id на существование в БД
@@ -162,80 +196,26 @@ public class ItemServiceImpl implements ItemService {
         return commentRepository.save(comment);
     }
 
-    private List<ItemDto> convertListItemsToListItemsDto(List<Item> listItems) {
-        List<ItemDto> itemDtoList = new ArrayList<>();
-        for (Item item : listItems) {
-            itemDtoList.add(toItemDto(item));
-        }
-        return itemDtoList;
-    }
-
-    public static List<CommentDto> convertListCommentsToListCommentsDto(List<Comment> listComments) {
-        List<CommentDto> commentDtoList = new ArrayList<>();
-        for (Comment comment : listComments) {
-            commentDtoList.add(toCommentDto(comment));
-        }
-        return commentDtoList;
-    }
-
-    private List<Item> convertListItemsDtoToListItems(List<ItemDto> itemDtoList) {
-        List<Item> itemList = new ArrayList<>();
-        for (ItemDto itemDto : itemDtoList) {
-            itemList.add(toItem(itemDto));
-        }
-        return itemList;
-    }
-
-    private Booking findNextBookingByDate(List<Booking> bookings, LocalDateTime now) {
+    private Booking findNextBookingByDate(Long itemId) {
         // Метод поиска следующего бронирования после указанной даты
-        Booking first = null;
-        if (bookings != null && !bookings.isEmpty()) {
-            for (Booking b : bookings) {
-                Long itemId = b.getItem().getId();
-                b.setItem(Item.builder().id(itemId).build());
-                Long bookerId = b.getBooker().getId();
-                b.setBooker(User.builder().id(bookerId).build());
-                if (b.getEnd().isAfter(now)) {
-                    if (first == null && (b.getStatus().equals(Status.APPROVED) || b.getStatus().equals(Status.WAITING))) {
-                        first = b;
-                    } else if (first == null) {
-                        first = null;
-                    } else if (b.getStart().isBefore(first.getStart())) {
-                        first = b;
-                    }
-                }
-                if (b.getStart().isBefore(now) && b.getEnd().isAfter(now)) {
-                    first = null;
-                }
-            }
+        Booking nextBooking = null;
+        List<Booking> listNextBookings = bookingRepository.findNextBookingByDate(itemId, Status.APPROVED,
+                Status.WAITING, PageRequest.of(0, 1));
+        if (!listNextBookings.isEmpty()) {
+            nextBooking = listNextBookings.get(0);
         }
-        return first;
+        return nextBooking;
     }
 
-    private Booking findLastBookingByDate(List<Booking> bookings, LocalDateTime now) {
+    private Booking findLastBookingByDate(Long itemId) {
         // Метод поиска последнего бронирования после указанной даты
-        Booking last = null;
-        if (bookings != null && !bookings.isEmpty()) {
-            for (Booking b : bookings) {
-                Long itemId = b.getItem().getId();
-                b.setItem(Item.builder().id(itemId).build());
-                Long bookerId = b.getBooker().getId();
-                b.setBooker(User.builder().id(bookerId).build());
-                if (b.getEnd().isBefore(now)) {
-                    if (last == null && (b.getStatus().equals(Status.APPROVED))) {
-                        last = b;
-                    } else if (last == null) {
-                        last = b;
-                    } else if (b.getEnd().isAfter(last.getEnd())) {
-                        last = b;
-                    }
-                }
-                if (b.getStart().isBefore(now) && b.getEnd().isAfter(now)) {
-                    last = b;
-                }
-            }
+        Booking lastBooking = null;
+        List<Booking> listNextBookings = bookingRepository.findLastBookingByDate(itemId, Status.APPROVED,
+                Status.WAITING, PageRequest.of(0, 1));
+        if (!listNextBookings.isEmpty()) {
+            lastBooking = listNextBookings.get(0);
         }
-        return last;
+        return lastBooking;
     }
 
 }

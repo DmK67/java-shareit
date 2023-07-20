@@ -6,7 +6,8 @@ import ru.practicum.shareit.item.model.ItemWithBooking;
 
 import java.util.ArrayList;
 
-import static ru.practicum.shareit.item.service.ItemServiceImpl.convertListCommentsToListCommentsDto;
+import static ru.practicum.shareit.item.comment.mapper.CommentMapper.convertListCommentsToListCommentsDto;
+
 
 @Component
 public class ItemWithBookingDtoMapper {

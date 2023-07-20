@@ -7,6 +7,7 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.validation.ValidationService;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
@@ -16,12 +17,14 @@ public class UserServiceImpl implements UserService {
 
     private final ValidationService validationService;
 
+    @Transactional
     @Override
     public User addUser(User user) {
         validationService.checkUniqueEmailUserAdd(user); // Проверка поля email объекта user на пустые строки и пробелы
         return repository.save(user);
     }
 
+    @Transactional
     @Override
     public User getUserById(long id) { // Метод получения пользователя по id
         User user = repository.findById(id)
@@ -29,11 +32,11 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
+    @Transactional
     @Override
     public User updateUser(User user, Long userId) {
-        getUserById(userId); // Проверка пользователя по его id на существование в БД
+        User updateUser = getUserById(userId); // Проверка пользователя по его id на существование в БД
         user.setId(userId);
-        User updateUser = getUserById(user.getId());
         if (user.getName() == null) {
             user.setName(updateUser.getName());
         }
@@ -49,11 +52,13 @@ public class UserServiceImpl implements UserService {
         return repository.save(updateUser);
     }
 
+    @Transactional
     @Override
     public void deleteUser(Long id) {
         repository.deleteById(id);
     }
 
+    @Transactional
     @Override
     public List<User> getListUsers() {
         return repository.findAll();

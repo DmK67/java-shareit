@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking.repository;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.booking.model.Booking;
@@ -37,5 +38,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT b FROM Booking b INNER JOIN Item i ON b.item.id = i.id " +
             "WHERE i.owner.id = ?1 and not b.status =?2 ORDER BY b.start DESC")
     List<Booking> findAllByItemOwnerIdAndStateFuture(Long owner, Status rejected);
+
+    @Query("select b from Booking b where b.start >= now() and b.end > now() and b.item.id=?1" +
+            " and (b.status =?2 or b.status =?3) order by b.start ASC ")
+    List<Booking> findNextBookingByDate(Long itemId, Status APPROVED, Status WAITING, Pageable pageable);
+
+    @Query("select b from Booking b where b.start < now() and b.item.id=?1" +
+            " and (b.status =?2 or b.status =?3) order by b.start DESC ")
+    List<Booking> findLastBookingByDate(Long itemId, Status APPROVED, Status WAITING, Pageable pageable);
 
 }
