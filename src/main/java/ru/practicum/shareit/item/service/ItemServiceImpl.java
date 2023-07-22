@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingForItemDto;
 import ru.practicum.shareit.booking.model.Booking;
@@ -42,7 +43,6 @@ public class ItemServiceImpl implements ItemService {
     private final UserService userService;
     private final ValidationService validationService;
     private final CommentRepository commentRepository;
-
     private final BookingRepository bookingRepository;
 
     @Transactional
@@ -131,10 +131,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional
     @Override
-    public List<ItemWithBookingDto> getListItemsUserById(Long ownerId) {
+    public List<ItemWithBookingDto> getListItemsUserById(Long ownerId, Integer from, Integer size) {
         // Метод получения списка вещей по id пользователя
         userService.getUserById(ownerId); // Проверяем владельца вещи по id на существование в памяти
-        List<Item> itemList = repository.findAllByOwnerId(ownerId);
+        Pageable page = PageRequest.of(from / size, size);
+        List<Item> itemList = repository.findAllByOwnerId(ownerId, page);
         List<ItemWithBookingDto> itemWithBookingDtoList = new ArrayList<>();
         for (Item item : itemList) {
             ItemWithBooking itemWithBooking = itemWithBooking(item);
@@ -165,13 +166,14 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional
     @Override
-    public List<ItemDto> getSearchItems(String text) { // Метод поиска вещей по подстроке
+    public List<ItemDto> getSearchItems(String text, Integer from, Integer size) { // Метод поиска вещей по подстроке
+        Pageable page = PageRequest.of(from / size, size);
         if (text == null || text.isBlank()) { // Проверка на пустою строку и на null
             log.error("В поиск передано пустое значение {}!", text);
             return Collections.emptyList();
         }
         log.info("Осуществляем поиск вещи содержащее текст: {}.", text);
-        return convertListItemsToListItemsDto(repository.searchItemsByNameContaining(text));
+        return convertListItemsToListItemsDto(repository.searchItemsByNameContaining(text, page));
     }
 
     @Transactional

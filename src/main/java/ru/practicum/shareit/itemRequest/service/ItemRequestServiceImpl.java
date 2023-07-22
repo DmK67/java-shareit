@@ -1,21 +1,25 @@
-package ru.practicum.shareit.itemRequest.repository.service;
+package ru.practicum.shareit.itemRequest.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidateException;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.itemRequest.dto.ItemRequestDtoWithAnswers;
 import ru.practicum.shareit.itemRequest.model.ItemRequest;
 import ru.practicum.shareit.itemRequest.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
-import org.springframework.data.domain.Pageable;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.itemRequest.mapper.ItemRequestMapper.toItemRequestDtoWithAnswers;
 import static ru.practicum.shareit.itemRequest.mapper.ItemRequestMapper.toListItemRequestDtoWithAnswers;
@@ -26,6 +30,7 @@ import static ru.practicum.shareit.itemRequest.mapper.ItemRequestMapper.toListIt
 public class ItemRequestServiceImpl implements ItemRequestService {
     private final UserService userService;
     private final ItemRequestRepository itemRequestRepository;
+    private final ItemRepository itemRepository;
 
     @Transactional
     @Override
@@ -36,7 +41,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         userService.getUserById(requesterId); // Проверяем пользователя по id на существование в БД
         itemRequest.setRequestor(User.builder().id(requesterId).build());
         itemRequest.setCreated(LocalDateTime.now());
-        return itemRequestRepository.save(itemRequest);
+        ItemRequest itemRequestSaved = itemRequestRepository.save(itemRequest);
+        return itemRequestSaved;
     }
 
     @Transactional
@@ -46,6 +52,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         userService.getUserById(requesterId); // Проверяем пользователя по id на существование в БД
         List<ItemRequest> itemRequests = itemRequestRepository.getAllByRequestorIdOrderByCreatedDesc(requesterId);
         log.info("Получен список запросов пользователя с ID = '{}' .", requesterId);
+        List<Long> listRequestId = itemRequests.stream().map(ItemRequest::getId).collect(Collectors.toList());
+        List<Item> allByRequestIds = itemRepository.findAllByRequestIds(listRequestId);
+        addItems(allByRequestIds, itemRequests);
         return toListItemRequestDtoWithAnswers(itemRequests);
     }
 
@@ -54,18 +63,13 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public List<ItemRequestDtoWithAnswers> getListRequestsCreatedByOtherUsers(Long requesterId, Integer from,
                                                                               Integer size) {
         // Метод получения списка запросов, созданных другими пользователями
-        if (from < 0) {
-            log.error("Ошибка! Параметр from= {} не может быть отрицательным!", from);
-            throw new ValidateException("Параметр from = " + from + " не может быть отрицательным!.");
-        }
-        if (size < 1) {
-            log.error("Ошибка! Параметр size= {} не может быть меньше либо равно единице!", size);
-            throw new ValidateException("Не верный параметр size = " + size + ".");
-        }
         userService.getUserById(requesterId);  // Проверяем пользователя по id на существование в БД
         Pageable pageable = PageRequest.of(from / size, size);
         List<ItemRequest> itemRequests =
                 itemRequestRepository.getItemRequestByRequesterIdIsNotOrderByCreated(requesterId, pageable);
+        List<Long> listRequestId = itemRequests.stream().map(ItemRequest::getId).collect(Collectors.toList());
+        List<Item> allByRequestIds = itemRepository.findAllByRequestIds(listRequestId);
+        addItems(allByRequestIds, itemRequests);
         log.info("Получен список всех запросов для пользователя по Id = {}.", requesterId);
         return toListItemRequestDtoWithAnswers(itemRequests);
     }
@@ -81,8 +85,26 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         ItemRequest itemRequest = itemRequestRepository.findById(itemRequestId).orElseThrow(
                 () -> new NotFoundException("Запрос на вещь по id=" + itemRequestId + " не существует!"));
         log.info("Получен запрос на вещь по Id ={} ", itemRequestId);
+        List<Item> listItem = itemRepository.findAllByRequestId(itemRequestId);
+        itemRequest.setItems(listItem);
         return toItemRequestDtoWithAnswers(itemRequest);
     }
 
+    private void addItems(List<Item> allByRequestIds, List<ItemRequest> itemRequests) {
+        if (!allByRequestIds.isEmpty()) {
+            Map<Long, List<Item>> mapItem = allByRequestIds.stream()
+                    .collect(Collectors.groupingBy(item -> item.getRequestId(), Collectors.toList()));
+
+            itemRequests.stream()
+                    .forEach(request -> {
+                        List<Item> listItem = mapItem.getOrDefault(request.getId(), List.of());
+
+                        request.setItems(listItem);
+                    });
+        } else {
+            itemRequests.stream()
+                    .forEach(a -> a.setItems(List.of()));
+        }
+    }
 
 }

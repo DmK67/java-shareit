@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.mapper;
 
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemForResponseDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.ItemWithBooking;
 
@@ -16,6 +17,7 @@ public class ItemMapper {
                 .name(item.getName())
                 .description(item.getDescription())
                 .available(item.getAvailable())
+                .requestId(item.getRequestId() != null ? item.getRequestId() : null)
                 .build();
     }
 
@@ -25,6 +27,7 @@ public class ItemMapper {
                 .name(itemDto.getName())
                 .description(itemDto.getDescription())
                 .available(itemDto.getAvailable())
+                .requestId(itemDto.getRequestId() != null ? itemDto.getRequestId() : null)
                 .build();
     }
 
@@ -43,6 +46,25 @@ public class ItemMapper {
             itemDtoList.add(toItemDto(item));
         }
         return itemDtoList;
+    }
+
+    public static List<ItemForResponseDto> convertListItemsToListIItemForResponseDto(List<Item> listItems) {
+        List<ItemForResponseDto> itemForResponseDtoList = new ArrayList<>();
+        for (Item item : listItems) {
+            itemForResponseDtoList.add(toItemForResponseDto(item));
+        }
+        return itemForResponseDtoList;
+    }
+
+    public static ItemForResponseDto toItemForResponseDto(Item item) {
+        // Метод перевода объекта item в объект itemForResponseDto
+        return ItemForResponseDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .requestId(item.getRequestId())
+                .build();
     }
 
 }

@@ -6,12 +6,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.itemRequest.dto.ItemRequestDto;
 import ru.practicum.shareit.itemRequest.dto.ItemRequestDtoWithAnswers;
-import ru.practicum.shareit.itemRequest.repository.service.ItemRequestService;
+import ru.practicum.shareit.itemRequest.service.ItemRequestService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 import static ru.practicum.shareit.itemRequest.mapper.ItemRequestMapper.toItemRequest;
@@ -24,7 +25,6 @@ import static ru.practicum.shareit.itemRequest.mapper.ItemRequestMapper.toItemRe
 @AllArgsConstructor
 @Validated
 @Slf4j
-//@RequiredArgsConstructor
 @RequestMapping(path = "/requests")
 public class ItemRequestController {
     private final ItemRequestService itemRequestService;
@@ -69,8 +69,8 @@ public class ItemRequestController {
     @GetMapping("/all") // Эндпоинт получения списока запросов, созданных другими пользователями
     public List<ItemRequestDtoWithAnswers> getAllRequests(
             @RequestHeader("X-Sharer-User-Id") Long requesterId,
-            @RequestParam(name = "from", defaultValue = "0") Integer from,
-            @RequestParam(name = "size", defaultValue = "20") Integer size) {
+            @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
+            @Positive @RequestParam(name = "size", defaultValue = "20") Integer size) {
         log.info("Получение списка запросов, созданных другими пользователями кроме Id ={}.", requesterId);
         return itemRequestService.getListRequestsCreatedByOtherUsers(requesterId, from, size);
     }

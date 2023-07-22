@@ -13,6 +13,4 @@ public interface ItemRequestRepository extends JpaRepository<ItemRequest, Long> 
     @Query("select i from ItemRequest i where i.requestor.id <> ?1 order by i.created")
     List<ItemRequest> getItemRequestByRequesterIdIsNotOrderByCreated(Long userId, Pageable pageable);
 
-    // List<ItemRequest> getAllByRequester_Id(Long userId, Pageable pageable);
-
 }

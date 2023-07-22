@@ -42,8 +42,8 @@ public class Item {
     @ManyToOne
     @JoinColumn(name = "owner")
     private User owner;
-    @Column
-    private Long request;
+    @Column(name = "request")
+    private Long requestId;
 
     @OneToMany(mappedBy = "item")
     private List<Booking> bookings;

@@ -1,16 +1,19 @@
 package ru.practicum.shareit.itemRequest.dto;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import ru.practicum.shareit.user.model.User;
 
-import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 /**
  * TODO Sprint add-item-requests.
  */
-@Data
+@Getter
+@Setter
 @Builder
 public class ItemRequestDto {
     //id — уникальный идентификатор запроса;
@@ -19,7 +22,8 @@ public class ItemRequestDto {
     //created — дата и время создания запроса.
 
     private long id;
-
+    @NotBlank
+    @NotNull
     private String description;
 
     private User requestor;

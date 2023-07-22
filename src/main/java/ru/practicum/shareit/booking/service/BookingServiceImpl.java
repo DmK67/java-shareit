@@ -2,6 +2,8 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
@@ -66,30 +68,31 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public List<Booking> getListBookingsUserById(Long userId, String state) {
+    public List<Booking> getListBookingsUserById(Long userId, String state, Integer from, Integer size) {
         // Метод получения списка всех бронированний пользователя по id
         userService.getUserById(userId); // Проверяем существование пользователя в БД
         validationService.checkStatusState(state); // Проверка statusState
+        Pageable page = PageRequest.of(from / size, size);
         StatusState statusState = StatusState.valueOf(state);
         List<Booking> listResult = new ArrayList<>();
         switch (statusState) {
             case CURRENT:
-                listResult = bookingRepository.findAllByBookerIdAndStateCurrent(userId);
+                listResult = bookingRepository.findAllByBookerIdAndStateCurrent(userId, page);
                 break;
             case PAST:
-                listResult = bookingRepository.findAllByBookerIdAndStatePast(userId, Status.APPROVED);
+                listResult = bookingRepository.findAllByBookerIdAndStatePast(userId, Status.APPROVED, page);
                 break;
             case FUTURE:
-                listResult = bookingRepository.findAllByBookerIdAndStateFuture(userId);
+                listResult = bookingRepository.findAllByBookerIdAndStateFuture(userId, page);
                 break;
             case WAITING:
-                listResult = bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING);
+                listResult = bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING, page);
                 break;
             case REJECTED:
-                listResult = bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED);
+                listResult = bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED, page);
                 break;
             case ALL:
-                listResult = bookingRepository.findAllByBookerIdOrderByStartDesc(userId);
+                listResult = bookingRepository.findAllByBookerIdOrderByStartDesc(userId, page);
                 break;
         }
         List<Booking> newListResult = listResultAddItemAndAddBooker(listResult);
@@ -129,34 +132,37 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public List<Booking> getListBookingsOwnerById(Long owner, String state) {
+    public List<Booking> getListBookingsOwnerById(Long owner, String state, Integer from, Integer size) {
         userService.getUserById(owner); // Проверяем существование пользователя в БД
         validationService.checkStatusState(state); // Проверка statusState
+        Pageable page = PageRequest.of(from / size, size);
         StatusState statusState = StatusState.valueOf(state);
         List<Booking> listResult = new ArrayList<>();
         switch (statusState) {
             case ALL: {
-                listResult = bookingRepository.findAllByItemOwnerIdOrderByStartDesc(owner);
+                listResult = bookingRepository.findAllByItemOwnerIdOrderByStartDesc(owner, page);
                 break;
             }
             case CURRENT: {
-                listResult = bookingRepository.findAllByItemOwnerAndStateCurrent(owner);
+                listResult = bookingRepository.findAllByItemOwnerAndStateCurrent(owner, page);
                 break;
             }
             case PAST: {
-                listResult = bookingRepository.findAllByItemOwnerIdAndStatePast(owner, Status.APPROVED);
+                listResult = bookingRepository.findAllByItemOwnerIdAndStatePast(owner, Status.APPROVED, page);
                 break;
             }
             case FUTURE: {
-                listResult = bookingRepository.findAllByItemOwnerIdAndStateFuture(owner, Status.REJECTED);
+                listResult = bookingRepository.findAllByItemOwnerIdAndStateFuture(owner, Status.REJECTED, page);
                 break;
             }
             case WAITING: {
-                listResult = bookingRepository.findAllByItemOwnerIdAndStatusOrderByStartDesc(owner, Status.WAITING);
+                listResult = bookingRepository.findAllByItemOwnerIdAndStatusOrderByStartDesc(owner,
+                        Status.WAITING, page);
                 break;
             }
             case REJECTED: {
-                listResult = bookingRepository.findAllByItemOwnerIdAndStatusOrderByStartDesc(owner, Status.REJECTED);
+                listResult = bookingRepository.findAllByItemOwnerIdAndStatusOrderByStartDesc(owner,
+                        Status.REJECTED, page);
                 break;
             }
         }

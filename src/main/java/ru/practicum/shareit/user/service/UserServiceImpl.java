@@ -14,7 +14,6 @@ import java.util.List;
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository repository;
-
     private final ValidationService validationService;
 
     @Transactional

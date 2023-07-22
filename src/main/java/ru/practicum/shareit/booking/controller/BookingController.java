@@ -9,9 +9,7 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 import java.util.List;
 
 import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingDto;
@@ -76,14 +74,13 @@ public class BookingController {
      * Бронирования должны возвращаться отсортированными по дате от более новых к более старым.
      */
     @GetMapping // Эндпоинт получения списка всех бронирований пользователя по id
-    public List<Booking> getListBookingsUserById(@Min(1) @NotNull
-                                                 @RequestHeader(value = "X-Sharer-User-Id", required = false)
-                                                 Long userId,
-                                                 @RequestParam(value = "state", required = false,
-                                                         defaultValue = "ALL")
-                                                 String state) {
+    public List<Booking> getListBookingsUserById(
+            @Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
+            @RequestParam(value = "state", required = false, defaultValue = "ALL") String state,
+            @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+            @Positive @RequestParam(defaultValue = "10") Integer size) {
         log.info("Получаем список всех бронирований пользователя по id={}", userId);
-        return bookingService.getListBookingsUserById(userId, state);
+        return bookingService.getListBookingsUserById(userId, state, from, size);
     }
 
     /**
@@ -92,13 +89,13 @@ public class BookingController {
      * Работа параметра state аналогична его работе в предыдущем сценарии.
      */
     @GetMapping("/owner") // Эндпоинт получения списка всех бронирований пользователя по id
-    public List<Booking> getListBookingsOwnerById(@Min(1) @NotNull
-                                                  @RequestHeader(value = "X-Sharer-User-Id", required = false)
-                                                  Long userId,
-                                                  @NotNull @NotBlank @RequestParam(value = "state", required = false,
-                                                          defaultValue = "ALL") String state) {
+    public List<Booking> getListBookingsOwnerById(
+            @Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
+            @NotNull @NotBlank @RequestParam(value = "state", required = false, defaultValue = "ALL") String state,
+            @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+            @Positive @RequestParam(defaultValue = "10") Integer size) {
         log.info("Получаем список всех бронирований пользователя по id={}", userId);
-        return bookingService.getListBookingsOwnerById(userId, state);
+        return bookingService.getListBookingsOwnerById(userId, state, from, size);
     }
 
 }
