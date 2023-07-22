@@ -1,16 +1,23 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import org.springframework.validation.annotation.Validated;
-import ru.practicum.shareit.request.ItemRequest;
+import lombok.*;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.item.comment.model.Comment;
+import ru.practicum.shareit.user.model.User;
+
+import javax.persistence.*;
+import java.util.List;
 
 /**
  * TODO Sprint add-controllers.
  */
-@Data
+@Getter
+@Setter
+@Builder
 @AllArgsConstructor
-@Validated
+@NoArgsConstructor
+@Entity
+@Table(name = "items", schema = "public")
 public class Item {
     /**
      * id — уникальный идентификатор вещи;
@@ -21,19 +28,28 @@ public class Item {
      * на соответствующий запрос.
      */
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "item_id")
     private Long id;
+    @Column(name = "item_name")
     private String name;
+    @Column()
     private String description;
+    @Column()
     private Boolean available;
-    private Long owner;
-    private ItemRequest request;
 
-    public Item(Long id, String name, String description, Boolean available, Long owner) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.available = available;
-        this.owner = owner;
-    }
+    @ManyToOne
+    @JoinColumn(name = "owner")
+    private User owner;
+    @Column
+    private Long request;
+
+    @OneToMany(mappedBy = "item")
+    private List<Booking> bookings;
+
+    @OneToMany(mappedBy = "item")
+    private List<Comment> comments;
+
 }
 

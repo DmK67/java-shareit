@@ -1,22 +1,18 @@
 package ru.practicum.shareit.item.repository;
 
-import ru.practicum.shareit.item.dto.ItemDto;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
-import java.util.Map;
 
-public interface ItemRepository {
-    Item add(Item item);
+public interface ItemRepository extends JpaRepository<Item, Long> {
 
-    Item getItemById(long id);
+    List<Item> findAllByOwnerId(Long owner); // Метод поиска списка вещей по id владельца
 
-    Item updateItem(Item item);
-
-    Map<Long, Item> getItemMap();
-
-    List<ItemDto> getListItemsUserById(Long ownerId);
-
-    List<ItemDto> getSearchItems(String text);
+    @Query("SELECT i FROM Item i JOIN FETCH i.owner o " +
+            "where i.available = true " +
+            "and (upper(i.name) like upper(concat('%', ?1, '%')) or upper(i.description) like upper(concat('%', ?1, '%')))")
+    List<Item> searchItemsByNameContaining(String text);
 
 }
