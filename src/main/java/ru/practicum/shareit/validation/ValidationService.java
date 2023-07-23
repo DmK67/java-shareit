@@ -7,6 +7,7 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.StatusState;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exceptions.NoSuchElementException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.StateStatusValidateException;
 import ru.practicum.shareit.exceptions.ValidateException;
@@ -70,6 +71,8 @@ public class ValidationService {
                 "бронирования!", userId);
         throw new NotFoundException("Просматривать информацию о бронированнии вещи может только владелец " +
                 "или клиент бронирования!");
+//        throw new NoSuchElementException("Просматривать информацию о бронированнии вещи может только владелец " +
+//                "или клиент бронирования!");
     }
 
     public void checkItemDtoWhenAdd(ItemDto itemDto) { // Метод проверки полей объекта ItemDto перед добавлением
@@ -85,7 +88,7 @@ public class ValidationService {
         // Метод проверки полей объекта BookingDto перед добавлением
         if (bookingDto.getStart() == null || bookingDto.getEnd() == null) {
             log.error("Ошибка! Поля начала и окончания бронирования не могут быть пустыми!");
-            throw new ValidateException("Ошибка! Поля начала и окончания бронирования не могут быть пустыми!");
+            throw new ValidateException("Ошибка! Указано неправильно дата или время бронирования!");
         }
         if (bookingDto.getEnd().isBefore(bookingDto.getStart())) {
             log.error("Ошибка! Дата и время окончания бронирования не может предшествовать дате и времени начала " +
@@ -94,20 +97,16 @@ public class ValidationService {
         }
         if (bookingDto.getStart().isEqual(bookingDto.getEnd())) {
             log.error("Ошибка! Дата и время начала бронирования равно дате и времени окончания бронирования!");
-            throw new ValidateException("Ошибка! Дата и время начала бронирования должно отличатся " +
-                    "от даты и времени окончания бронирования!");
+            throw new ValidateException("Ошибка! Указано неправильно дата или время бронирования!");
         }
         if (bookingDto.getStart().isBefore(LocalDateTime.now())) {
             log.error("Ошибка! Указано неправильно дата/время начала бронирования!");
-            throw new ValidateException("Ошибка! Дата и время начала бронирования должно " +
-                    "быть позже точного времени!");
+            throw new ValidateException("Ошибка! Указано неправильно дата или время бронирования!");
         }
         if (bookingDto.getEnd().isBefore(LocalDateTime.now())) {
             log.error("Ошибка! Указано неправильно дата/время окончания бронирования!");
-            throw new ValidateException("Ошибка! Дата и время окончания бронирования должно " +
-                    "быть позже точного времени!");
+            throw new ValidateException("Ошибка! Указано неправильно дата или время бронирования!");
         }
-
     }
 
     public void checkStatusState(String state) {

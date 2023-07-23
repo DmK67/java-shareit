@@ -176,7 +176,6 @@ public class ItemServiceImpl implements ItemService {
         return convertListItemsToListItemsDto(repository.searchItemsByNameContaining(text, page));
     }
 
-    @Transactional
     @Override
     public void checkingIsAvailable(Item item) { // Метод проверки статуса бронирования
         if (!item.getAvailable()) {

@@ -46,10 +46,7 @@ public class BookingServiceImpl implements BookingService {
         bookingDto.setStatus(Status.WAITING);
         Booking booking = toBooking(bookingDto);
         booking.setBooker(booker);
-        booking.setItem(Item.builder()
-                .id(itemDB.getId())
-                .name(itemDB.getName())
-                .build());
+        booking.setItem(itemDB);
         return bookingRepository.save(booking);
     }
 
