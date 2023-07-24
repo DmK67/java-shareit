@@ -7,7 +7,6 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.StatusState;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.exceptions.NoSuchElementException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.StateStatusValidateException;
 import ru.practicum.shareit.exceptions.ValidateException;
@@ -50,7 +49,7 @@ public class ValidationService {
     }
 
     public void checkBookerIsTheOwner(Item itemDB, Long bookerId) { // Метод проверки: является ли арендодатель
-        // - владельцем вещи
+                                                                    // - владельцем вещи
         if (itemDB.getOwner().getId().equals(bookerId)) {
             log.error("Ошибка! Невозможно добавить бронирование, пользователь по id={} " +
                     "является владельцем вещи", bookerId);
@@ -71,8 +70,6 @@ public class ValidationService {
                 "бронирования!", userId);
         throw new NotFoundException("Просматривать информацию о бронированнии вещи может только владелец " +
                 "или клиент бронирования!");
-//        throw new NoSuchElementException("Просматривать информацию о бронированнии вещи может только владелец " +
-//                "или клиент бронирования!");
     }
 
     public void checkItemDtoWhenAdd(ItemDto itemDto) { // Метод проверки полей объекта ItemDto перед добавлением
@@ -153,5 +150,6 @@ public class ValidationService {
             throw new ValidateException("Текст комментария не может быть пустым.");
         }
     }
+
 }
 

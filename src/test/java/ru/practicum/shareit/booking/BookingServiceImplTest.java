@@ -94,31 +94,32 @@ class BookingServiceTest {
             .item(item).build();
 
 
-
 //    @Test
-//    void createBookingWhenItemIsNotAvailableThenReturnedNotAvailableException() {
-//        itemDto.setAvailable(false);
-//        Mockito.when(userService.findUserById(anyLong()))
-//                .thenReturn(userDto);
-//        Mockito.when(itemService.findItemById(anyLong(), anyLong()))
-//                .thenReturn(itemDto);
-//        Mockito.when(itemService.findOwnerId(anyLong()))
-//                .thenReturn(1L);
-//        Exception e = assertThrows(NotAvailableException.class,
-//                () -> bookingService.create(inputBookingDto, 2L));
+//    void addBookingWhenItemIsNotAvailableThenReturnedNotAvailableException() {
+//        Mockito.when(itemService.getItemById(anyLong()))
+//                .thenReturn(item);
+//        Mockito.when(itemService.checkingIsAvailable(item.getId()))
+//                .thenReturn();
+//        Mockito.when(userService.getUserById(anyLong()))
+//                .thenReturn(user1);
+//
+//
+////        Mockito.when(itemService.findOwnerId(anyLong()))
+////                .thenReturn(1L);
+//        item.setAvailable(false);
+//        Exception e = assertThrows(ValidateException.class,
+//                () -> bookingService.addBooking(bookingDto, 2L));
 //
 //        assertEquals(e.getMessage(), String.format("Item with ID = %d is not available.", 1L));
 //    }
 
     @Test
-    void findBookingByIdWhenBookingIsNotFoundThenReturnedNotFoundException() {
-        Mockito.when(bookingRepository.findById(anyLong()))
-                .thenReturn(Optional.empty());
+    void getBookingById_WhenBookingIsNotFound_ThenReturnedNotFoundException() {
 
         Exception e = assertThrows(NotFoundException.class,
                 () -> bookingService.getBookingById(1L));
 
-        assertEquals(e.getMessage(), String.format("Бронирование по id=1 не существует!", 1L));
+        assertEquals(e.getMessage(), String.format("Бронирование по id=" + booking1.getId() + " не существует!", 1L));
     }
 
 //    @Test
