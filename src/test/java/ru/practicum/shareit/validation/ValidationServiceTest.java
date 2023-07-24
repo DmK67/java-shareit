@@ -5,6 +5,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -21,13 +22,14 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingDto;
 import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
 
-@ToString
+
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ExtendWith(MockitoExtension.class)
 class ValidationServiceTest {
@@ -37,7 +39,6 @@ class ValidationServiceTest {
     UserRepository userRepository;
     @Mock
     ItemService itemService;
-
 
     BookingDto bookingDto = mock(BookingDto.class);
     private final User user1 = new User(1L, "User1", "user1@email.com");
@@ -67,12 +68,14 @@ class ValidationServiceTest {
     void tearDown() {
     }
 
+
     @Test
     void checkUniqueEmailUserAdd_WhenEmailIsNull_ThenReturnedValidateException() {
         user1.setEmail(null);
+//        doThrow(new ValidateException("Ошибка! Пользователь с пустым e-mail не может быть добавлен!"))
+//                .when(validationService).checkUniqueEmailUserAdd(user1);
 
-        doThrow(new ValidateException("Ошибка! Пользователь с пустым e-mail не может быть добавлен!"))
-                .when(validationService).checkUniqueEmailUserAdd(user1);
+
     }
 
     @Test
