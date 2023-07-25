@@ -27,6 +27,7 @@ import ru.practicum.shareit.validation.ValidationService;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -190,14 +191,16 @@ public class ItemServiceImpl implements ItemService {
         User user = userService.getUserById(ownerId); // Проверяем пользователя по id на существование в БД
         validationService.checkCommentText(comment.getText()); // Проверяем поле text
         validationService.checkTheUserRentedTheItem(ownerId, item); // Проверяем что пользователь действительно брал
-        // вещь в аренду
+                                                                    // вещь в аренду
         comment.setItem(item);
         comment.setAuthor(user);
         comment.setCreated(LocalDateTime.now());
-        return commentRepository.save(comment);
+        Comment commentFromBd = commentRepository.save(comment);
+        item.setComments(new ArrayList<>(List.of(commentFromBd)));
+        return commentFromBd;
     }
 
-    private Booking findNextBookingByDate(Long itemId) {
+    protected Booking findNextBookingByDate(Long itemId) {
         // Метод поиска следующего бронирования после указанной даты
         Booking nextBooking = null;
         List<Booking> listNextBookings = bookingRepository.findNextBookingByDate(itemId, Status.APPROVED,
@@ -208,7 +211,7 @@ public class ItemServiceImpl implements ItemService {
         return nextBooking;
     }
 
-    private Booking findLastBookingByDate(Long itemId) {
+    protected Booking findLastBookingByDate(Long itemId) {
         // Метод поиска последнего бронирования после указанной даты
         Booking lastBooking = null;
         List<Booking> listNextBookings = bookingRepository.findLastBookingByDate(itemId, Status.APPROVED,

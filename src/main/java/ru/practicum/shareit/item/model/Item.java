@@ -6,6 +6,7 @@ import ru.practicum.shareit.item.comment.model.Comment;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -50,6 +51,13 @@ public class Item {
 
     @OneToMany(mappedBy = "item")
     private List<Comment> comments;
+
+    public List<Booking> getBookings() {
+        if (bookings == null) {
+            bookings = new ArrayList<>();
+        }
+        return bookings;
+    }
 
 }
 

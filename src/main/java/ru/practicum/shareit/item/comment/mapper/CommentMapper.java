@@ -33,6 +33,9 @@ public class CommentMapper {
 
     public static List<CommentDto> convertListCommentsToListCommentsDto(List<Comment> listComments) {
         List<CommentDto> commentDtoList = new ArrayList<>();
+        if (listComments == null) {
+            listComments = new ArrayList<>();
+        }
         for (Comment comment : listComments) {
             commentDtoList.add(toCommentDto(comment));
         }
