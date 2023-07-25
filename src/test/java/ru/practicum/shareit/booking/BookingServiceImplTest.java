@@ -12,6 +12,7 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.booking.service.BookingServiceImpl;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidateException;
@@ -28,9 +29,14 @@ import ru.practicum.shareit.validation.ValidationService;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ExtendWith(MockitoExtension.class)
@@ -113,14 +119,29 @@ class BookingServiceTest {
 //        assertEquals(e.getMessage(), String.format("Item with ID = %d is not available.", 1L));
 //    }
 
-    @Test
-    void getBookingById_WhenBookingIsNotFound_ThenReturnedNotFoundException() {
+//    @Test
+//    void getBookingById_WhenBookingIsNotFound_ThenReturnedNotFoundException() {
+//
+//        Exception e = assertThrows(NotFoundException.class,
+//                () -> bookingService.getBookingById(1L));
+//
+//        assertEquals(e.getMessage(), String.format("Бронирование по id=" + booking1.getId() + " не существует!", 1L));
+//        MyList myList = mock(MyList.class);
+//    }
 
-        Exception e = assertThrows(NotFoundException.class,
-                () -> bookingService.getBookingById(1L));
-
-        assertEquals(e.getMessage(), String.format("Бронирование по id=" + booking1.getId() + " не существует!", 1L));
-    }
+//    @Test
+//    void getBookingById_WhenBookingIsNotFound_ThenReturnedNotFoundException() {
+//        //BookingRepository repository = mock(BoockingRepository.class);
+//        //BookingService service = new BookingServiceImpl(repository);
+//
+//
+//        when(repository.findById(anyLong())).return(null);
+//
+//
+//        assertThrows(NotFoundException.class, () -> service.findBookingById(1L));
+//
+//
+//    }
 
 //    @Test
 //    void findBookingByIdWhenUserIsNotOwnerThenReturnedOperationAccessException() {

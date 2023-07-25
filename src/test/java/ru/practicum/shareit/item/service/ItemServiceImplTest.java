@@ -3,21 +3,12 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.service.BookingServiceImpl;
+import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidateException;
-import ru.practicum.shareit.item.comment.dto.CommentDto;
-import ru.practicum.shareit.item.comment.model.Comment;
 import ru.practicum.shareit.item.comment.repositiry.CommentRepository;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemWithBookingDto;
@@ -30,23 +21,17 @@ import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.validation.ValidationService;
 
 import javax.transaction.Transactional;
-import javax.validation.ConstraintViolationException;
-
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static ru.practicum.shareit.item.comment.mapper.CommentMapper.toComment;
 import static ru.practicum.shareit.item.mapper.ItemMapper.toItem;
 import static ru.practicum.shareit.user.mapper.UserMapper.toUser;
 
 @Transactional
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@AutoConfigureTestDatabase
 class ItemServiceImplTest {
 
     private final ItemServiceImpl itemService;
@@ -90,6 +75,7 @@ class ItemServiceImplTest {
 
     }
 
+    @DirtiesContext
     @Test
     void addItem_WhenAllIsOk_ThenReturnedAddedItem() {
         userService.addUser(user1);
@@ -101,7 +87,7 @@ class ItemServiceImplTest {
         assertEquals(item1.getName(), itemFromDb.getName());
         assertEquals(item1.getDescription(), itemFromDb.getDescription());
     }
-
+    @DirtiesContext
     @Test
     void addItem_WhenAvailableIsNull_ThenReturnValidateException() {
         item1.setAvailable(null);
@@ -109,7 +95,7 @@ class ItemServiceImplTest {
         assertThrows(ValidateException.class,
                 () -> itemService.addItem(item1, user1.getId()));
     }
-
+    @DirtiesContext
     @Test
     void addItem_WhenItemDtoNameIsNull_ThenReturnValidateException() {
         itemDto1.setName(null);
@@ -117,7 +103,7 @@ class ItemServiceImplTest {
         assertThrows(ValidateException.class,
                 () -> itemService.addItem(toItem(itemDto1), user1.getId()));
     }
-
+    @DirtiesContext
     @Test
     void addItem_WhenItemDtoNameIsBlank_ThenReturnValidateException() {
         itemDto1.setName("");
@@ -126,7 +112,7 @@ class ItemServiceImplTest {
                 () -> itemService.addItem(toItem(itemDto1), user1.getId()));
         itemDto1.setName("itemDto1");
     }
-
+    @DirtiesContext
     @Test
     void addItem_WhenItemDtoDescriptionIsNull_ThenReturnValidateException() {
         itemDto1.setDescription(null);
@@ -134,7 +120,7 @@ class ItemServiceImplTest {
         assertThrows(ValidateException.class,
                 () -> itemService.addItem(toItem(itemDto1), user1.getId()));
     }
-
+    @DirtiesContext
     @Test
     void addItem_WhenItemDtoDescriptionIsBlank_ThenReturnValidateException() {
         itemDto1.setDescription("");
@@ -142,11 +128,10 @@ class ItemServiceImplTest {
         assertThrows(ValidateException.class,
                 () -> itemService.addItem(toItem(itemDto1), user1.getId()));
     }
-
+    @DirtiesContext
     @Test
     void getItemById_WhenItemIsOk_ThenReturnedItem() {
         userService.addUser(user1);
-        //userService.addUser(owner);
         Item savedItem = itemService.addItem(item1, user1.getId());
 
         Item item = itemService.getItemById(savedItem.getId());
@@ -157,25 +142,23 @@ class ItemServiceImplTest {
         assertEquals(item.getDescription(), item1.getDescription());
         assertTrue(item.getAvailable());
     }
-
+    @DirtiesContext
     @Test
     void getItemById_WhenItemIsNotFound_ThenReturnedNotFoundException() {
-        userService.addUser(user1);
-        itemService.addItem(item1, user1.getId());
 
         assertThrows(NotFoundException.class,
                 () -> itemService.getItemById(9000L));
     }
-
+    @DirtiesContext
     @Test
     void getItemById_WhenUserIsNotFound_ThenReturnedNotFoundException() {
 
         assertThrows(NotFoundException.class,
                 () -> itemService.addItem(item1, user1.getId()));
     }
-
+    @DirtiesContext
     @Test
-    void getItemByIdWithBooking_WhenItemIsOk_ThenReturneItemWithBookingDto() { // Дописать !!!
+    void getItemByIdWithBooking_WhenItemIsOk_ThenReturneItemWithBookingDto() {
         userService.addUser(user1);
         Item savedItem = itemService.addItem(item1, user1.getId());
 
@@ -188,8 +171,37 @@ class ItemServiceImplTest {
         assertTrue(item.getAvailable());
     }
 
+    @DirtiesContext
     @Test
-    void updateItem() {
+    void getItemByIdWithBooking_WhenItemIsNotFound_ThenReturnedNotFoundException() {
+        assertThrows(NotFoundException.class,
+                () -> itemService.getItemById(9000L));
+    }
+
+    @DirtiesContext
+    @Test
+    void getItemByIdWithBooking_WhenUserIsNotFound_ThenReturnedNotFoundException() {
+        assertThrows(NotFoundException.class,
+                () -> itemService.addItem(item1, user1.getId()));
+    }
+
+    @DirtiesContext
+    @Test
+    void updateItem_WhenAllFildsIsOk_ThenReturnItemFromDb() {
+        User savedOwner = userService.addUser(user1);
+        Item savedItemBeforeUpdate = itemService.addItem(item1, savedOwner.getId());
+
+        Item updatedItem = Item.builder()
+                .id(savedItemBeforeUpdate.getId())
+                .name("update name")
+                .description("update description")
+                .build();
+        Item itemAfterUpdate = itemService.updateItem(updatedItem, updatedItem.getId(), savedOwner.getId());
+
+        assertEquals(savedItemBeforeUpdate.getName(), itemAfterUpdate.getName());
+        assertEquals(savedItemBeforeUpdate.getDescription(), itemAfterUpdate.getDescription());
+        assertEquals(savedItemBeforeUpdate.getId(), itemAfterUpdate.getId());
+        assertEquals(savedItemBeforeUpdate.getAvailable(), itemAfterUpdate.getAvailable());
     }
 
     @Test
