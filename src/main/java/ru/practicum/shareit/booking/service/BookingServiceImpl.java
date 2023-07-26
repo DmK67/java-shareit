@@ -24,6 +24,8 @@ import java.util.List;
 
 import static ru.practicum.shareit.booking.mapper.BookingMapper.listResultAddItemAndAddBooker;
 import static ru.practicum.shareit.booking.mapper.BookingMapper.toBooking;
+import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
+import static ru.practicum.shareit.user.mapper.UserMapper.toUserDto;
 
 @Service
 @AllArgsConstructor
@@ -47,7 +49,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = toBooking(bookingDto);
         booking.setBooker(booker);
         booking.setItem(itemDB);
-        return bookingRepository.save(booking);
+    return bookingRepository.save(booking);
     }
 
     @Transactional

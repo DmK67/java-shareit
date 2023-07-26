@@ -12,20 +12,24 @@ import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
 
+import static ru.practicum.shareit.item.mapper.ItemMapper.toItem;
+import static ru.practicum.shareit.user.mapper.UserMapper.toUser;
+import static ru.practicum.shareit.user.mapper.UserMapper.toUserDto;
+
 @Component
 @AllArgsConstructor
 
 public class BookingMapper {
 
-    public static BookingDto toBookingDto(Booking booking) { // Метод перевода объекта booking в объект bookingDto
+    public static BookingDto toBookingDto(Booking booking) {// Метод перевода объекта booking в объект bookingDto
         return BookingDto.builder()
                 .id(booking.getId())
                 .start(booking.getStart())
                 .end(booking.getEnd())
-                .itemId(booking.getItem().getId())
-                .booker(UserDto.builder().id(booking.getBooker().getId()).build())
                 .status(booking.getStatus())
                 .item(ItemDto.builder().id(booking.getItem().getId()).name(booking.getItem().getName()).build())
+                .itemId(booking.getItem().getId())
+                .booker(toUserDto(booking.getBooker()))
                 .build();
     }
 
@@ -38,6 +42,9 @@ public class BookingMapper {
                 .start(bookingDto.getStart())
                 .end(bookingDto.getEnd())
                 .item(item)
+
+                //.booker(toUser(bookingDto.getBooker()))
+
                 .status(bookingDto.getStatus())
                 .build();
     }
