@@ -11,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @RequiredArgsConstructor
 @Builder
+@EqualsAndHashCode
 public class ItemWithBooking {
     private Long id;
 

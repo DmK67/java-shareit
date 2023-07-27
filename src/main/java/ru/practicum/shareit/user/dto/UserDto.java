@@ -11,6 +11,7 @@ import javax.validation.constraints.Email;
 @NoArgsConstructor
 @Validated
 @Builder
+@EqualsAndHashCode
 public class UserDto {
 
     private Long id;
