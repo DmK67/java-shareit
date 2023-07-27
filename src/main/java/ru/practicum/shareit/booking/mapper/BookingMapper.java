@@ -42,9 +42,6 @@ public class BookingMapper {
                 .start(bookingDto.getStart())
                 .end(bookingDto.getEnd())
                 .item(item)
-
-                //.booker(toUser(bookingDto.getBooker()))
-
                 .status(bookingDto.getStatus())
                 .build();
     }

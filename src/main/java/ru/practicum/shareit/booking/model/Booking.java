@@ -5,6 +5,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 /**
@@ -47,6 +48,9 @@ public class Booking {
     @Column(name = "booking_status")
     @Enumerated(EnumType.STRING)
     private Status status;
+//    @Transient
+//    @NotNull
+//    private Long itemId;
 
 }
 
