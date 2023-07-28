@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,13 +11,18 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.practicum.shareit.user.mapper.UserMapper.toUser;
@@ -65,34 +71,68 @@ public class UserControllerTest {
                 .andExpect((jsonPath("$.email").value(user.getEmail())));
     }
 
-
-//    @Test
-//    void addUser_WhenUserDtoNotValid_ThenReturnBadRequest() throws Exception {
-//        UserDto userDto2 = new UserDto(2L, "", "user2@email.ru");
-//
-//        mockMvc.perform(post("/users")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(userDto2))
-//                        .accept(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isBadRequest());
-//
-//        verify(userService, never()).addUser(toUser(userDto));
-//    }
-
     @Test
-    void updateUser() {
+    void updateUser_WhenAllIsOk_ReturnUser() throws Exception {
+        UserDto updateUserDto = UserDto.builder()
+                .id(1L)
+                .name("updateUser")
+                .email("updateuser@ya.ru")
+                .build();
+        User updateUser = toUser(updateUserDto);
+
+        when(userService.updateUser(any(), anyLong()))
+                .thenReturn(updateUser);
+
+        mockMvc.perform(patch("/users/{id}", 1L)
+                        .header("X-Sharer-User-Id", 1L)
+                        .content(objectMapper.writeValueAsString(updateUserDto))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        verify(userService).updateUser(updateUser, 1L);
 
     }
 
     @Test
-    void testUpdateUser() {
+    void getUserById_WhenAllIsOk_ReturnUser() throws Exception {
+        when(userService.getUserById(anyLong()))
+                .thenReturn(user);
+
+        String result = mockMvc.perform(get("/users/{userId}", 1L))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Assertions.assertEquals(objectMapper.writeValueAsString(user), result);
     }
 
     @Test
-    void deleteUser() {
+    void getUserById_WhenUserIsNotExist_ThenReturnNotFoundException() throws Exception {
+        when(userService.getUserById(100L))
+                .thenThrow(new NotFoundException(String.format("Пользователь по id=%d не существует!", 100L)));
+
+        mockMvc.perform(get("/users/{id}", 100L))
+                .andExpect(status().isNotFound())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
     }
 
     @Test
-    void getListUsers() {
+    void getListUsers() throws Exception {
+        when(userService.getListUsers())
+                .thenReturn(List.of(user));
+
+        String result = mockMvc.perform(get("/users"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Assertions.assertEquals(objectMapper.writeValueAsString(List.of(user)), result);
     }
 }

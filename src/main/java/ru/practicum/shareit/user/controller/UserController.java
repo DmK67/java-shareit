@@ -43,7 +43,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}") // Эндпоинт получения пользователя по его id
-    public UserDto updateUser(@Min(1) @PathVariable Long userId) {
+    public UserDto getUserById(@Min(1) @PathVariable Long userId) {
         log.info("Получаем пользователя по Id={}.", userId);
         return toUserDto(userService.getUserById(userId));
     }

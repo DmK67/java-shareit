@@ -87,7 +87,6 @@ public class ItemController {
      */
     @GetMapping("/search") // Эндпоинт поиска по подстроке
     public List<ItemDto> getSearchItems(
-            @Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
             @RequestParam(value = "text", required = false) String text,
             @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
             @Positive @RequestParam(defaultValue = "10") Integer size) {
