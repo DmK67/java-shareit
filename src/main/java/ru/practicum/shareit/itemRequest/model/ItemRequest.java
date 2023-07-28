@@ -1,9 +1,6 @@
 package ru.practicum.shareit.itemRequest.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -19,6 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@EqualsAndHashCode
 @Table(name = "itemRequest", schema = "public")
 public class ItemRequest {
     //id — уникальный идентификатор запроса;
@@ -36,7 +34,6 @@ public class ItemRequest {
     private User requestor;
     @Column(name = "created")
     private LocalDateTime created;
-
     @Transient
     private List<Item> items;
 }

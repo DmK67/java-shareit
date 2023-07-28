@@ -14,7 +14,6 @@ import ru.practicum.shareit.user.model.User;
 
 import javax.transaction.Transactional;
 import javax.validation.ConstraintViolationException;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -101,7 +100,7 @@ class UserServiceImplTest {
                 () -> userService.addUser(user1));
     }
 
-   @DirtiesContext
+    @DirtiesContext
     @Test
     void addUser_WhenEmailIsNull_ThenReturnValidateException() {
         user1.setEmail(null);

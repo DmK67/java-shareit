@@ -14,6 +14,7 @@ import java.util.List;
 @Builder
 @RequiredArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class ItemRequestDtoWithAnswers {
     Long id;                //уникальный идентификатор запроса;
     @NotBlank

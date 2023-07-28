@@ -44,19 +44,11 @@ import static ru.practicum.shareit.user.mapper.UserMapper.toUser;
 class ItemServiceImplTest {
 
     private final ItemServiceImpl itemService;
-
     private final ItemServiceImpl itemServiceImpl;
-
     private final UserService userService;
-
-    private final BookingService bookingService;
-
     private final BookingRepository bookingRepository;
-
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
-    CommentRepository commentRepository;
-    ValidationService validationService;
 
     LocalDateTime now = LocalDateTime.now();
 
@@ -92,7 +84,6 @@ class ItemServiceImplTest {
     @Test
     void addItem_WhenAllIsOk_ThenReturnedAddedItem() {
         userService.addUser(user1);
-        item1.setId(999L);
 
         Item itemFromDb = itemService.addItem(item1, user1.getId());
 
