@@ -1,20 +1,14 @@
 package ru.practicum.shareit.validation;
 
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
@@ -22,10 +16,8 @@ import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.StateStatusValidateException;
 import ru.practicum.shareit.exceptions.ValidateException;
-import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
@@ -34,8 +26,9 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.when;
 import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingDto;
 import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
 
@@ -209,8 +202,8 @@ class ValidationServiceTest {
     @Test
     void checkStatusState_WhereInvalidStatus_ThenReturnedStateStatusValidateException() {
         textStatus = "Ok";
-                assertThrows(StateStatusValidateException.class,
-                        () -> validationService.checkStatusState(textStatus));
+        assertThrows(StateStatusValidateException.class,
+                () -> validationService.checkStatusState(textStatus));
     }
 
     @Test

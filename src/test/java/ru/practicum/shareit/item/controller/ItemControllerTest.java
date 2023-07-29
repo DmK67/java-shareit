@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,7 +10,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
 import ru.practicum.shareit.booking.dto.BookingForItemDto;
 import ru.practicum.shareit.item.comment.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -19,17 +17,14 @@ import ru.practicum.shareit.item.dto.ItemWithBookingDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.ItemWithBooking;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.user.controller.UserController;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.assertj.core.internal.bytebuddy.matcher.ElementMatchers.is;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -38,7 +33,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.practicum.shareit.item.comment.mapper.CommentMapper.toComment;
 import static ru.practicum.shareit.item.mapper.ItemMapper.toItem;
-import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
 import static ru.practicum.shareit.item.mapper.ItemWithBookingDtoMapper.toItemWithBooking;
 
 @WebMvcTest(ItemController.class)
@@ -217,16 +211,16 @@ class ItemControllerTest {
 
     @Test
     void addComment_WhenAllIsOkThenReturnCommentDto() throws Exception {
-            when(itemService.addComment(any(), anyLong(), any()))
-                    .thenReturn(toComment(commentDto));
+        when(itemService.addComment(any(), anyLong(), any()))
+                .thenReturn(toComment(commentDto));
 
-            mockMvc.perform(post("/items/1/comment")
-                            .header("X-Sharer-User-Id", 1L)
-                            .content(objectMapper.writeValueAsString(commentDto))
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id").value(commentDto.getId()))
-                    .andExpect(jsonPath("$.text").value(commentDto.getText()))
-                    .andExpect(jsonPath("$.authorName").value(commentDto.getAuthorName()));
+        mockMvc.perform(post("/items/1/comment")
+                        .header("X-Sharer-User-Id", 1L)
+                        .content(objectMapper.writeValueAsString(commentDto))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(commentDto.getId()))
+                .andExpect(jsonPath("$.text").value(commentDto.getText()))
+                .andExpect(jsonPath("$.authorName").value(commentDto.getAuthorName()));
     }
 }

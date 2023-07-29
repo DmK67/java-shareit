@@ -15,28 +15,24 @@ import ru.practicum.shareit.exceptions.ValidateException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.item.service.ItemServiceImpl;
 import ru.practicum.shareit.itemRequest.dto.ItemRequestDto;
 import ru.practicum.shareit.itemRequest.dto.ItemRequestDtoWithAnswers;
 import ru.practicum.shareit.itemRequest.model.ItemRequest;
 import ru.practicum.shareit.itemRequest.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
-import ru.practicum.shareit.user.service.UserServiceImpl;
 import ru.practicum.shareit.validation.ValidationService;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
-
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -103,7 +99,7 @@ class ItemRequestServiceTest {
                 .requestor(toUser(requesterDto))
                 .created(null)
                 .build();
-        itemRequest =toItemRequest(itemRequestDto);
+        itemRequest = toItemRequest(itemRequestDto);
         itemRequest.setItems(null);
 
     }

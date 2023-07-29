@@ -8,8 +8,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.shareit.item.controller.ItemController;
-import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.itemRequest.dto.ItemRequestDto;
 import ru.practicum.shareit.itemRequest.dto.ItemRequestDtoWithAnswers;
 import ru.practicum.shareit.itemRequest.service.ItemRequestService;
@@ -17,7 +15,7 @@ import ru.practicum.shareit.itemRequest.service.ItemRequestService;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -25,7 +23,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.practicum.shareit.itemRequest.mapper.ItemRequestMapper.toItemRequest;
-import static ru.practicum.shareit.itemRequest.mapper.ItemRequestMapper.toItemRequestDtoWithAnswers;
 
 @WebMvcTest(ItemRequestController.class)
 @AutoConfigureMockMvc
@@ -43,6 +40,7 @@ class ItemRequestControllerTest {
             .id(1L)
             .description("testDescription")
             .build();
+
     @Test
     void addItemRequest_WhenAllIsOk_ThenReturnItemRequestDto() throws Exception {
         when(itemRequestService.addItemRequest(any(), anyLong()))
@@ -103,6 +101,6 @@ class ItemRequestControllerTest {
                 .getResponse()
                 .getContentAsString();
 
-        verify(itemRequestService).getItemRequestById(1L,1L);
+        verify(itemRequestService).getItemRequestById(1L, 1L);
     }
 }

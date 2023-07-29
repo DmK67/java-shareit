@@ -18,7 +18,7 @@ import static ru.practicum.shareit.user.mapper.UserMapper.toUserDto;
 
 public class BookingMapper {
 
-    public static BookingDto toBookingDto(Booking booking) {// Метод перевода объекта booking в объект bookingDto
+    public static BookingDto toBookingDto(Booking booking) { // Метод перевода объекта booking в объект bookingDto
         return BookingDto.builder()
                 .id(booking.getId())
                 .start(booking.getStart())

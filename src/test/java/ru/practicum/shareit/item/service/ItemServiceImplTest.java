@@ -11,12 +11,10 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exceptions.ForbiddenException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidateException;
 import ru.practicum.shareit.item.comment.model.Comment;
-import ru.practicum.shareit.item.comment.repositiry.CommentRepository;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemWithBookingDto;
 import ru.practicum.shareit.item.model.Item;
@@ -25,7 +23,6 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
-import ru.practicum.shareit.validation.ValidationService;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -515,7 +512,7 @@ class ItemServiceImplTest {
         nextBooking = itemServiceImpl.findNextBookingByDate(itemFromBd.getId());
 
         assertNotNull(nextBooking);
-        assertEquals(bookingFromBd2.getId(),nextBooking.getId());
+        assertEquals(bookingFromBd2.getId(), nextBooking.getId());
         assertEquals(bookingFromBd2.getItem(), nextBooking.getItem());
         assertEquals(bookingFromBd2.getStatus(), nextBooking.getStatus());
     }
@@ -551,7 +548,7 @@ class ItemServiceImplTest {
         lastBooking = itemServiceImpl.findLastBookingByDate(itemFromBd.getId());
 
         assertNotNull(lastBooking);
-        assertEquals(bookingFromBd2.getId(),lastBooking.getId());
+        assertEquals(bookingFromBd2.getId(), lastBooking.getId());
         assertEquals(bookingFromBd2.getItem(), lastBooking.getItem());
         assertEquals(bookingFromBd2.getStatus(), lastBooking.getStatus());
     }
