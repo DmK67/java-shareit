@@ -225,8 +225,6 @@ class UserServiceImplTest {
 
         List<User> result = userService.getListUsers();
 
-        //assertEquals(listUsers.size(), result.size());
-
         for (User user : listUsers) {
             assertThat(result, hasItem(allOf(
                     hasProperty("id", notNullValue()),
