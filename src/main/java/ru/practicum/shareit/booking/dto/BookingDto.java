@@ -27,7 +27,6 @@ public class BookingDto {
     private Long itemId;
     private UserDto booker;
     private Status status;
-
     private ItemDto item;
 
 }

@@ -27,7 +27,6 @@ import ru.practicum.shareit.validation.ValidationService;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -191,7 +190,7 @@ public class ItemServiceImpl implements ItemService {
         User user = userService.getUserById(ownerId); // Проверяем пользователя по id на существование в БД
         validationService.checkCommentText(comment.getText()); // Проверяем поле text
         validationService.checkTheUserRentedTheItem(ownerId, item); // Проверяем что пользователь действительно брал
-                                                                    // вещь в аренду
+        // вещь в аренду
         comment.setItem(item);
         comment.setAuthor(user);
         comment.setCreated(LocalDateTime.now());
@@ -221,5 +220,6 @@ public class ItemServiceImpl implements ItemService {
         }
         return lastBooking;
     }
+
 
 }

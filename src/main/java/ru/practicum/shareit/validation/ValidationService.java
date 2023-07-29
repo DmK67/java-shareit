@@ -38,9 +38,6 @@ public class ValidationService {
         // Метод проверки соответствия владельца вещи
         Item item = itemRepository.findById(itemId).get();
         Booking booking = bookingRepository.findById(bookingId).get();
-        if (item.getOwner().getId().equals(ownerId)) {
-            return;
-        }
         if (booking.getBooker().getId().equals(ownerId)) {
             log.error("Ошибка! Пользователь по Id: {} является арендатором вещи! " +
                     "Изменение статуса вещи ЗАПРЕЩЕНО!", ownerId);
@@ -49,7 +46,7 @@ public class ValidationService {
     }
 
     public void checkBookerIsTheOwner(Item itemDB, Long bookerId) { // Метод проверки: является ли арендодатель
-                                                                    // - владельцем вещи
+        // - владельцем вещи
         if (itemDB.getOwner().getId().equals(bookerId)) {
             log.error("Ошибка! Невозможно добавить бронирование, пользователь по id={} " +
                     "является владельцем вещи", bookerId);

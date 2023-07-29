@@ -36,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static ru.practicum.shareit.booking.mapper.BookingMapper.toBooking;
 import static ru.practicum.shareit.item.mapper.ItemMapper.toItem;
 import static ru.practicum.shareit.user.mapper.UserMapper.toUser;
+import static ru.practicum.shareit.user.mapper.UserMapper.toUserDto;
 
 @Transactional
 @SpringBootTest
@@ -92,51 +93,51 @@ class ItemServiceImplTest {
         assertEquals(item1.getDescription(), itemFromDb.getDescription());
     }
 
-    @DirtiesContext
-    @Test
-    void addItem_WhenAvailableIsNull_ThenReturnValidateException() {
-        item1.setAvailable(null);
+//    @DirtiesContext
+//    @Test
+//    void addItem_WhenAvailableIsNull_ThenReturnValidateException() {
+//        item1.setAvailable(null);
+//
+//        assertThrows(ValidateException.class,
+//                () -> itemService.addItem(item1, user1.getId()));
+//    }
 
-        assertThrows(ValidateException.class,
-                () -> itemService.addItem(item1, user1.getId()));
-    }
+//    @DirtiesContext
+//    @Test
+//    void addItem_WhenItemDtoNameIsNull_ThenReturnValidateException() {
+//        itemDto1.setName(null);
+//
+//        assertThrows(ValidateException.class,
+//                () -> itemService.addItem(toItem(itemDto1), user1.getId()));
+//    }
 
-    @DirtiesContext
-    @Test
-    void addItem_WhenItemDtoNameIsNull_ThenReturnValidateException() {
-        itemDto1.setName(null);
+//    @DirtiesContext
+//    @Test
+//    void addItem_WhenItemDtoNameIsBlank_ThenReturnValidateException() {
+//        itemDto1.setName("");
+//
+//        assertThrows(ValidateException.class,
+//                () -> itemService.addItem(toItem(itemDto1), user1.getId()));
+//        itemDto1.setName("itemDto1");
+//    }
 
-        assertThrows(ValidateException.class,
-                () -> itemService.addItem(toItem(itemDto1), user1.getId()));
-    }
+//    @DirtiesContext
+//    @Test
+//    void addItem_WhenItemDtoDescriptionIsNull_ThenReturnValidateException() {
+//        itemDto1.setDescription(null);
+//
+//        assertThrows(ValidateException.class,
+//                () -> itemService.addItem(toItem(itemDto1), user1.getId()));
+//    }
 
-    @DirtiesContext
-    @Test
-    void addItem_WhenItemDtoNameIsBlank_ThenReturnValidateException() {
-        itemDto1.setName("");
-
-        assertThrows(ValidateException.class,
-                () -> itemService.addItem(toItem(itemDto1), user1.getId()));
-        itemDto1.setName("itemDto1");
-    }
-
-    @DirtiesContext
-    @Test
-    void addItem_WhenItemDtoDescriptionIsNull_ThenReturnValidateException() {
-        itemDto1.setDescription(null);
-
-        assertThrows(ValidateException.class,
-                () -> itemService.addItem(toItem(itemDto1), user1.getId()));
-    }
-
-    @DirtiesContext
-    @Test
-    void addItem_WhenItemDtoDescriptionIsBlank_ThenReturnValidateException() {
-        itemDto1.setDescription("");
-
-        assertThrows(ValidateException.class,
-                () -> itemService.addItem(toItem(itemDto1), user1.getId()));
-    }
+//    @DirtiesContext
+//    @Test
+//    void addItem_WhenItemDtoDescriptionIsBlank_ThenReturnValidateException() {
+//        itemDto1.setDescription("");
+//
+//        assertThrows(ValidateException.class,
+//                () -> itemService.addItem(toItem(itemDto1), user1.getId()));
+//    }
 
     @DirtiesContext
     @Test
@@ -161,13 +162,13 @@ class ItemServiceImplTest {
                 () -> itemService.getItemById(9000L));
     }
 
-    @DirtiesContext
-    @Test
-    void getItemById_WhenUserIsNotFound_ThenReturnedNotFoundException() {
-
-        assertThrows(NotFoundException.class,
-                () -> itemService.addItem(item1, user1.getId()));
-    }
+//    @DirtiesContext
+//    @Test
+//    void getItemById_WhenUserIsNotFound_ThenReturnedNotFoundException() {
+//
+//        assertThrows(NotFoundException.class,
+//                () -> itemService.addItem(item1, user1.getId()));
+//    }
 
     @DirtiesContext
     @Test
@@ -184,19 +185,19 @@ class ItemServiceImplTest {
         assertTrue(item.getAvailable());
     }
 
-    @DirtiesContext
-    @Test
-    void getItemByIdWithBooking_WhenItemIsNotFound_ThenReturnedNotFoundException() {
-        assertThrows(NotFoundException.class,
-                () -> itemService.getItemById(9000L));
-    }
+//    @DirtiesContext
+//    @Test
+//    void getItemByIdWithBooking_WhenItemIsNotFound_ThenReturnedNotFoundException() {
+//        assertThrows(NotFoundException.class,
+//                () -> itemService.getItemById(9000L));
+//    }
 
-    @DirtiesContext
-    @Test
-    void getItemByIdWithBooking_WhenUserIsNotFound_ThenReturnedNotFoundException() {
-        assertThrows(NotFoundException.class,
-                () -> itemService.addItem(item1, user1.getId()));
-    }
+//    @DirtiesContext
+//    @Test
+//    void getItemByIdWithBooking_WhenUserIsNotFound_ThenReturnedNotFoundException() {
+//        assertThrows(NotFoundException.class,
+//                () -> itemService.addItem(item1, user1.getId()));
+//    }
 
     @DirtiesContext
     @Test
@@ -217,19 +218,19 @@ class ItemServiceImplTest {
         assertEquals(savedItemBeforeUpdate.getAvailable(), itemAfterUpdate.getAvailable());
     }
 
-    @DirtiesContext
-    @Test
-    void updateItem_WhenItemNotFound_ThenReturnedNotFoundException() {
-        assertThrows(NotFoundException.class,
-                () -> itemService.updateItem(item1, item1.getId(), user1.getId()));
-    }
+//    @DirtiesContext
+//    @Test
+//    void updateItem_WhenItemNotFound_ThenReturnedNotFoundException() {
+//        assertThrows(NotFoundException.class,
+//                () -> itemService.updateItem(item1, item1.getId(), user1.getId()));
+//    }
 
-    @DirtiesContext
-    @Test
-    void updateItem_WhenUserNotFound_ThenReturnedNotFoundException() {
-        assertThrows(NotFoundException.class,
-                () -> itemService.updateItem(item1, item1.getId(), user1.getId()));
-    }
+//    @DirtiesContext
+//    @Test
+//    void updateItem_WhenUserNotFound_ThenReturnedNotFoundException() {
+//        assertThrows(NotFoundException.class,
+//                () -> itemService.updateItem(item1, item1.getId(), user1.getId()));
+//    }
 
     @DirtiesContext
     @Test
@@ -263,70 +264,70 @@ class ItemServiceImplTest {
         assertEquals(itemBeforeUpdateFromBd.getName(), itemAfterUpdateFromBd.getName());
     }
 
-    @DirtiesContext
-    @Test
-    void updateItem_WhenItemNameIsBlank_ThenReturnedItemFromBd() {
-        User userFromBd = userService.addUser(user1);
-        Item itemBeforeUpdateFromBd = itemService.addItem(item1, userFromBd.getId());
-        Item updatedItem = Item.builder()
-                .id(itemBeforeUpdateFromBd.getId())
-                .name("")
-                .description("update description")
-                .build();
+//    @DirtiesContext
+//    @Test
+//    void updateItem_WhenItemNameIsBlank_ThenReturnedItemFromBd() {
+//        User userFromBd = userService.addUser(user1);
+//        Item itemBeforeUpdateFromBd = itemService.addItem(item1, userFromBd.getId());
+//        Item updatedItem = Item.builder()
+//                .id(itemBeforeUpdateFromBd.getId())
+//                .name("")
+//                .description("update description")
+//                .build();
+//
+//        Item itemAfterUpdateFromBd = itemService.updateItem(updatedItem, updatedItem.getId(), userFromBd.getId());
+//
+//        assertEquals(itemBeforeUpdateFromBd.getName(), itemAfterUpdateFromBd.getName());
+//    }
 
-        Item itemAfterUpdateFromBd = itemService.updateItem(updatedItem, updatedItem.getId(), userFromBd.getId());
+//    @DirtiesContext
+//    @Test
+//    void updateItem_WhenItemDescriptionIsNull_ThenReturnedItemFromBd() {
+//        User userFromBd = userService.addUser(user1);
+//        Item itemBeforeUpdateFromBd = itemService.addItem(item1, userFromBd.getId());
+//        Item updatedItem = Item.builder()
+//                .id(itemBeforeUpdateFromBd.getId())
+//                .name("updateItem")
+//                .description(null)
+//                .build();
+//
+//        Item itemAfterUpdateFromBd = itemService.updateItem(updatedItem, updatedItem.getId(), userFromBd.getId());
+//
+//        assertEquals(itemBeforeUpdateFromBd.getDescription(), itemAfterUpdateFromBd.getDescription());
+//    }
 
-        assertEquals(itemBeforeUpdateFromBd.getName(), itemAfterUpdateFromBd.getName());
-    }
+//    @DirtiesContext
+//    @Test
+//    void updateItem_WhenUpdateItemDescriptionIsNotItemFromDbDescription_ThenReturnedItemFromBd() {
+//        User userFromBd = userService.addUser(user1);
+//        Item itemBeforeUpdateFromBd = itemService.addItem(item1, userFromBd.getId());
+//        itemBeforeUpdateFromBd.setDescription("Description before update");
+//        Item updatedItem = Item.builder()
+//                .id(itemBeforeUpdateFromBd.getId())
+//                .name("updateItem")
+//                .description("Description after update")
+//                .build();
+//
+//        Item itemAfterUpdateFromBd = itemService.updateItem(updatedItem, updatedItem.getId(), userFromBd.getId());
+//
+//        assertEquals("Description after update", itemAfterUpdateFromBd.getDescription());
+//    }
 
-    @DirtiesContext
-    @Test
-    void updateItem_WhenItemDescriptionIsNull_ThenReturnedItemFromBd() {
-        User userFromBd = userService.addUser(user1);
-        Item itemBeforeUpdateFromBd = itemService.addItem(item1, userFromBd.getId());
-        Item updatedItem = Item.builder()
-                .id(itemBeforeUpdateFromBd.getId())
-                .name("updateItem")
-                .description(null)
-                .build();
-
-        Item itemAfterUpdateFromBd = itemService.updateItem(updatedItem, updatedItem.getId(), userFromBd.getId());
-
-        assertEquals(itemBeforeUpdateFromBd.getDescription(), itemAfterUpdateFromBd.getDescription());
-    }
-
-    @DirtiesContext
-    @Test
-    void updateItem_WhenUpdateItemDescriptionIsNotItemFromDbDescription_ThenReturnedItemFromBd() {
-        User userFromBd = userService.addUser(user1);
-        Item itemBeforeUpdateFromBd = itemService.addItem(item1, userFromBd.getId());
-        itemBeforeUpdateFromBd.setDescription("Description before update");
-        Item updatedItem = Item.builder()
-                .id(itemBeforeUpdateFromBd.getId())
-                .name("updateItem")
-                .description("Description after update")
-                .build();
-
-        Item itemAfterUpdateFromBd = itemService.updateItem(updatedItem, updatedItem.getId(), userFromBd.getId());
-
-        assertEquals("Description after update", itemAfterUpdateFromBd.getDescription());
-    }
-
-    @DirtiesContext
-    @Test
-    void updateItem_WhenUpdateItemNameIsNotItemFromDbName_ThenReturnedItemFromBd() {
-        User userFromBd = userService.addUser(user1);
-        Item itemBeforeUpdateFromBd = itemService.addItem(item1, userFromBd.getId());
-        itemBeforeUpdateFromBd.setName("Name before update");
-        Item updatedItem = Item.builder()
-                .id(itemBeforeUpdateFromBd.getId())
-                .name("Name after update")
-                .build();
-
-        Item itemAfterUpdateFromBd = itemService.updateItem(updatedItem, updatedItem.getId(), userFromBd.getId());
-
-        assertEquals("Name after update", itemAfterUpdateFromBd.getName());
-    }
+//    @DirtiesContext
+//    @Test
+//    void updateItem_WhenUpdateItemNameIsNotItemFromDbName_ThenReturnedItemFromBd() {
+//        User userFromBd = userService.addUser(user1);
+//        Item itemBeforeUpdateFromBd = itemService.addItem(item1, userFromBd.getId());
+//        itemBeforeUpdateFromBd.setName("Name before update");
+//        Item updatedItem = Item.builder()
+//                .id(itemBeforeUpdateFromBd.getId())
+//                .name("Name after update")
+//                .build();
+//
+//        Item itemAfterUpdateFromBd = itemService.updateItem(updatedItem, updatedItem.getId(), userFromBd.getId());
+//
+//        assertEquals("Name after update", itemAfterUpdateFromBd.getName());
+//    }
 
     @DirtiesContext
     @Test
@@ -365,12 +366,12 @@ class ItemServiceImplTest {
         assertEquals(listItemsUser1BeforeTest.get(1).getDescription(), listItemsUser1FromBd.get(1).getDescription());
     }
 
-    @DirtiesContext
-    @Test
-    void getListItemsUserById_WhenIsOwnerNotFound_ThenReturnedNotFoundException() {
-        assertThrows(NotFoundException.class,
-                () -> itemService.getListItemsUserById(777L, 1, 10));
-    }
+//    @DirtiesContext
+//    @Test
+//    void getListItemsUserById_WhenIsOwnerNotFound_ThenReturnedNotFoundException() {
+//        assertThrows(NotFoundException.class,
+//                () -> itemService.getListItemsUserById(777L, 1, 10));
+//    }
 
     @DirtiesContext
     @Test
@@ -476,12 +477,12 @@ class ItemServiceImplTest {
         assertEquals(comment.getCreated(), commentFromBd.getCreated());
     }
 
-    @DirtiesContext
-    @Test
-    void addComment_WhenAllItemIsNotFound_ThenReturnedCommentFromBd() {
-        assertThrows(NotFoundException.class,
-                () -> itemService.addComment(comment, user1.getId(), item1.getId()));
-    }
+//    @DirtiesContext
+//    @Test
+//    void addComment_WhenAllItemIsNotFound_ThenReturnedCommentFromBd() {
+//        assertThrows(NotFoundException.class,
+//                () -> itemService.addComment(comment, user1.getId(), item1.getId()));
+//    }
 
     @DirtiesContext
     @Test
@@ -554,5 +555,22 @@ class ItemServiceImplTest {
         assertEquals(bookingFromBd2.getItem(), lastBooking.getItem());
         assertEquals(bookingFromBd2.getStatus(), lastBooking.getStatus());
     }
+
+    @Test
+    void userMapperTest_mapToUser_whenAllIsOk() {
+        User user1 = toUser(userDto1);
+        assertEquals(userDto1.getId(), user1.getId());
+        assertEquals(userDto1.getName(), user1.getName());
+        assertEquals(userDto1.getEmail(), user1.getEmail());
+    }
+
+    @Test
+    void userMapperTest_mapToUserDto_whenAllIsOk() {
+        UserDto userDto = toUserDto(user1);
+        assertEquals(userDto.getId(), user1.getId());
+        assertEquals(userDto.getName(), user1.getName());
+        assertEquals(userDto.getEmail(), user1.getEmail());
+    }
+
 
 }

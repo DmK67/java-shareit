@@ -174,7 +174,7 @@ class ItemRequestServiceTest {
     }
 
     @Test
-    void getItemRequestById_WhenItemRequestIdIsNul_ThenReturnValidateException() {
+    void getItemRequestById_WhenItemRequestIdIsNull_ThenReturnValidateException() {
         assertThrows(ValidateException.class,
                 () -> itemRequestService.getItemRequestById(1L, null));
     }

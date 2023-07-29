@@ -1,5 +1,6 @@
 package ru.practicum.shareit.validation;
 
+import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,17 +11,26 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.exceptions.StateStatusValidateException;
 import ru.practicum.shareit.exceptions.ValidateException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.user.service.UserService;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -30,19 +40,26 @@ import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingDto;
 import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
 
 
-@MockitoSettings(strictness = Strictness.LENIENT)
-@ExtendWith(MockitoExtension.class)
+@Transactional
+@SpringBootTest
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@AutoConfigureTestDatabase
 class ValidationServiceTest {
+    @InjectMocks
+    private ValidationService validationService;
     @Mock
-    ValidationService validationService;
+    private UserService userService;
     @Mock
-    UserRepository userRepository;
+    private UserRepository userRepository;
     @Mock
-    ItemService itemService;
+    private ItemRepository itemRepository;
+    @Mock
+    private BookingRepository bookingRepository;
 
-    BookingDto bookingDto = mock(BookingDto.class);
+    private String textStatus;
     private final User user1 = new User(1L, "User1", "user1@email.com");
     private final User user2 = new User(2L, "User2", "user2@email.com");
+    private final User user3 = new User(3L, "User3", "user3@email.com");
     private final Item item = Item.builder()
             .id(1L)
             .name("Item")
@@ -68,138 +85,151 @@ class ValidationServiceTest {
     void tearDown() {
     }
 
-
     @Test
     void checkUniqueEmailUserAdd_WhenEmailIsNull_ThenReturnedValidateException() {
         user1.setEmail(null);
-//        doThrow(new ValidateException("Ошибка! Пользователь с пустым e-mail не может быть добавлен!"))
-//                .when(validationService).checkUniqueEmailUserAdd(user1);
 
-
+        assertThrows(ValidateException.class,
+                () -> validationService.checkUniqueEmailUserAdd(user1));
     }
 
     @Test
     void checkUniqueEmailUserAdd_WhenEmailIsBlank_ThenReturnedValidateException() {
         user1.setEmail("");
 
-        doThrow(new ValidateException("Ошибка! Пользователь с пустым e-mail не может быть добавлен!"))
-                .when(validationService).checkUniqueEmailUserAdd(user1);
+        assertThrows(ValidateException.class,
+                () -> validationService.checkUniqueEmailUserAdd(user1));
+        user1.setEmail("user1@ya.ru");
     }
 
     @Test
-    void checkOwnerItemAndBooker_WhenUserIsNotOwner_() {
+    void checkOwnerItemAndBooker_WhenUserIsNotOwner_ThenReturnedNotFoundException() {
+        item.setOwner(user3);
+        booking.setBooker(item.getOwner());
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.ofNullable(booking));
 
-        doThrow(new NotFoundException("Вносить изменения в параметры вещи может только владелец!"))
-                .when(validationService).checkOwnerItemAndBooker(item.getId(), user1.getId(), user2.getId());
+        assertThrows(NotFoundException.class,
+                () -> validationService
+                        .checkOwnerItemAndBooker(item.getId(), item.getOwner().getId(), booking.getId()));
     }
 
     @Test
-    void checkOwnerItemAndBooker_WhenUserIsOwner_ThenReturnedNotFoundException() {
-        doThrow(new NotFoundException("Вносить изменения в параметры вещи может только владелец!"))
-                .when(validationService).checkOwnerItemAndBooker(item.getId(), user1.getId(), user1.getId());
+    void checkBookerIsTheOwner_WhenBookerIsOwnerItem_ThenReturnedNotFoundException() {
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user1));
+
+        assertThrows(NotFoundException.class,
+                () -> validationService.checkBookerIsTheOwner(item, user1.getId()));
     }
 
     @Test
-    void checkBookerIsTheOwner_WhenBookerIsNotOwnerItem() {
-        doThrow(new NotFoundException("Ошибка! Невозможно добавить бронирование!"))
-                .when(validationService).checkBookerIsTheOwner(item, user2.getId());
-    }
+    void checkBookerOrOwner_WhenBookerIsOwnerItem_ThenReturnedNotFoundException() {
+        booking.setBooker(user3);
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.ofNullable(booking));
 
-    @Test
-    void checkBookerIsTheOwner_WhenBookerIsOwnerItem_() {
-        doThrow(new NotFoundException("Ошибка! Невозможно добавить бронирование!"))
-                .when(validationService).checkBookerIsTheOwner(item, user1.getId());
-    }
-
-    @Test
-    void checkBookerOrOwner() {
-        doThrow(new NotFoundException("Просматривать информацию о бронированнии вещи может только владелец" +
-                " или клиент бронирования!"))
-                .when(validationService).checkBookerOrOwner(user1.getId(), booking.getId());
+        assertThrows(NotFoundException.class,
+                () -> validationService.checkBookerOrOwner(user2.getId(), booking.getId()));
     }
 
     @Test
     void checkItemDtoWhenAdd_WhereAreTheEmptyFields_ThenReturnedNotFoundException() {
-        ItemDto itemDto = toItemDto(item);
-        itemDto.setAvailable(null);
+        item.setAvailable(null);
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
 
-        doThrow(new NotFoundException("Ошибка! Вещь с пустыми полями не может быть добавлена!"))
-                .when(validationService).checkItemDtoWhenAdd(itemDto);
+        assertThrows(ValidateException.class,
+                () -> validationService.checkItemDtoWhenAdd(toItemDto(item)));
 
-        itemDto.setAvailable(true);
-        itemDto.setName(null);
+        item.setAvailable(true);
+        item.setName(null);
 
-        doThrow(new NotFoundException("Ошибка! Вещь с пустыми полями не может быть добавлена!"))
-                .when(validationService).checkItemDtoWhenAdd(itemDto);
+        assertThrows(ValidateException.class,
+                () -> validationService.checkItemDtoWhenAdd(toItemDto(item)));
 
-        itemDto.setName("");
+        item.setName("");
 
-        doThrow(new NotFoundException("Ошибка! Вещь с пустыми полями не может быть добавлена!"))
-                .when(validationService).checkItemDtoWhenAdd(itemDto);
+        assertThrows(ValidateException.class,
+                () -> validationService.checkItemDtoWhenAdd(toItemDto(item)));
 
-        itemDto.setName("itemDto");
-        itemDto.setDescription(null);
+        item.setName("itemDto");
+        item.setDescription(null);
 
-        doThrow(new NotFoundException("Ошибка! Вещь с пустыми полями не может быть добавлена!"))
-                .when(validationService).checkItemDtoWhenAdd(itemDto);
+        assertThrows(ValidateException.class,
+                () -> validationService.checkItemDtoWhenAdd(toItemDto(item)));
 
-        itemDto.setDescription("");
+        item.setDescription("");
 
-        doThrow(new NotFoundException("Ошибка! Вещь с пустыми полями не может быть добавлена!"))
-                .when(validationService).checkItemDtoWhenAdd(itemDto);
+        assertThrows(ValidateException.class,
+                () -> validationService.checkItemDtoWhenAdd(toItemDto(item)));
 
-        itemDto.setDescription(item.getDescription());
+        item.setDescription(item.getDescription());
     }
 
     @Test
     void checkBookingDtoWhenAdd_WhereInvalidTimeAndDate_ThenReturnedValidateException() {
-        validationService = mock(ValidationService.class);
+
         BookingDto bookingDtoBadTime = toBookingDto(booking);
         bookingDtoBadTime.setStart(null);
 
-        doThrow(new ValidateException("Ошибка! Указано неправильно дата или время бронирования!"))
-                .when(validationService).checkBookingDtoWhenAdd(bookingDtoBadTime);
+        assertThrows(ValidateException.class,
+                () -> validationService.checkBookingDtoWhenAdd(bookingDtoBadTime));
 
         bookingDtoBadTime.setStart(LocalDateTime.now());
         bookingDtoBadTime.setEnd(null);
 
-        doThrow(new ValidateException("Ошибка! Указано неправильно дата или время бронирования!"))
-                .when(validationService).checkBookingDtoWhenAdd(bookingDtoBadTime);
-
-        bookingDtoBadTime.setStart(LocalDateTime.now());
-        bookingDtoBadTime.setEnd(LocalDateTime.now().plusHours(1));
-
-        doThrow(new ValidateException("Ошибка! Указано неправильно дата или время бронирования!"))
-                .when(validationService).checkBookingDtoWhenAdd(bookingDtoBadTime);
-
-        bookingDtoBadTime.setStart(LocalDateTime.now());
-        bookingDtoBadTime.setEnd(LocalDateTime.now());
-
-        doThrow(new ValidateException("Ошибка! Указано неправильно дата или время бронирования!"))
-                .when(validationService).checkBookingDtoWhenAdd(bookingDtoBadTime);
-
-        bookingDtoBadTime.setStart(LocalDateTime.now().minusHours(1));
-        bookingDtoBadTime.setEnd(LocalDateTime.now());
-
-        doThrow(new ValidateException("Ошибка! Указано неправильно дата или время бронирования!"))
-                .when(validationService).checkBookingDtoWhenAdd(bookingDtoBadTime);
+        assertThrows(ValidateException.class,
+                () -> validationService.checkBookingDtoWhenAdd(bookingDtoBadTime));
 
         bookingDtoBadTime.setStart(LocalDateTime.now());
         bookingDtoBadTime.setEnd(LocalDateTime.now().minusHours(1));
 
-        doThrow(new ValidateException("Ошибка! Указано неправильно дата или время бронирования!"))
-                .when(validationService).checkBookingDtoWhenAdd(bookingDtoBadTime);
+        assertThrows(ValidateException.class,
+                () -> validationService.checkBookingDtoWhenAdd(bookingDtoBadTime));
+
+        bookingDtoBadTime.setStart(LocalDateTime.now());
+        bookingDtoBadTime.setEnd(LocalDateTime.now());
+
+        assertThrows(ValidateException.class,
+                () -> validationService.checkBookingDtoWhenAdd(bookingDtoBadTime));
+
+        bookingDtoBadTime.setStart(LocalDateTime.now().minusHours(1));
+        bookingDtoBadTime.setEnd(LocalDateTime.now());
+
+        assertThrows(ValidateException.class,
+                () -> validationService.checkBookingDtoWhenAdd(bookingDtoBadTime));
+
+        bookingDtoBadTime.setStart(LocalDateTime.now());
+        bookingDtoBadTime.setEnd(LocalDateTime.now().minusHours(1));
+
+        assertThrows(ValidateException.class,
+                () -> validationService.checkBookingDtoWhenAdd(bookingDtoBadTime));
     }
 
     @Test
-    void checkStatusState() {
+    void checkStatusState_WhereInvalidStatus_ThenReturnedStateStatusValidateException() {
+        textStatus = "Ok";
+                assertThrows(StateStatusValidateException.class,
+                        () -> validationService.checkStatusState(textStatus));
     }
 
     @Test
-    void checkTheUserRentedTheItem() {
+    void checkTheUserRentedTheItem_WhereIsNotRentedItem_ThenReturnedValidateException() {
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user1));
+
+        assertThrows(ValidateException.class,
+                () -> validationService.checkTheUserRentedTheItem(user1.getId(), item));
     }
 
     @Test
-    void checkCommentText() {
+    void checkCommentText_WhereCommentTextIsNotValid_ThenReturnedValidateException() {
+        textStatus = "";
+        assertThrows(ValidateException.class,
+                () -> validationService.checkCommentText(textStatus));
+
+        textStatus = null;
+        assertThrows(ValidateException.class,
+                () -> validationService.checkCommentText(textStatus));
     }
 }

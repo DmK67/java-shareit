@@ -30,7 +30,6 @@ public class ItemWithBookingDto {
     private BookingForItemDto nextBooking;
     @NotNull
     private Long requestId;
-
     private List<CommentDto> comments;
 
 }

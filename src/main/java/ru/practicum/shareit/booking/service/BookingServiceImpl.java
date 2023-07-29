@@ -24,8 +24,6 @@ import java.util.List;
 
 import static ru.practicum.shareit.booking.mapper.BookingMapper.listResultAddItemAndAddBooker;
 import static ru.practicum.shareit.booking.mapper.BookingMapper.toBooking;
-import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
-import static ru.practicum.shareit.user.mapper.UserMapper.toUserDto;
 
 @Service
 @AllArgsConstructor
@@ -49,7 +47,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = toBooking(bookingDto);
         booking.setBooker(booker);
         booking.setItem(itemDB);
-    return bookingRepository.save(booking);
+        return bookingRepository.save(booking);
     }
 
     @Transactional
@@ -101,11 +99,11 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     @Override
     public Booking getBookingByIdAndStatus(Long ownerId, Long bookingId) {
-            // Метод получение данных о конкретном бронировании (включая его статус)
+        // Метод получение данных о конкретном бронировании (включая его статус)
         userService.getUserById(ownerId); // Проверяем существование пользователя в БД
         Booking bookingById = getBookingById(bookingId); // Проверяем существование бронирования в БД
         validationService.checkBookerOrOwner(ownerId, bookingId); // Проверяем владельца вещи
-                                                                // и клиента бронирования на соответствие
+        // и клиента бронирования на соответствие
         return bookingById;
     }
 
