@@ -186,9 +186,9 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     @Override
     public Comment addComment(Comment comment, Long ownerId, Long itemId) { // Метод добавления комментария
+        validationService.checkCommentText(comment.getText());  // Проверяем поле text
         Item item = getItemById(itemId); // Проверяем вещь по id на существование в БД
         User user = userService.getUserById(ownerId); // Проверяем пользователя по id на существование в БД
-        validationService.checkCommentText(comment.getText()); // Проверяем поле text
         validationService.checkTheUserRentedTheItem(ownerId, item); // Проверяем что пользователь действительно брал
         // вещь в аренду
         comment.setItem(item);
