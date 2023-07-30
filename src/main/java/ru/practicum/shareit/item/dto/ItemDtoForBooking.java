@@ -11,7 +11,6 @@ import javax.validation.constraints.NotNull;
 @Getter
 @Setter
 @Builder
-@EqualsAndHashCode
 public class ItemDtoForBooking {
     private Long id;
     @NotBlank

@@ -34,6 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.practicum.shareit.booking.mapper.BookingMapper.toBooking;
+import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingDto;
 import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
 import static ru.practicum.shareit.user.mapper.UserMapper.toUserDto;
 
@@ -110,7 +111,7 @@ public class BookingControllerTest {
         Booking booking = toBooking(bookingDtoForResponse);
         booking.setBooker(booker);
 
-        when(bookingService.addBooking(any(), any())).thenReturn(booking);
+        when(bookingService.addBooking(any(), any())).thenReturn(toBookingDto(booking));
 
         String result = mockMvc.perform(post("/bookings")
                         .header("X-Sharer-User-Id", booker.getId())
@@ -150,7 +151,7 @@ public class BookingControllerTest {
         booking.setBooker(booker);
 
         when(bookingService.updateBooking(any(), any(), any()))
-                .thenReturn(booking);
+                .thenReturn(bookingDto);
 
         String result = mockMvc.perform(patch("/bookings/{bookingId}", bookingDtoForResponse.getId())
                         .param("approved", "true")

@@ -11,27 +11,36 @@ import java.util.List;
 /**
  * TODO Sprint add-item-requests.
  */
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@EqualsAndHashCode
 @Table(name = "itemRequest", schema = "public")
 public class ItemRequest {
-    //id — уникальный идентификатор запроса;
-    //description — текст запроса, содержащий описание требуемой вещи;
-    //requestor — пользователь, создавший запрос;
-    //created — дата и время создания запроса.
+
+    /**
+     * id — уникальный идентификатор запроса;
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "request_id")
     private long id;
+    /**
+     * description — текст запроса, содержащий описание требуемой вещи;
+     */
     @Column()
     private String description;
+    /**
+     * requestor — пользователь, создавший запрос;
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "requestor")
     private User requestor;
+    /**
+     * created — дата и время создания запроса.
+     */
     @Column(name = "created")
     private LocalDateTime created;
     @Transient

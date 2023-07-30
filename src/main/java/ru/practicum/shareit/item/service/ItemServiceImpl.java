@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingForItemDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
@@ -21,10 +22,9 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.ItemWithBooking;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
-import ru.practicum.shareit.validation.ValidationService;
 
-import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,6 +34,7 @@ import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingForItem
 import static ru.practicum.shareit.item.comment.mapper.CommentMapper.convertListCommentsToListCommentsDto;
 import static ru.practicum.shareit.item.mapper.ItemMapper.*;
 import static ru.practicum.shareit.item.mapper.ItemWithBookingDtoMapper.toItemWithBookingDto;
+import static ru.practicum.shareit.utility.ValidationClass.*;
 
 @Service
 @AllArgsConstructor
@@ -41,19 +42,21 @@ import static ru.practicum.shareit.item.mapper.ItemWithBookingDtoMapper.toItemWi
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository repository;
     private final UserService userService;
-    private final ValidationService validationService;
+    private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final BookingRepository bookingRepository;
 
     @Transactional
     @Override
     public Item addItem(Item item, Long ownerId) {
-        validationService.checkItemDtoWhenAdd(toItemDto(item)); // Проверяем поля объекта itemDto перед добавлением
-        item.setOwner(userService.getUserById(ownerId));
+        checkItemDtoWhenAdd(toItemDto(item)); // Проверяем поля объекта itemDto перед добавлением
+        User userFromBd = userRepository.findById(ownerId)
+                .orElseThrow(() -> new NotFoundException("Пользователь по id=" + ownerId + " не существует!"));
+        item.setOwner(userFromBd);
         return repository.save(item);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public Item getItemById(Long id) { // Метод получения вещи по id
         Item item = repository.findById(id)
@@ -61,12 +64,13 @@ public class ItemServiceImpl implements ItemService {
         return item;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public ItemWithBookingDto getItemByIdWithBooking(Long itemId, Long owner) {
         // Метод получения вещи по id с бронированием
         Item itemFromBD = getItemById(itemId);
-        userService.getUserById(owner);
+        userRepository.findById(owner) // Проверяем пользователя по id на существование в БД
+                .orElseThrow(() -> new NotFoundException("Пользователь по id=" + owner + " не существует!"));
         ItemWithBooking itemWithBooking = itemWithBooking(itemFromBD);
         List<Booking> allBookings = itemFromBD.getBookings();
         Booking lastBooking = null;
@@ -89,7 +93,6 @@ public class ItemServiceImpl implements ItemService {
             itemWithBookingDto.setLastBooking(lastBookingForItemDto);
             List<CommentDto> commentDtoList = convertListCommentsToListCommentsDto(listComments);
             itemWithBookingDto.setComments(commentDtoList);
-
             return itemWithBookingDto;
         }
     }
@@ -98,7 +101,8 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Item updateItem(Item item, Long itemId, Long ownerId) { // Метод обновления вещи
         Item updateItem = getItemById(itemId); // Проверяем вещь по id на существование в БД
-        User owner = userService.getUserById(ownerId); // Проверяем пользователя по id на существование в БД
+        User owner = userRepository.findById(ownerId) // Проверяем пользователя по id на существование в БД
+                .orElseThrow(() -> new NotFoundException("Пользователь по id=" + ownerId + " не существует!"));
         item.setOwner(owner);
         if (!updateItem.getOwner().getId().equals(ownerId)) { // Проверяем соответствие владельца вещи
             log.error("Ошибка! Пользователь по Id: {} не является владельцем вещи! " +
@@ -129,11 +133,12 @@ public class ItemServiceImpl implements ItemService {
         return repository.save(updateItem);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public List<ItemWithBookingDto> getListItemsUserById(Long ownerId, Integer from, Integer size) {
         // Метод получения списка вещей по id пользователя
-        userService.getUserById(ownerId); // Проверяем владельца вещи по id на существование в памяти
+        userRepository.findById(ownerId) // Проверяем пользователя по id на существование в БД
+                .orElseThrow(() -> new NotFoundException("Пользователь по id=" + ownerId + " не существует!"));
         Pageable page = PageRequest.of(from / size, size);
         List<Item> itemList = repository.findAllByOwnerId(ownerId, page);
         List<ItemWithBookingDto> itemWithBookingDtoList = new ArrayList<>();
@@ -164,7 +169,7 @@ public class ItemServiceImpl implements ItemService {
         return itemWithBookingDtoList;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public List<ItemDto> getSearchItems(String text, Integer from, Integer size) { // Метод поиска вещей по подстроке
         Pageable page = PageRequest.of(from / size, size);
@@ -187,9 +192,10 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Comment addComment(Comment comment, Long ownerId, Long itemId) { // Метод добавления комментария
         Item item = getItemById(itemId); // Проверяем вещь по id на существование в БД
-        User user = userService.getUserById(ownerId); // Проверяем пользователя по id на существование в БД
-        validationService.checkCommentText(comment.getText()); // Проверяем поле text
-        validationService.checkTheUserRentedTheItem(ownerId, item); // Проверяем что пользователь действительно брал
+        User user = userRepository.findById(ownerId) // Проверяем пользователя по id на существование в БД
+                .orElseThrow(() -> new NotFoundException("Пользователь по id=" + ownerId + " не существует!"));
+        checkCommentText(comment.getText()); // Проверяем поле text
+        checkTheUserRentedTheItem(ownerId, item); // Проверяем что пользователь действительно брал
         // вещь в аренду
         comment.setItem(item);
         comment.setAuthor(user);
@@ -199,7 +205,7 @@ public class ItemServiceImpl implements ItemService {
         return commentFromBd;
     }
 
-    protected Booking findNextBookingByDate(Long itemId) {
+    private Booking findNextBookingByDate(Long itemId) {
         // Метод поиска следующего бронирования после указанной даты
         Booking nextBooking = null;
         List<Booking> listNextBookings = bookingRepository.findNextBookingByDate(itemId, Status.APPROVED,
@@ -210,7 +216,7 @@ public class ItemServiceImpl implements ItemService {
         return nextBooking;
     }
 
-    protected Booking findLastBookingByDate(Long itemId) {
+    private Booking findLastBookingByDate(Long itemId) {
         // Метод поиска последнего бронирования после указанной даты
         Booking lastBooking = null;
         List<Booking> listNextBookings = bookingRepository.findLastBookingByDate(itemId, Status.APPROVED,

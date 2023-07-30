@@ -1,8 +1,7 @@
-package ru.practicum.shareit.validation;
+package ru.practicum.shareit.utility;
 
-import lombok.AllArgsConstructor;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.StatusState;
@@ -18,15 +17,13 @@ import ru.practicum.shareit.user.model.User;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Service
-@AllArgsConstructor
+@UtilityClass
 @Slf4j
-public class ValidationService {
+public class ValidationClass {
+    private ItemRepository itemRepository;
+    private BookingRepository bookingRepository;
 
-    private final ItemRepository itemRepository;
-    private final BookingRepository bookingRepository;
-
-    public void checkUniqueEmailUserAdd(User user) { // Метод проверки поля e-mail на пустые строки
+    public static void checkUniqueEmailUserAdd(User user) { // Метод проверки поля e-mail на пустые строки
         // и пробелы при добавлении
         if (user.getEmail() == null || user.getEmail().isBlank()) {
             log.error("Ошибка! Пользователь с пустым e-mail не может быть добавлен!");
@@ -34,9 +31,9 @@ public class ValidationService {
         }
     }
 
-    public void checkOwnerItemAndBooker(Long itemId, Long ownerId, Long bookingId) {
+    public static void checkOwnerItemAndBooker(Long itemId, Long ownerId, Long bookingId) {
         // Метод проверки соответствия владельца вещи
-        Item item = itemRepository.findById(itemId).get();
+        itemRepository.findById(itemId).get();
         Booking booking = bookingRepository.findById(bookingId).get();
         if (booking.getBooker().getId().equals(ownerId)) {
             log.error("Ошибка! Пользователь по Id: {} является арендатором вещи! " +
@@ -45,7 +42,7 @@ public class ValidationService {
         }
     }
 
-    public void checkBookerIsTheOwner(Item itemDB, Long bookerId) { // Метод проверки: является ли арендодатель
+    public static void checkBookerIsTheOwner(Item itemDB, Long bookerId) { // Метод проверки: является ли арендодатель
         // - владельцем вещи
         if (itemDB.getOwner().getId().equals(bookerId)) {
             log.error("Ошибка! Невозможно добавить бронирование, пользователь по id={} " +
@@ -54,22 +51,7 @@ public class ValidationService {
         }
     }
 
-    public void checkBookerOrOwner(Long userId, Long bookingId) {
-        // Метод проверки владельца вещи и клиента бронирования перед просмотром
-        Booking booking = bookingRepository.findById(bookingId).get();
-        Item item = booking.getItem();
-        if (item.getOwner().getId().equals(userId)) {
-            return;
-        } else if (booking.getBooker().getId().equals(userId)) {
-            return;
-        }
-        log.error("Просмотр запрещен! Пользователь по Id: {} не является ни владельцем вещи ни клиентом " +
-                "бронирования!", userId);
-        throw new NotFoundException("Просматривать информацию о бронированнии вещи может только владелец " +
-                "или клиент бронирования!");
-    }
-
-    public void checkItemDtoWhenAdd(ItemDto itemDto) { // Метод проверки полей объекта ItemDto перед добавлением
+    public static void checkItemDtoWhenAdd(ItemDto itemDto) { // Метод проверки полей объекта ItemDto перед добавлением
         if (itemDto.getAvailable() == null
                 || itemDto.getName() == null || itemDto.getName().isBlank()
                 || itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
@@ -78,7 +60,7 @@ public class ValidationService {
         }
     }
 
-    public void checkBookingDtoWhenAdd(BookingDto bookingDto) {
+    public static void checkBookingDtoWhenAdd(BookingDto bookingDto) {
         // Метод проверки полей объекта BookingDto перед добавлением
         if (bookingDto.getStart() == null || bookingDto.getEnd() == null) {
             log.error("Ошибка! Поля начала и окончания бронирования не могут быть пустыми!");
@@ -103,7 +85,7 @@ public class ValidationService {
         }
     }
 
-    public void checkStatusState(String state) {
+    public static void checkStatusState(String state) {
         if (state.equalsIgnoreCase(StatusState.ALL.name())) {
             return;
         }
@@ -126,7 +108,7 @@ public class ValidationService {
         throw new StateStatusValidateException();
     }
 
-    public void checkTheUserRentedTheItem(Long userId, Item item) {
+    public static void checkTheUserRentedTheItem(Long userId, Item item) {
         List<Booking> bookings = item.getBookings();
         boolean isBooker = false;
         for (Booking booking : bookings) {
@@ -142,7 +124,7 @@ public class ValidationService {
         }
     }
 
-    public void checkCommentText(String text) { // Метод проверки поля text
+    public static void checkCommentText(String text) { // Метод проверки поля text
         if (text == null || text.isBlank()) {
             throw new ValidateException("Текст комментария не может быть пустым.");
         }

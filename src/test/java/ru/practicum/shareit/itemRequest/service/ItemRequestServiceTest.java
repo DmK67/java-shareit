@@ -22,7 +22,7 @@ import ru.practicum.shareit.itemRequest.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
-import ru.practicum.shareit.validation.ValidationService;
+import ru.practicum.shareit.utility.ValidationClass;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -61,7 +61,7 @@ class ItemRequestServiceTest {
     @Mock
     ItemService itemService;
     @Mock
-    private ValidationService validationService;
+    private ValidationClass validationService;
     private final EntityManager entityManager;
 
     TypedQuery<ItemRequest> query;

@@ -1,4 +1,4 @@
-package ru.practicum.shareit.validation;
+package ru.practicum.shareit.utility;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.AfterEach;
@@ -39,7 +39,7 @@ import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
 @AutoConfigureTestDatabase
 class ValidationServiceTest {
     @InjectMocks
-    private ValidationService validationService;
+    private ValidationClass validationService;
     @Mock
     private UserService userService;
     @Mock

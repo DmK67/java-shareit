@@ -13,7 +13,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode
 public class ItemWithBookingDto {
     private Long id;
     @NotNull

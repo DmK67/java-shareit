@@ -6,7 +6,6 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode
 public class UserDtoForBooking {
     private Long id;
 

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidateException;
 import ru.practicum.shareit.item.model.Item;
@@ -13,9 +14,9 @@ import ru.practicum.shareit.itemRequest.dto.ItemRequestDtoWithAnswers;
 import ru.practicum.shareit.itemRequest.model.ItemRequest;
 import ru.practicum.shareit.itemRequest.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
 
-import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import static ru.practicum.shareit.itemRequest.mapper.ItemRequestMapper.toListIt
 @Slf4j
 public class ItemRequestServiceImpl implements ItemRequestService {
     private final UserService userService;
+    private final UserRepository userRepository;
     private final ItemRequestRepository itemRequestRepository;
     private final ItemRepository itemRepository;
 
@@ -38,18 +40,20 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         if (requesterId == null) { // Проверка аргумента requesterId на null
             throw new ValidateException("Неверный параметр пользователя (Id = " + null + ").");
         }
-        userService.getUserById(requesterId); // Проверяем пользователя по id на существование в БД
+        userRepository.findById(requesterId) // Проверяем пользователя по id на существование в БД
+                .orElseThrow(() -> new NotFoundException("Пользователь по id=" + requesterId + " не существует!"));
         itemRequest.setRequestor(User.builder().id(requesterId).build());
         itemRequest.setCreated(LocalDateTime.now());
         ItemRequest itemRequestSaved = itemRequestRepository.save(itemRequest);
         return itemRequestSaved;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public List<ItemRequestDtoWithAnswers> getItemRequestsByUserId(Long requesterId) {
         //  Метод получения списка своих запросов вместе с ответами на них
-        userService.getUserById(requesterId); // Проверяем пользователя по id на существование в БД
+        userRepository.findById(requesterId) // Проверяем пользователя по id на существование в БД
+                .orElseThrow(() -> new NotFoundException("Пользователь по id=" + requesterId + " не существует!"));
         List<ItemRequest> itemRequests = itemRequestRepository.getAllByRequestorIdOrderByCreatedDesc(requesterId);
         log.info("Получен список запросов пользователя с ID = '{}' .", requesterId);
         List<Long> listRequestId = itemRequests.stream().map(ItemRequest::getId).collect(Collectors.toList());
@@ -58,12 +62,13 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         return toListItemRequestDtoWithAnswers(itemRequests);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public List<ItemRequestDtoWithAnswers> getListRequestsCreatedByOtherUsers(Long requesterId, Integer from,
                                                                               Integer size) {
         // Метод получения списка запросов, созданных другими пользователями
-        userService.getUserById(requesterId);  // Проверяем пользователя по id на существование в БД
+        userRepository.findById(requesterId) // Проверяем пользователя по id на существование в БД
+                .orElseThrow(() -> new NotFoundException("Пользователь по id=" + requesterId + " не существует!"));
         Pageable pageable = PageRequest.of(from / size, size);
         List<ItemRequest> itemRequests =
                 itemRequestRepository.getItemRequestByRequesterIdIsNotOrderByCreated(requesterId, pageable);
@@ -74,10 +79,11 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         return toListItemRequestDtoWithAnswers(itemRequests);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public ItemRequestDtoWithAnswers getItemRequestById(Long userId, Long itemRequestId) {
-        userService.getUserById(userId);  // Проверяем пользователя по id на существование в БД
+        userRepository.findById(userId) // Проверяем пользователя по id на существование в БД
+                .orElseThrow(() -> new NotFoundException("Пользователь по id=" + userId + " не существует!"));
         if (itemRequestId == null) {
             log.info("Ошибка! Значение Id= {} не может быть пустым!", itemRequestId);
             throw new ValidateException("Передан не верный Id=" + itemRequestId);
@@ -101,9 +107,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
                         request.setItems(listItem);
                     });
-        } else {
-            itemRequests.stream()
-                    .forEach(a -> a.setItems(List.of()));
         }
     }
 

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
@@ -13,17 +14,16 @@ import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidateException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
-import ru.practicum.shareit.validation.ValidationService;
+import ru.practicum.shareit.user.repository.UserRepository;
 
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ru.practicum.shareit.booking.mapper.BookingMapper.listResultAddItemAndAddBooker;
-import static ru.practicum.shareit.booking.mapper.BookingMapper.toBooking;
+import static ru.practicum.shareit.booking.mapper.BookingMapper.*;
+import static ru.practicum.shareit.user.mapper.UserMapper.toUser;
+import static ru.practicum.shareit.utility.ValidationClass.*;
 
 @Service
 @AllArgsConstructor
@@ -31,44 +31,50 @@ import static ru.practicum.shareit.booking.mapper.BookingMapper.toBooking;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
-    private final ItemService itemService;
-    private final UserService userService;
-    private final ValidationService validationService;
+    private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     @Override
-    public Booking addBooking(BookingDto bookingDto, Long bookerId) { // Метод добавления бронирования
-        Item itemDB = itemService.getItemById(bookingDto.getItemId()); // Получение и проверка на наличии вещи в БД
-        itemService.checkingIsAvailable(itemDB); // Проверка доступности к бронированию
-        User booker = userService.getUserById(bookerId); // Получение и проверка на наличии пользователя в БД
-        validationService.checkBookingDtoWhenAdd(bookingDto); // Проверка полей объекта BookingDto перед добавлением
-        validationService.checkBookerIsTheOwner(itemDB, bookerId); // Проверка является ли арендодатель-владельцем вещи
+    public BookingDto addBooking(BookingDto bookingDto, Long bookerId) { // Метод добавления бронирования
+        // Получение и проверка на наличии вещи в БД
+        Item itemDB = itemRepository.findById(bookingDto.getItemId()).orElseThrow(() ->
+                new NotFoundException("Вещь по id=" + bookingDto.getItemId() + " не существует!"));
+        if (!itemDB.getAvailable()) { // Проверка доступности к бронированию
+            throw new ValidateException("Вещь нельзя забронировать, поскольку available = false.");
+        }
+        User booker = userRepository.findById(bookerId)
+                .orElseThrow(() -> new NotFoundException("Пользователь по id=" + bookerId + " не существует!"));
+        checkBookingDtoWhenAdd(bookingDto); // Проверка полей объекта BookingDto перед добавлением
+        checkBookerIsTheOwner(itemDB, bookerId); // Проверка является ли арендодатель-владельцем вещи
         bookingDto.setStatus(Status.WAITING);
         Booking booking = toBooking(bookingDto);
         booking.setBooker(booker);
         booking.setItem(itemDB);
-        return bookingRepository.save(booking);
+        return toBookingDto(bookingRepository.save(booking));
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
-    public Booking getBookingById(Long id) {
+    public BookingDto getBookingById(Long id) {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Бронирование по id=" + id + " не существует!"));
-        return booking;
+        return toBookingDto(booking);
     }
 
     @Transactional
     @Override
     public void deleteBooking(Long id) {
+        bookingRepository.deleteById(id);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
-    public List<Booking> getListBookingsUserById(Long userId, String state, Integer from, Integer size) {
+    public List<BookingDto> getListBookingsUserById(Long userId, String state, Integer from, Integer size) {
         // Метод получения списка всех бронированний пользователя по id
-        userService.getUserById(userId); // Проверяем существование пользователя в БД
-        validationService.checkStatusState(state); // Проверка statusState
+        userRepository.findById(userId) // Проверяем существование пользователя в БД
+                .orElseThrow(() -> new NotFoundException("Пользователь по id=" + userId + " не существует!"));
+        checkStatusState(state); // Проверка statusState
         Pageable page = PageRequest.of(from / size, size);
         StatusState statusState = StatusState.valueOf(state);
         List<Booking> listResult = new ArrayList<>();
@@ -93,45 +99,49 @@ public class BookingServiceImpl implements BookingService {
                 break;
         }
         List<Booking> newListResult = listResultAddItemAndAddBooker(listResult);
-        return newListResult;
+        return toListBookingDto(newListResult);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
-    public Booking getBookingByIdAndStatus(Long ownerId, Long bookingId) {
+    public BookingDto getBookingByIdAndStatus(Long ownerId, Long bookingId) {
         // Метод получение данных о конкретном бронировании (включая его статус)
-        userService.getUserById(ownerId); // Проверяем существование пользователя в БД
-        Booking bookingById = getBookingById(bookingId); // Проверяем существование бронирования в БД
-        validationService.checkBookerOrOwner(ownerId, bookingId); // Проверяем владельца вещи
+        userRepository.findById(ownerId) // Проверяем существование пользователя в БД
+                .orElseThrow(() -> new NotFoundException("Пользователь по id=" + ownerId + " не существует!"));
+        BookingDto bookingById = getBookingById(bookingId); // Проверяем существование бронирования в БД
+        checkBookerOrOwner(ownerId, bookingId); // Проверяем владельца вещи
         // и клиента бронирования на соответствие
         return bookingById;
     }
 
     @Transactional
     @Override
-    public Booking updateBooking(Long ownerId, Boolean approved, Long bookingId) { // Метод обновления бронирования
-        userService.getUserById(ownerId); // Проверяем существование пользователя в БД
-        Booking bookingFromBD = getBookingById(bookingId); // Получаем и проверяем существование бронирования в БД
-        validationService.checkOwnerItemAndBooker(bookingFromBD.getItem().getId(), ownerId, bookingId);
+    public BookingDto updateBooking(Long ownerId, Boolean approved, Long bookingId) { // Метод обновления бронирования
+        userRepository.findById(ownerId) // Проверяем существование пользователя в БД
+                .orElseThrow(() -> new NotFoundException("Пользователь по id=" + ownerId + " не существует!"));
+        BookingDto bookingDtoFromBD = getBookingById(bookingId); // Получаем и проверяем существование бронирования в БД
+        Booking bookingFromBD = toBooking(bookingDtoFromBD);
+        bookingFromBD.setBooker(toUser(bookingDtoFromBD.getBooker()));
+        checkOwnerItemAndBooker(bookingFromBD.getItem().getId(), ownerId, bookingId);
         // Проверяем соответствие владельца вещи
         if (!bookingFromBD.getStatus().equals(Status.WAITING)) {
             throw new ValidateException("Статус изменить не возможно.");
         }
         if (approved) {
             bookingFromBD.setStatus(Status.APPROVED);
-            bookingRepository.save(bookingFromBD);
+            return toBookingDto(bookingRepository.save(bookingFromBD));
         } else {
             bookingFromBD.setStatus(Status.REJECTED);
-            bookingRepository.save(bookingFromBD);
+            return toBookingDto(bookingRepository.save(bookingFromBD));
         }
-        return bookingRepository.save(bookingFromBD);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
-    public List<Booking> getListBookingsOwnerById(Long owner, String state, Integer from, Integer size) {
-        userService.getUserById(owner); // Проверяем существование пользователя в БД
-        validationService.checkStatusState(state); // Проверка statusState
+    public List<BookingDto> getListBookingsOwnerById(Long owner, String state, Integer from, Integer size) {
+        userRepository.findById(owner) // Проверяем существование пользователя в БД
+                .orElseThrow(() -> new NotFoundException("Пользователь по id=" + owner + " не существует!"));
+        checkStatusState(state); // Проверка statusState
         Pageable page = PageRequest.of(from / size, size);
         StatusState statusState = StatusState.valueOf(state);
         List<Booking> listResult = new ArrayList<>();
@@ -164,7 +174,22 @@ public class BookingServiceImpl implements BookingService {
             }
         }
         List<Booking> newListResult = listResultAddItemAndAddBooker(listResult);
-        return newListResult;
+        return toListBookingDto(newListResult);
+    }
+
+    private void checkBookerOrOwner(Long userId, Long bookingId) {
+        // Метод проверки владельца вещи и клиента бронирования перед просмотром
+        Booking booking = bookingRepository.findById(bookingId).get();
+        Item item = booking.getItem();
+        if (item.getOwner().getId().equals(userId)) {
+            return;
+        } else if (booking.getBooker().getId().equals(userId)) {
+            return;
+        }
+        log.error("Просмотр запрещен! Пользователь по Id: {} не является ни владельцем вещи ни клиентом " +
+                "бронирования!", userId);
+        throw new NotFoundException("Просматривать информацию о бронированнии вещи может только владелец " +
+                "или клиент бронирования!");
     }
 
 }

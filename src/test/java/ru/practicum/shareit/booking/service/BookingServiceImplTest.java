@@ -20,7 +20,7 @@ import ru.practicum.shareit.item.service.ItemServiceImpl;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserServiceImpl;
-import ru.practicum.shareit.validation.ValidationService;
+import ru.practicum.shareit.utility.ValidationClass;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -52,7 +52,7 @@ class BookingServiceImplTest {
     @Mock
     ItemRepository itemRepository;
     @Mock
-    private ValidationService validationService;
+    private ValidationClass validationService;
 
     User user;
     User booker;
@@ -92,7 +92,7 @@ class BookingServiceImplTest {
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(itemRepository.findById(any())).thenReturn(Optional.of(item));
         when(bookingRepository.save(any())).thenReturn(toBooking(bookingDto));
-        Booking savedBookingFromBd = bookingService.addBooking(bookingDto, booker.getId());
+        BookingDto savedBookingFromBd = bookingService.addBooking(bookingDto, booker.getId());
 
         assertNotNull(savedBookingFromBd);
         assertEquals(savedBookingFromBd.getStart(), savedBookingFromBd.getStart());
@@ -105,7 +105,7 @@ class BookingServiceImplTest {
     @Test
     void getBookingById_WhenAllIsOk_ReturnBooking() {
         when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
-        Booking bookingFromBd = bookingService.getBookingById(booking.getId());
+        BookingDto bookingFromBd = bookingService.getBookingById(booking.getId());
 
         assertEquals(booking.getId(), bookingFromBd.getId());
         assertEquals(booking.getItem().getName(), bookingFromBd.getItem().getName());
@@ -256,7 +256,7 @@ class BookingServiceImplTest {
     @Test
     void getBookingByIdAndStatus_WhenAllIsOk_ReturnBooking() {
         when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
-        Booking bookingFromBd = bookingService.getBookingByIdAndStatus(owner.getId(), booking.getId());
+        BookingDto bookingFromBd = bookingService.getBookingByIdAndStatus(owner.getId(), booking.getId());
 
         assertEquals(booking.getId(), bookingFromBd.getId());
         assertEquals(booking.getItem().getName(), bookingFromBd.getItem().getName());
@@ -274,7 +274,7 @@ class BookingServiceImplTest {
         when(userRepository.findById(owner.getId())).thenReturn(Optional.of(owner));
         when(bookingRepository.save(any())).thenReturn(updatedBooking);
 
-        Booking updatedBookingFromBd = bookingService.updateBooking(owner.getId(), true, booking.getId());
+        BookingDto updatedBookingFromBd = bookingService.updateBooking(owner.getId(), true, booking.getId());
 
         assertNotNull(updatedBookingFromBd);
         assertEquals(bookingDto.getStart(), updatedBookingFromBd.getStart());

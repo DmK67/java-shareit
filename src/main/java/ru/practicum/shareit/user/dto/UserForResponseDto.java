@@ -11,7 +11,6 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @Validated
 @Builder
-@EqualsAndHashCode
 public class UserForResponseDto {
     private Long id;
     @NotBlank
