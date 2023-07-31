@@ -4,8 +4,6 @@ import lombok.*;
 import ru.practicum.shareit.item.dto.ItemForResponseDto;
 import ru.practicum.shareit.user.dto.UserForResponseDto;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 
