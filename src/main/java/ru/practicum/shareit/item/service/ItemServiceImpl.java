@@ -23,7 +23,6 @@ import ru.practicum.shareit.item.model.ItemWithBooking;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -41,7 +40,6 @@ import static ru.practicum.shareit.utility.ValidationClass.*;
 @Slf4j
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository repository;
-    private final UserService userService;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final BookingRepository bookingRepository;
@@ -201,7 +199,7 @@ public class ItemServiceImpl implements ItemService {
         comment.setAuthor(user);
         comment.setCreated(LocalDateTime.now());
         Comment commentFromBd = commentRepository.save(comment);
-        item.setComments(new ArrayList<>(List.of(commentFromBd)));
+        item.setComments(List.of(commentFromBd));
         return commentFromBd;
     }
 
@@ -226,6 +224,5 @@ public class ItemServiceImpl implements ItemService {
         }
         return lastBooking;
     }
-
 
 }

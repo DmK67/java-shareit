@@ -15,19 +15,11 @@ import java.util.List;
 @Builder
 public class ItemWithBookingDto {
     private Long id;
-    @NotNull
-    @NotBlank
     private String name;
-    @NotNull
-    @NotBlank
     private String description;
-    @NotNull
     private Boolean available;
-    @NotNull
     private BookingForItemDto lastBooking;
-    @NotNull
     private BookingForItemDto nextBooking;
-    @NotNull
     private Long requestId;
     private List<CommentDto> comments;
 

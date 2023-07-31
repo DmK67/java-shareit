@@ -1,7 +1,6 @@
 package ru.practicum.shareit.item.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +47,6 @@ class ItemControllerTest {
 
     Item item;
     ItemDto itemDto;
-
     ItemWithBooking itemWithBooking;
     ItemWithBookingDto itemWithBookingDto;
     Long requestId;
@@ -57,7 +55,6 @@ class ItemControllerTest {
     BookingForItemDto nextBooking;
     CommentDto commentDto;
     List<ItemWithBookingDto> itemWithBookingDtoList;
-
 
     @BeforeEach
     void setUp() {
@@ -104,16 +101,13 @@ class ItemControllerTest {
         commentDto = CommentDto.builder().id(1L).item(item).text("Text").authorName("Name").build();
     }
 
-    @AfterEach
-    void tearDown() {
-    }
-
     @Test
     void addItem_WhenAllIsOkThenReturnItem() throws Exception {
-        when(itemService.addItem(any(), anyLong())).thenReturn(toItem(itemDto));
+        ItemDto itemDtoForResponse = itemDto;
+        when(itemService.addItem(any(), anyLong())).thenReturn(toItem(itemDtoForResponse));
 
-        mockMvc.perform(post("/items")
-                        .header("X-Sharer-User-Id", 1L)
+        String result = mockMvc.perform(post("/items")
+                        .header("X-Sharer-User-Id", owner.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(toItem(itemDto))))
                 .andExpect(status().isOk())
@@ -121,7 +115,7 @@ class ItemControllerTest {
                 .getResponse()
                 .getContentAsString();
 
-        verify(itemService).addItem(toItem(itemDto), 1L);
+        assertEquals(objectMapper.writeValueAsString(itemDtoForResponse), result);
     }
 
     @Test
@@ -166,10 +160,9 @@ class ItemControllerTest {
                 .requestId(1L)
                 .build();
 
-        when(itemService.updateItem(any(), anyLong(), anyLong()))
-                .thenReturn(toItem(updateItemDto));
+        when(itemService.updateItem(any(), anyLong(), anyLong())).thenReturn(toItem(updateItemDto));
 
-        mockMvc.perform(patch("/items/{itemId}", 1L)
+        String result = mockMvc.perform(patch("/items/{itemId}", 1L)
                         .header("X-Sharer-User-Id", 1L)
                         .content(objectMapper.writeValueAsString(updateItemDto))
                         .contentType(MediaType.APPLICATION_JSON))
@@ -178,7 +171,7 @@ class ItemControllerTest {
                 .getResponse()
                 .getContentAsString();
 
-        verify(itemService).updateItem(toItem(updateItemDto), 1L, 1L);
+        assertEquals(objectMapper.writeValueAsString(updateItemDto), result);
     }
 
     @Test

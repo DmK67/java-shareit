@@ -14,12 +14,8 @@ import java.time.LocalDateTime;
 @Builder
 public class BookingForItemDto {
     private Long id;
-    @NotNull
     private LocalDateTime startTime;
-    @NotNull
     private LocalDateTime endTime;
-    @NotNull
-    @NotBlank
     private Long bookerId;
     private Status status;
 }

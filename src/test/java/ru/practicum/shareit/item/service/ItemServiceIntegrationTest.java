@@ -9,7 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.ForbiddenException;
 import ru.practicum.shareit.exceptions.NotFoundException;
@@ -24,7 +23,6 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
 
-import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,20 +33,17 @@ import static ru.practicum.shareit.item.mapper.ItemMapper.toItem;
 import static ru.practicum.shareit.user.mapper.UserMapper.toUser;
 import static ru.practicum.shareit.user.mapper.UserMapper.toUserDto;
 
-@Transactional
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @AutoConfigureTestDatabase
-class ItemServiceImplTest {
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+class ItemServiceIntegrationTest {
 
-    private final ItemServiceImpl itemService;
-    private final ItemServiceImpl itemServiceImpl;
+    private final ItemService itemService;
     private final UserService userService;
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
-
-    LocalDateTime now = LocalDateTime.now();
 
     Item item1;
     Item item2;
@@ -78,65 +73,57 @@ class ItemServiceImplTest {
         comment = Comment.builder().text("comment").created(LocalDateTime.now()).build();
     }
 
-    @DirtiesContext
     @Test
     void addItem_WhenAllIsOk_ThenReturnedAddedItem() {
         userService.addUser(user1);
 
         Item itemFromDb = itemService.addItem(item1, user1.getId());
 
-        assertEquals(1, itemFromDb.getId());
         assertEquals(item1.getName(), itemFromDb.getName());
         assertEquals(item1.getDescription(), itemFromDb.getDescription());
     }
 
-//    @DirtiesContext
-//    @Test
-//    void addItem_WhenAvailableIsNull_ThenReturnValidateException() {
-//        item1.setAvailable(null);
-//
-//        assertThrows(ValidateException.class,
-//                () -> itemService.addItem(item1, user1.getId()));
-//    }
+    @Test
+    void addItem_WhenAvailableIsNull_ThenReturnValidateException() {
+        item1.setAvailable(null);
 
-//    @DirtiesContext
-//    @Test
-//    void addItem_WhenItemDtoNameIsNull_ThenReturnValidateException() {
-//        itemDto1.setName(null);
-//
-//        assertThrows(ValidateException.class,
-//                () -> itemService.addItem(toItem(itemDto1), user1.getId()));
-//    }
+        assertThrows(ValidateException.class,
+                () -> itemService.addItem(item1, user1.getId()));
+    }
 
-//    @DirtiesContext
-//    @Test
-//    void addItem_WhenItemDtoNameIsBlank_ThenReturnValidateException() {
-//        itemDto1.setName("");
-//
-//        assertThrows(ValidateException.class,
-//                () -> itemService.addItem(toItem(itemDto1), user1.getId()));
-//        itemDto1.setName("itemDto1");
-//    }
+    @Test
+    void addItem_WhenItemDtoNameIsNull_ThenReturnValidateException() {
+        itemDto1.setName(null);
 
-//    @DirtiesContext
-//    @Test
-//    void addItem_WhenItemDtoDescriptionIsNull_ThenReturnValidateException() {
-//        itemDto1.setDescription(null);
-//
-//        assertThrows(ValidateException.class,
-//                () -> itemService.addItem(toItem(itemDto1), user1.getId()));
-//    }
+        assertThrows(ValidateException.class,
+                () -> itemService.addItem(toItem(itemDto1), user1.getId()));
+    }
 
-//    @DirtiesContext
-//    @Test
-//    void addItem_WhenItemDtoDescriptionIsBlank_ThenReturnValidateException() {
-//        itemDto1.setDescription("");
-//
-//        assertThrows(ValidateException.class,
-//                () -> itemService.addItem(toItem(itemDto1), user1.getId()));
-//    }
+    @Test
+    void addItem_WhenItemDtoNameIsBlank_ThenReturnValidateException() {
+        itemDto1.setName("");
 
-    @DirtiesContext
+        assertThrows(ValidateException.class,
+                () -> itemService.addItem(toItem(itemDto1), user1.getId()));
+        itemDto1.setName("itemDto1");
+    }
+
+    @Test
+    void addItem_WhenItemDtoDescriptionIsNull_ThenReturnValidateException() {
+        itemDto1.setDescription(null);
+
+        assertThrows(ValidateException.class,
+                () -> itemService.addItem(toItem(itemDto1), user1.getId()));
+    }
+
+    @Test
+    void addItem_WhenItemDtoDescriptionIsBlank_ThenReturnValidateException() {
+        itemDto1.setDescription("");
+
+        assertThrows(ValidateException.class,
+                () -> itemService.addItem(toItem(itemDto1), user1.getId()));
+    }
+
     @Test
     void getItemById_WhenItemIsOk_ThenReturnedItem() {
         userService.addUser(user1);
@@ -151,7 +138,6 @@ class ItemServiceImplTest {
         assertTrue(item.getAvailable());
     }
 
-    @DirtiesContext
     @Test
     void getItemById_WhenItemIsNotFound_ThenReturnedNotFoundException() {
 
@@ -159,44 +145,25 @@ class ItemServiceImplTest {
                 () -> itemService.getItemById(9000L));
     }
 
-//    @DirtiesContext
-//    @Test
-//    void getItemById_WhenUserIsNotFound_ThenReturnedNotFoundException() {
-//
-//        assertThrows(NotFoundException.class,
-//                () -> itemService.addItem(item1, user1.getId()));
-//    }
-
-    @DirtiesContext
     @Test
-    void getItemByIdWithBooking_WhenItemIsOk_ThenReturneItemWithBookingDto() {
-        userService.addUser(user1);
-        Item savedItem = itemService.addItem(item1, user1.getId());
+    void getItemById_WhenUserIsNotFound_ThenReturnedNotFoundException() {
 
-        Item item = itemService.getItemById(savedItem.getId());
-
-        assertNotNull(item.getId());
-        assertEquals(1L, item.getId());
-        assertEquals(item.getName(), item1.getName());
-        assertEquals(item.getDescription(), item1.getDescription());
-        assertTrue(item.getAvailable());
+        assertThrows(NotFoundException.class,
+                () -> itemService.addItem(item1, user1.getId()));
     }
 
-//    @DirtiesContext
-//    @Test
-//    void getItemByIdWithBooking_WhenItemIsNotFound_ThenReturnedNotFoundException() {
-//        assertThrows(NotFoundException.class,
-//                () -> itemService.getItemById(9000L));
-//    }
+    @Test
+    void getItemByIdWithBooking_WhenItemIsNotFound_ThenReturnedNotFoundException() {
+        assertThrows(NotFoundException.class,
+                () -> itemService.getItemById(9000L));
+    }
 
-//    @DirtiesContext
-//    @Test
-//    void getItemByIdWithBooking_WhenUserIsNotFound_ThenReturnedNotFoundException() {
-//        assertThrows(NotFoundException.class,
-//                () -> itemService.addItem(item1, user1.getId()));
-//    }
+    @Test
+    void getItemByIdWithBooking_WhenUserIsNotFound_ThenReturnedNotFoundException() {
+        assertThrows(NotFoundException.class,
+                () -> itemService.addItem(item1, user1.getId()));
+    }
 
-    @DirtiesContext
     @Test
     void updateItem_WhenAllFildsIsOk_ThenReturnItemFromDb() {
         User savedOwner = userService.addUser(user1);
@@ -209,27 +176,24 @@ class ItemServiceImplTest {
                 .build();
         Item itemAfterUpdate = itemService.updateItem(updatedItem, updatedItem.getId(), savedOwner.getId());
 
-        assertEquals(savedItemBeforeUpdate.getName(), itemAfterUpdate.getName());
-        assertEquals(savedItemBeforeUpdate.getDescription(), itemAfterUpdate.getDescription());
-        assertEquals(savedItemBeforeUpdate.getId(), itemAfterUpdate.getId());
-        assertEquals(savedItemBeforeUpdate.getAvailable(), itemAfterUpdate.getAvailable());
+        assertEquals(updatedItem.getName(), itemAfterUpdate.getName());
+        assertEquals(updatedItem.getDescription(), itemAfterUpdate.getDescription());
+        assertEquals(updatedItem.getId(), itemAfterUpdate.getId());
+        assertEquals(updatedItem.getAvailable(), itemAfterUpdate.getAvailable());
     }
 
-//    @DirtiesContext
-//    @Test
-//    void updateItem_WhenItemNotFound_ThenReturnedNotFoundException() {
-//        assertThrows(NotFoundException.class,
-//                () -> itemService.updateItem(item1, item1.getId(), user1.getId()));
-//    }
+    @Test
+    void updateItem_WhenItemNotFound_ThenReturnedNotFoundException() {
+        assertThrows(NotFoundException.class,
+                () -> itemService.updateItem(item1, item1.getId(), user1.getId()));
+    }
 
-//    @DirtiesContext
-//    @Test
-//    void updateItem_WhenUserNotFound_ThenReturnedNotFoundException() {
-//        assertThrows(NotFoundException.class,
-//                () -> itemService.updateItem(item1, item1.getId(), user1.getId()));
-//    }
+    @Test
+    void updateItem_WhenUserNotFound_ThenReturnedNotFoundException() {
+        assertThrows(NotFoundException.class,
+                () -> itemService.updateItem(item1, item1.getId(), user1.getId()));
+    }
 
-    @DirtiesContext
     @Test
     void updateItem_WhenUserIsOwner_ThenReturnedForbiddenException() {
         User user1FromBd = userService.addUser(user1);
@@ -245,7 +209,6 @@ class ItemServiceImplTest {
                 () -> itemService.updateItem(updateItem, itemFromBd.getId(), user2FromBd.getId()));
     }
 
-    @DirtiesContext
     @Test
     void updateItem_WhenItemNameIsNull_ThenReturnedItemFromBd() {
         User userFromBd = userService.addUser(user1);
@@ -261,72 +224,67 @@ class ItemServiceImplTest {
         assertEquals(itemBeforeUpdateFromBd.getName(), itemAfterUpdateFromBd.getName());
     }
 
-//    @DirtiesContext
-//    @Test
-//    void updateItem_WhenItemNameIsBlank_ThenReturnedItemFromBd() {
-//        User userFromBd = userService.addUser(user1);
-//        Item itemBeforeUpdateFromBd = itemService.addItem(item1, userFromBd.getId());
-//        Item updatedItem = Item.builder()
-//                .id(itemBeforeUpdateFromBd.getId())
-//                .name("")
-//                .description("update description")
-//                .build();
-//
-//        Item itemAfterUpdateFromBd = itemService.updateItem(updatedItem, updatedItem.getId(), userFromBd.getId());
-//
-//        assertEquals(itemBeforeUpdateFromBd.getName(), itemAfterUpdateFromBd.getName());
-//    }
+    @Test
+    void updateItem_WhenItemNameIsBlank_ThenReturnedItemFromBd() {
+        User userFromBd = userService.addUser(user1);
+        Item itemBeforeUpdateFromBd = itemService.addItem(item1, userFromBd.getId());
+        Item updatedItem = Item.builder()
+                .id(itemBeforeUpdateFromBd.getId())
+                .name("")
+                .description("update description")
+                .build();
 
-//    @DirtiesContext
-//    @Test
-//    void updateItem_WhenItemDescriptionIsNull_ThenReturnedItemFromBd() {
-//        User userFromBd = userService.addUser(user1);
-//        Item itemBeforeUpdateFromBd = itemService.addItem(item1, userFromBd.getId());
-//        Item updatedItem = Item.builder()
-//                .id(itemBeforeUpdateFromBd.getId())
-//                .name("updateItem")
-//                .description(null)
-//                .build();
-//
-//        Item itemAfterUpdateFromBd = itemService.updateItem(updatedItem, updatedItem.getId(), userFromBd.getId());
-//
-//        assertEquals(itemBeforeUpdateFromBd.getDescription(), itemAfterUpdateFromBd.getDescription());
-//    }
+        Item itemAfterUpdateFromBd = itemService.updateItem(updatedItem, updatedItem.getId(), userFromBd.getId());
 
-//    @DirtiesContext
-//    @Test
-//    void updateItem_WhenUpdateItemDescriptionIsNotItemFromDbDescription_ThenReturnedItemFromBd() {
-//        User userFromBd = userService.addUser(user1);
-//        Item itemBeforeUpdateFromBd = itemService.addItem(item1, userFromBd.getId());
-//        itemBeforeUpdateFromBd.setDescription("Description before update");
-//        Item updatedItem = Item.builder()
-//                .id(itemBeforeUpdateFromBd.getId())
-//                .name("updateItem")
-//                .description("Description after update")
-//                .build();
-//
-//        Item itemAfterUpdateFromBd = itemService.updateItem(updatedItem, updatedItem.getId(), userFromBd.getId());
-//
-//        assertEquals("Description after update", itemAfterUpdateFromBd.getDescription());
-//    }
+        assertEquals(itemBeforeUpdateFromBd.getName(), itemAfterUpdateFromBd.getName());
+    }
 
-//    @DirtiesContext
-//    @Test
-//    void updateItem_WhenUpdateItemNameIsNotItemFromDbName_ThenReturnedItemFromBd() {
-//        User userFromBd = userService.addUser(user1);
-//        Item itemBeforeUpdateFromBd = itemService.addItem(item1, userFromBd.getId());
-//        itemBeforeUpdateFromBd.setName("Name before update");
-//        Item updatedItem = Item.builder()
-//                .id(itemBeforeUpdateFromBd.getId())
-//                .name("Name after update")
-//                .build();
-//
-//        Item itemAfterUpdateFromBd = itemService.updateItem(updatedItem, updatedItem.getId(), userFromBd.getId());
-//
-//        assertEquals("Name after update", itemAfterUpdateFromBd.getName());
-//    }
+    @Test
+    void updateItem_WhenItemDescriptionIsNull_ThenReturnedItemFromBd() {
+        User userFromBd = userService.addUser(user1);
+        Item itemBeforeUpdateFromBd = itemService.addItem(item1, userFromBd.getId());
+        Item updatedItem = Item.builder()
+                .id(itemBeforeUpdateFromBd.getId())
+                .name("updateItem")
+                .description(null)
+                .build();
 
-    @DirtiesContext
+        Item itemAfterUpdateFromBd = itemService.updateItem(updatedItem, updatedItem.getId(), userFromBd.getId());
+
+        assertEquals(itemBeforeUpdateFromBd.getDescription(), itemAfterUpdateFromBd.getDescription());
+    }
+
+    @Test
+    void updateItem_WhenUpdateItemDescriptionIsNotItemFromDbDescription_ThenReturnedItemFromBd() {
+        User userFromBd = userService.addUser(user1);
+        Item itemBeforeUpdateFromBd = itemService.addItem(item1, userFromBd.getId());
+        itemBeforeUpdateFromBd.setDescription("Description before update");
+        Item updatedItem = Item.builder()
+                .id(itemBeforeUpdateFromBd.getId())
+                .name("updateItem")
+                .description("Description after update")
+                .build();
+
+        Item itemAfterUpdateFromBd = itemService.updateItem(updatedItem, updatedItem.getId(), userFromBd.getId());
+
+        assertEquals("Description after update", itemAfterUpdateFromBd.getDescription());
+    }
+
+    @Test
+    void updateItem_WhenUpdateItemNameIsNotItemFromDbName_ThenReturnedItemFromBd() {
+        User userFromBd = userService.addUser(user1);
+        Item itemBeforeUpdateFromBd = itemService.addItem(item1, userFromBd.getId());
+        itemBeforeUpdateFromBd.setName("Name before update");
+        Item updatedItem = Item.builder()
+                .id(itemBeforeUpdateFromBd.getId())
+                .name("Name after update")
+                .build();
+
+        Item itemAfterUpdateFromBd = itemService.updateItem(updatedItem, updatedItem.getId(), userFromBd.getId());
+
+        assertEquals("Name after update", itemAfterUpdateFromBd.getName());
+    }
+
     @Test
     void updateItem_WhenUpdateItemOwner_ThenReturnedItemFromBd() {
         User ownerFromBd = userService.addUser(user1);
@@ -343,7 +301,6 @@ class ItemServiceImplTest {
         assertEquals(itemBeforeUpdateFromBd.getOwner().getEmail(), itemAfterUpdateFromBd.getOwner().getEmail());
     }
 
-    @DirtiesContext
     @Test
     void getListItemsUserById_WhenIsOk_ThenReturnedItemListWithBookingDto() {
         User user1FromBd = userService.addUser(user1);
@@ -363,14 +320,12 @@ class ItemServiceImplTest {
         assertEquals(listItemsUser1BeforeTest.get(1).getDescription(), listItemsUser1FromBd.get(1).getDescription());
     }
 
-//    @DirtiesContext
-//    @Test
-//    void getListItemsUserById_WhenIsOwnerNotFound_ThenReturnedNotFoundException() {
-//        assertThrows(NotFoundException.class,
-//                () -> itemService.getListItemsUserById(777L, 1, 10));
-//    }
+    @Test
+    void getListItemsUserById_WhenIsOwnerNotFound_ThenReturnedNotFoundException() {
+        assertThrows(NotFoundException.class,
+                () -> itemService.getListItemsUserById(777L, 1, 10));
+    }
 
-    @DirtiesContext
     @Test
     void getSearchItems_WhenTextFromNameIsOk_ThenReturnedListItemsDto() {
         User user1FromBd = userService.addUser(user1);
@@ -389,7 +344,6 @@ class ItemServiceImplTest {
         assertEquals(listItemsUser1BeforeTest.get(0).getDescription(), listItemsDtoFromBd.get(0).getDescription());
     }
 
-    @DirtiesContext
     @Test
     void getSearchItems_WhenTextFromDescriptionIsOk_ThenReturnedListItemsDto() {
         User user1FromBd = userService.addUser(user1);
@@ -408,7 +362,6 @@ class ItemServiceImplTest {
         assertEquals(listItemsUser1BeforeTest.get(0).getDescription(), listItemsDtoFromBd.get(0).getDescription());
     }
 
-    @DirtiesContext
     @Test
     void getSearchItems_WhenTextIsNull_ThenReturnedCollectionsIsEmpty() {
         User user1FromBd = userService.addUser(user1);
@@ -422,7 +375,6 @@ class ItemServiceImplTest {
         assertEquals(0, listItemsDtoFromBd.size());
     }
 
-    @DirtiesContext
     @Test
     void getSearchItems_WhenTextIsBlank_ThenReturnedCollectionsIsEmpty() {
         User user1FromBd = userService.addUser(user1);
@@ -436,7 +388,6 @@ class ItemServiceImplTest {
         assertEquals(0, listItemsDtoFromBd.size());
     }
 
-    @DirtiesContext
     @Test
     void checkingIsAvailable_WhenIsAvailableFalse_ThenReturnedValidateException() {
         User user1FromBd = userService.addUser(user1);
@@ -446,7 +397,6 @@ class ItemServiceImplTest {
                 () -> itemService.checkingIsAvailable(item1FromDb));
     }
 
-    @DirtiesContext
     @Test
     void addComment_WhenAllIsOk_ThenReturnedCommentFromBd() {
         User user1FromBd = userService.addUser(user1);
@@ -466,6 +416,7 @@ class ItemServiceImplTest {
         bookingFromBd.setBooker(bookerFromBd);
 
         Comment commentFromBd = itemService.addComment(comment, bookerFromBd.getId(), item1FromDb.getId());
+        item1FromDb.setComments(List.of(commentFromBd));
         List<Comment> commentsListByItemFromBd = item1FromDb.getComments();
 
         assertNotNull(commentFromBd);
@@ -474,83 +425,10 @@ class ItemServiceImplTest {
         assertEquals(comment.getCreated(), commentFromBd.getCreated());
     }
 
-//    @DirtiesContext
-//    @Test
-//    void addComment_WhenAllItemIsNotFound_ThenReturnedCommentFromBd() {
-//        assertThrows(NotFoundException.class,
-//                () -> itemService.addComment(comment, user1.getId(), item1.getId()));
-//    }
-
-    @DirtiesContext
     @Test
-    void findNextBookingByDate_WhenAllIsOk_ThenReturnedBooking() {
-        Booking nextBooking = null;
-        User bookerFromBd1 = userRepository.save(user1);
-        User bookerFromBd2 = userRepository.save(user2);
-        item1.setOwner(user1);
-        Item itemFromBd = itemRepository.save(item1);
-        Booking booking1 = Booking.builder()
-                .id(1L)
-                .start(LocalDateTime.now())
-                .end(LocalDateTime.now().plusHours(2))
-                .item(itemFromBd)
-                .booker(bookerFromBd1)
-                .status(Status.WAITING)
-                .build();
-        Booking booking2 = Booking.builder()
-                .id(2L)
-                .start(LocalDateTime.now().plusHours(3))
-                .end(LocalDateTime.now().plusHours(4))
-                .item(itemFromBd)
-                .booker(bookerFromBd2)
-                .status(Status.WAITING)
-                .build();
-        Booking bookingFromBd1 = bookingRepository.save(booking1);
-        Booking bookingFromBd2 = bookingRepository.save(booking2);
-        itemFromBd.setBookings(new ArrayList<>(List.of(bookingFromBd1, bookingFromBd2)));
-
-        nextBooking = itemServiceImpl.findNextBookingByDate(itemFromBd.getId());
-
-        assertNotNull(nextBooking);
-        assertEquals(bookingFromBd2.getId(), nextBooking.getId());
-        assertEquals(bookingFromBd2.getItem(), nextBooking.getItem());
-        assertEquals(bookingFromBd2.getStatus(), nextBooking.getStatus());
-    }
-
-    @DirtiesContext
-    @Test
-    void findLastBookingByDate_WhenAllIsOk_ThenReturnedBooking() {
-        Booking lastBooking = null;
-        User bookerFromBd1 = userRepository.save(user1);
-        User bookerFromBd2 = userRepository.save(user2);
-        item1.setOwner(user1);
-        Item itemFromBd = itemRepository.save(item1);
-        Booking booking1 = Booking.builder()
-                .id(1L)
-                .start(LocalDateTime.now().plusHours(1))
-                .end(LocalDateTime.now().plusHours(2))
-                .item(itemFromBd)
-                .booker(bookerFromBd1)
-                .status(Status.WAITING)
-                .build();
-        Booking booking2 = Booking.builder()
-                .id(2L)
-                .start(LocalDateTime.now().minusHours(3))
-                .end(LocalDateTime.now().minusHours(1))
-                .item(itemFromBd)
-                .booker(bookerFromBd2)
-                .status(Status.WAITING)
-                .build();
-        Booking bookingFromBd1 = bookingRepository.save(booking1);
-        Booking bookingFromBd2 = bookingRepository.save(booking2);
-        itemFromBd.setBookings(new ArrayList<>(List.of(bookingFromBd1, bookingFromBd2)));
-
-        lastBooking = itemServiceImpl.findLastBookingByDate(itemFromBd.getId());
-
-        assertNotNull(lastBooking);
-        assertEquals(bookingFromBd2.getId(), lastBooking.getId());
-        assertEquals(bookingFromBd2.getItem(), lastBooking.getItem());
-        assertEquals(bookingFromBd2.getStatus(), lastBooking.getStatus());
+    void addComment_WhenAllItemIsNotFound_ThenReturnedCommentFromBd() {
+        assertThrows(NotFoundException.class,
+                () -> itemService.addComment(comment, user1.getId(), item1.getId()));
     }
 
     @Test

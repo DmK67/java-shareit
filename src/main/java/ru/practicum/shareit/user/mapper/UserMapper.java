@@ -5,6 +5,9 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserDtoForBooking;
 import ru.practicum.shareit.user.model.User;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 public class UserMapper {
     public static UserDto toUserDto(User user) { // Метод перевода объекта user в объект userDto
@@ -27,5 +30,18 @@ public class UserMapper {
         return UserDtoForBooking.builder()
                 .id(user.getId())
                 .build();
+    }
+
+    public static List<UserDto> toListUserDto(List<User> userList) { // Метод перевода объекта user в объект userDto
+        List<UserDto> userDtoList = new ArrayList<>();
+        for (User user : userList) {
+            UserDto userDto = UserDto.builder()
+                    .id(user.getId())
+                    .name(user.getName())
+                    .email(user.getEmail())
+                    .build();
+            userDtoList.add(userDto);
+        }
+        return userDtoList;
     }
 }

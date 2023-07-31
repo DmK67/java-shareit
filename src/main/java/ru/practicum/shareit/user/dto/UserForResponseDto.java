@@ -13,7 +13,5 @@ import javax.validation.constraints.NotNull;
 @Builder
 public class UserForResponseDto {
     private Long id;
-    @NotBlank
-    @NotNull
     private String name;
 }

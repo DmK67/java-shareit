@@ -5,13 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.StatusState;
-import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.StateStatusValidateException;
 import ru.practicum.shareit.exceptions.ValidateException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
@@ -20,25 +18,12 @@ import java.util.List;
 @UtilityClass
 @Slf4j
 public class ValidationClass {
-    private ItemRepository itemRepository;
-    private BookingRepository bookingRepository;
 
     public static void checkUniqueEmailUserAdd(User user) { // Метод проверки поля e-mail на пустые строки
         // и пробелы при добавлении
         if (user.getEmail() == null || user.getEmail().isBlank()) {
             log.error("Ошибка! Пользователь с пустым e-mail не может быть добавлен!");
             throw new ValidateException("Ошибка! Пользователь с пустым e-mail не может быть добавлен!");
-        }
-    }
-
-    public static void checkOwnerItemAndBooker(Long itemId, Long ownerId, Long bookingId) {
-        // Метод проверки соответствия владельца вещи
-        itemRepository.findById(itemId).get();
-        Booking booking = bookingRepository.findById(bookingId).get();
-        if (booking.getBooker().getId().equals(ownerId)) {
-            log.error("Ошибка! Пользователь по Id: {} является арендатором вещи! " +
-                    "Изменение статуса вещи ЗАПРЕЩЕНО!", ownerId);
-            throw new NotFoundException("Вносить изменения в параметры вещи может только владелец!");
         }
     }
 

@@ -15,7 +15,6 @@ import ru.practicum.shareit.itemRequest.model.ItemRequest;
 import ru.practicum.shareit.itemRequest.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,10 +28,9 @@ import static ru.practicum.shareit.itemRequest.mapper.ItemRequestMapper.toListIt
 @AllArgsConstructor
 @Slf4j
 public class ItemRequestServiceImpl implements ItemRequestService {
-    private final UserService userService;
-    private final UserRepository userRepository;
-    private final ItemRequestRepository itemRequestRepository;
-    private final ItemRepository itemRepository;
+    private UserRepository userRepository;
+    private ItemRequestRepository itemRequestRepository;
+    private ItemRepository itemRepository;
 
     @Transactional
     @Override

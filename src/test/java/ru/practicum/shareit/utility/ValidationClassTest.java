@@ -1,13 +1,9 @@
 package ru.practicum.shareit.utility;
 
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
@@ -22,7 +18,6 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
 
-import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -33,13 +28,12 @@ import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingDto;
 import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
 
 
-@Transactional
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@AutoConfigureTestDatabase
-class ValidationServiceTest {
-    @InjectMocks
-    private ValidationClass validationService;
+//@AutoConfigureTestDatabase
+class ValidationClassTest {
+
+    private ValidationClass validationClass;
     @Mock
     private UserService userService;
     @Mock
@@ -48,6 +42,7 @@ class ValidationServiceTest {
     private ItemRepository itemRepository;
     @Mock
     private BookingRepository bookingRepository;
+
 
     private String textStatus;
     private final User user1 = new User(1L, "User1", "user1@email.com");
@@ -70,20 +65,12 @@ class ValidationServiceTest {
             .status(Status.WAITING)
             .build();
 
-    @BeforeEach
-    void setUp() {
-    }
-
-    @AfterEach
-    void tearDown() {
-    }
-
     @Test
     void checkUniqueEmailUserAdd_WhenEmailIsNull_ThenReturnedValidateException() {
         user1.setEmail(null);
 
         assertThrows(ValidateException.class,
-                () -> validationService.checkUniqueEmailUserAdd(user1));
+                () -> validationClass.checkUniqueEmailUserAdd(user1));
     }
 
     @Test
@@ -91,20 +78,8 @@ class ValidationServiceTest {
         user1.setEmail("");
 
         assertThrows(ValidateException.class,
-                () -> validationService.checkUniqueEmailUserAdd(user1));
+                () -> validationClass.checkUniqueEmailUserAdd(user1));
         user1.setEmail("user1@ya.ru");
-    }
-
-    @Test
-    void checkOwnerItemAndBooker_WhenUserIsNotOwner_ThenReturnedNotFoundException() {
-        item.setOwner(user3);
-        booking.setBooker(item.getOwner());
-        when(itemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
-        when(bookingRepository.findById(anyLong())).thenReturn(Optional.ofNullable(booking));
-
-        assertThrows(NotFoundException.class,
-                () -> validationService
-                        .checkOwnerItemAndBooker(item.getId(), item.getOwner().getId(), booking.getId()));
     }
 
     @Test
@@ -113,17 +88,7 @@ class ValidationServiceTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user1));
 
         assertThrows(NotFoundException.class,
-                () -> validationService.checkBookerIsTheOwner(item, user1.getId()));
-    }
-
-    @Test
-    void checkBookerOrOwner_WhenBookerIsOwnerItem_ThenReturnedNotFoundException() {
-        booking.setBooker(user3);
-        when(itemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
-        when(bookingRepository.findById(anyLong())).thenReturn(Optional.ofNullable(booking));
-
-        assertThrows(NotFoundException.class,
-                () -> validationService.checkBookerOrOwner(user2.getId(), booking.getId()));
+                () -> validationClass.checkBookerIsTheOwner(item, user1.getId()));
     }
 
     @Test
@@ -132,29 +97,29 @@ class ValidationServiceTest {
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
 
         assertThrows(ValidateException.class,
-                () -> validationService.checkItemDtoWhenAdd(toItemDto(item)));
+                () -> validationClass.checkItemDtoWhenAdd(toItemDto(item)));
 
         item.setAvailable(true);
         item.setName(null);
 
         assertThrows(ValidateException.class,
-                () -> validationService.checkItemDtoWhenAdd(toItemDto(item)));
+                () -> validationClass.checkItemDtoWhenAdd(toItemDto(item)));
 
         item.setName("");
 
         assertThrows(ValidateException.class,
-                () -> validationService.checkItemDtoWhenAdd(toItemDto(item)));
+                () -> validationClass.checkItemDtoWhenAdd(toItemDto(item)));
 
         item.setName("itemDto");
         item.setDescription(null);
 
         assertThrows(ValidateException.class,
-                () -> validationService.checkItemDtoWhenAdd(toItemDto(item)));
+                () -> validationClass.checkItemDtoWhenAdd(toItemDto(item)));
 
         item.setDescription("");
 
         assertThrows(ValidateException.class,
-                () -> validationService.checkItemDtoWhenAdd(toItemDto(item)));
+                () -> validationClass.checkItemDtoWhenAdd(toItemDto(item)));
 
         item.setDescription(item.getDescription());
     }
@@ -166,44 +131,44 @@ class ValidationServiceTest {
         bookingDtoBadTime.setStart(null);
 
         assertThrows(ValidateException.class,
-                () -> validationService.checkBookingDtoWhenAdd(bookingDtoBadTime));
+                () -> validationClass.checkBookingDtoWhenAdd(bookingDtoBadTime));
 
         bookingDtoBadTime.setStart(LocalDateTime.now());
         bookingDtoBadTime.setEnd(null);
 
         assertThrows(ValidateException.class,
-                () -> validationService.checkBookingDtoWhenAdd(bookingDtoBadTime));
+                () -> validationClass.checkBookingDtoWhenAdd(bookingDtoBadTime));
 
         bookingDtoBadTime.setStart(LocalDateTime.now());
         bookingDtoBadTime.setEnd(LocalDateTime.now().minusHours(1));
 
         assertThrows(ValidateException.class,
-                () -> validationService.checkBookingDtoWhenAdd(bookingDtoBadTime));
+                () -> validationClass.checkBookingDtoWhenAdd(bookingDtoBadTime));
 
         bookingDtoBadTime.setStart(LocalDateTime.now());
         bookingDtoBadTime.setEnd(LocalDateTime.now());
 
         assertThrows(ValidateException.class,
-                () -> validationService.checkBookingDtoWhenAdd(bookingDtoBadTime));
+                () -> validationClass.checkBookingDtoWhenAdd(bookingDtoBadTime));
 
         bookingDtoBadTime.setStart(LocalDateTime.now().minusHours(1));
         bookingDtoBadTime.setEnd(LocalDateTime.now());
 
         assertThrows(ValidateException.class,
-                () -> validationService.checkBookingDtoWhenAdd(bookingDtoBadTime));
+                () -> validationClass.checkBookingDtoWhenAdd(bookingDtoBadTime));
 
         bookingDtoBadTime.setStart(LocalDateTime.now());
         bookingDtoBadTime.setEnd(LocalDateTime.now().minusHours(1));
 
         assertThrows(ValidateException.class,
-                () -> validationService.checkBookingDtoWhenAdd(bookingDtoBadTime));
+                () -> validationClass.checkBookingDtoWhenAdd(bookingDtoBadTime));
     }
 
     @Test
     void checkStatusState_WhereInvalidStatus_ThenReturnedStateStatusValidateException() {
         textStatus = "Ok";
         assertThrows(StateStatusValidateException.class,
-                () -> validationService.checkStatusState(textStatus));
+                () -> validationClass.checkStatusState(textStatus));
     }
 
     @Test
@@ -212,17 +177,17 @@ class ValidationServiceTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user1));
 
         assertThrows(ValidateException.class,
-                () -> validationService.checkTheUserRentedTheItem(user1.getId(), item));
+                () -> validationClass.checkTheUserRentedTheItem(user1.getId(), item));
     }
 
     @Test
     void checkCommentText_WhereCommentTextIsNotValid_ThenReturnedValidateException() {
         textStatus = "";
         assertThrows(ValidateException.class,
-                () -> validationService.checkCommentText(textStatus));
+                () -> validationClass.checkCommentText(textStatus));
 
         textStatus = null;
         assertThrows(ValidateException.class,
-                () -> validationService.checkCommentText(textStatus));
+                () -> validationClass.checkCommentText(textStatus));
     }
 }

@@ -4,11 +4,13 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
 
+import static ru.practicum.shareit.user.mapper.UserMapper.toListUserDto;
 import static ru.practicum.shareit.utility.ValidationClass.checkUniqueEmailUserAdd;
 
 @Service
@@ -59,8 +61,9 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<User> getListUsers() {
-        return repository.findAll();
+    public List<UserDto> getListUsers() {
+
+        return toListUserDto(repository.findAll());
     }
 
 }

@@ -51,7 +51,9 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = toBooking(bookingDto);
         booking.setBooker(booker);
         booking.setItem(itemDB);
-        return toBookingDto(bookingRepository.save(booking));
+        Booking bookingFromBd = bookingRepository.save(booking);
+        bookingFromBd.setBooker(booker);
+        return toBookingDto(bookingFromBd);
     }
 
     @Transactional(readOnly = true)
@@ -122,8 +124,19 @@ public class BookingServiceImpl implements BookingService {
         BookingDto bookingDtoFromBD = getBookingById(bookingId); // Получаем и проверяем существование бронирования в БД
         Booking bookingFromBD = toBooking(bookingDtoFromBD);
         bookingFromBD.setBooker(toUser(bookingDtoFromBD.getBooker()));
-        checkOwnerItemAndBooker(bookingFromBD.getItem().getId(), ownerId, bookingId);
-        // Проверяем соответствие владельца вещи
+        itemRepository.findById(bookingFromBD.getItem().getId()).get();
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException("Бронирование по id=" + bookingId + " не существует!"));
+        if (booking.getBooker().getId().equals(ownerId)) {
+            log.error("Ошибка! Пользователь по Id: {} является арендатором вещи! " +
+                    "Изменение статуса вещи ЗАПРЕЩЕНО!", ownerId);
+            throw new NotFoundException("Вносить изменения в параметры вещи может только владелец!");
+        }
+        if (booking.getBooker().getId().equals(ownerId)) {
+            log.error("Ошибка! Пользователь по Id: {} является арендатором вещи! " +
+                    "Изменение статуса вещи ЗАПРЕЩЕНО!", ownerId);
+            throw new NotFoundException("Вносить изменения в параметры вещи может только владелец!");
+        }
         if (!bookingFromBD.getStatus().equals(Status.WAITING)) {
             throw new ValidateException("Статус изменить не возможно.");
         }
