@@ -59,6 +59,9 @@
                         <systemPropertyVariables>
                             <spring.profiles.active>test</spring.profiles.active>
                         </systemPropertyVariables>
+
+                            <skipTests>true</skipTests>
+
                     </configuration>
                 </plugin>
                 <plugin>

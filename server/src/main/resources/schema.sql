@@ -40,8 +40,6 @@ CREATE TABLE IF NOT EXISTS items
             on delete cascade
 );
 
-CREATE TYPE IF NOT EXISTS status as ENUM ('WAITING', 'APPROVED', 'REJECTED', 'CANCELED');
-
 drop table IF EXISTS BOOKINGS CASCADE;
 CREATE TABLE IF NOT EXISTS bookings
 (
@@ -50,7 +48,7 @@ CREATE TABLE IF NOT EXISTS bookings
     END_BOOKING    TIMESTAMP WITHOUT TIME ZONE             NOT NULL,
     ITEM_ID        BIGINT                                  not null,
     BOOKER_ID      BIGINT                                  not null,
-    BOOKING_STATUS PUBLIC.STATUS,
+    BOOKING_STATUS VARCHAR(64) NOT NULL,
     constraint bookings_pk
         primary key (ID),
     constraint "BOOKINGS_ITEMS_ID_fk"

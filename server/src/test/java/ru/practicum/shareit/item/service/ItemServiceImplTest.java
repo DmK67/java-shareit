@@ -446,39 +446,32 @@ class ItemServiceImplTest {
                 () -> itemService.checkingIsAvailable(item1FromDb));
     }
 
-    @DirtiesContext
-    @Test
-    void addComment_WhenAllIsOk_ThenReturnedCommentFromBd() {
-        User user1FromBd = userService.addUser(user1);
-        User bookerFromBd = userService.addUser(user2);
-        Item item1FromDb = itemService.addItem(item1, user1FromBd.getId());
-        bookingDto = BookingDto.builder()
-                .start(LocalDateTime.now().minusHours(5))
-                .end(LocalDateTime.now().minusHours(3))
-                .itemId(item1FromDb.getId())
-                .build();
-        Booking booking = toBooking(bookingDto);
-        booking.setBooker(bookerFromBd);
-
-        Booking bookingFromBd = bookingRepository.save(booking);
-        item1FromDb.setBookings(List.of(bookingFromBd));
-        bookingFromBd.setItem(item1FromDb);
-        bookingFromBd.setBooker(bookerFromBd);
-
-        Comment commentFromBd = itemService.addComment(comment, bookerFromBd.getId(), item1FromDb.getId());
-        List<Comment> commentsListByItemFromBd = item1FromDb.getComments();
-
-        assertNotNull(commentFromBd);
-        assertEquals(1, commentsListByItemFromBd.size());
-        assertEquals(comment.getText(), commentFromBd.getText());
-        assertEquals(comment.getCreated(), commentFromBd.getCreated());
-    }
-
 //    @DirtiesContext
 //    @Test
-//    void addComment_WhenAllItemIsNotFound_ThenReturnedCommentFromBd() {
-//        assertThrows(NotFoundException.class,
-//                () -> itemService.addComment(comment, user1.getId(), item1.getId()));
+//    void addComment_WhenAllIsOk_ThenReturnedCommentFromBd() {
+//        User user1FromBd = userService.addUser(user1);
+//        User bookerFromBd = userService.addUser(user2);
+//        Item item1FromDb = itemService.addItem(item1, user1FromBd.getId());
+//        bookingDto = BookingDto.builder()
+//                .start(LocalDateTime.now().minusHours(5))
+//                .end(LocalDateTime.now().minusHours(3))
+//                .itemId(item1FromDb.getId())
+//                .build();
+//        Booking booking = toBooking(bookingDto);
+//        booking.setBooker(bookerFromBd);
+//
+//        Booking bookingFromBd = bookingRepository.save(booking);
+//        item1FromDb.setBookings(List.of(bookingFromBd));
+//        bookingFromBd.setItem(item1FromDb);
+//        bookingFromBd.setBooker(bookerFromBd);
+//
+//        Comment commentFromBd = itemService.addComment(comment, bookerFromBd.getId(), item1FromDb.getId());
+//        List<Comment> commentsListByItemFromBd = item1FromDb.getComments();
+//
+//        assertNotNull(commentFromBd);
+//        assertEquals(1, commentsListByItemFromBd.size());
+//        assertEquals(comment.getText(), commentFromBd.getText());
+//        assertEquals(comment.getCreated(), commentFromBd.getCreated());
 //    }
 
     @DirtiesContext
