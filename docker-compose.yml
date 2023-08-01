@@ -24,12 +24,13 @@ services:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
   db:
-    image: postgres:13.7-alpine
-    container_name: shareit-db-postgress
-    ports:
-      - "6541:5432"
-    environment:
-      - POSTGRES_DB=shareit
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=root
+      image: postgres:13.7-alpine
+      container_name: shareit-db-postgress
+      ports:
+        - "6541:5432"
+      environment:
+        - POSTGRES_DB=shareit
+        - POSTGRES_USER=root
+        - POSTGRES_PASSWORD=root

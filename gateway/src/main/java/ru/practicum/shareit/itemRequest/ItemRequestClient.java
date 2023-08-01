@@ -63,7 +63,7 @@ public class ItemRequestClient extends BaseClient {
      * `GET /requests/{requestId}` — получить данные об одном конкретном запросе вместе с данными об ответах на него
      * в том же формате, что и в эндпоинте GET /requests. Посмотреть данные об отдельном запросе может любой пользователь.
      */
-    public ResponseEntity<Object> getItemRequestById(Long requestId, Long userId) {
+    public ResponseEntity<Object> getItemRequestById(Long userId, Long requestId) {
         return get("/" + requestId, userId);
     }
 }
