@@ -19,7 +19,7 @@ import java.util.List;
 @Slf4j
 public class ValidationUtil {
 
-    public void checkUniqueEmailUserAdd(User user) { // Метод проверки поля e-mail на пустые строки
+    public static void checkUniqueEmailUserAdd(User user) { // Метод проверки поля e-mail на пустые строки
         // и пробелы при добавлении
         if (user.getEmail() == null || user.getEmail().isBlank()) {
             log.error("Ошибка! Пользователь с пустым e-mail не может быть добавлен!");
