@@ -10,7 +10,6 @@ import ru.practicum.shareit.exceptions.StateStatusValidateException;
 import ru.practicum.shareit.exceptions.ValidateException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,14 +17,6 @@ import java.util.List;
 @UtilityClass
 @Slf4j
 public class ValidationUtil {
-
-    public static void checkUniqueEmailUserAdd(User user) { // Метод проверки поля e-mail на пустые строки
-        // и пробелы при добавлении
-        if (user.getEmail() == null || user.getEmail().isBlank()) {
-            log.error("Ошибка! Пользователь с пустым e-mail не может быть добавлен!");
-            throw new ValidateException("Ошибка! Пользователь с пустым e-mail не может быть добавлен!");
-        }
-    }
 
     public void checkBookerIsTheOwner(Item itemDB, Long bookerId) { // Метод проверки: является ли арендодатель
         // - владельцем вещи

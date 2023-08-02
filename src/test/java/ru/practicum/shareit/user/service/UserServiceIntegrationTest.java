@@ -81,6 +81,22 @@ class UserServiceIntegrationTest {
     }
 
     @Test
+    void addUser_WhenEmailIsNull_ThenReturnedValidateException() {
+        user1.setEmail(null);
+
+        assertThrows(ValidateException.class,
+                () -> userService.addUser(user1));
+    }
+
+    @Test
+    void addUser_WhenEmailIsBlank_ThenReturnedValidateException() {
+        user1.setEmail("");
+
+        assertThrows(ValidateException.class,
+                () -> userService.addUser(user1));
+    }
+
+    @Test
     void addUser_WhenEmailInvalid_ThenReturnConstraintViolationException() {
         user1.setEmail("wrong email");
 

@@ -58,23 +58,6 @@ class ValidationUtilTest {
             .build();
 
     @Test
-    void checkUniqueEmailUserAdd_WhenEmailIsNull_ThenReturnedValidateException() {
-        user1.setEmail(null);
-
-        assertThrows(ValidateException.class,
-                () -> checkUniqueEmailUserAdd(user1));
-    }
-
-    @Test
-    void checkUniqueEmailUserAdd_WhenEmailIsBlank_ThenReturnedValidateException() {
-        user1.setEmail("");
-
-        assertThrows(ValidateException.class,
-                () -> checkUniqueEmailUserAdd(user1));
-        user1.setEmail("user1@ya.ru");
-    }
-
-    @Test
     void checkBookerIsTheOwner_WhenBookerIsOwnerItem_ThenReturnedNotFoundException() {
         when(itemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
         when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user1));

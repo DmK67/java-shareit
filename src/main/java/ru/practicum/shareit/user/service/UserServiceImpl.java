@@ -1,9 +1,11 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.exceptions.ValidateException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -11,17 +13,21 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.util.List;
 
 import static ru.practicum.shareit.user.mapper.UserMapper.toListUserDto;
-import static ru.practicum.shareit.utility.ValidationUtil.checkUniqueEmailUserAdd;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository repository;
 
     @Transactional
     @Override
     public User addUser(User user) {
-        checkUniqueEmailUserAdd(user); // Проверка поля email объекта user на пустые строки и пробелы
+        // Проверка поля email объекта user на пустые строки и пробелы
+        if (user.getEmail() == null || user.getEmail().isBlank()) {
+            log.error("Ошибка! Пользователь с пустым e-mail не может быть добавлен!");
+            throw new ValidateException("Ошибка! Пользователь с пустым e-mail не может быть добавлен!");
+        }
         return repository.save(user);
     }
 
