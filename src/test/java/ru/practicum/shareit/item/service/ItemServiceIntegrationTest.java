@@ -17,10 +17,8 @@ import ru.practicum.shareit.item.comment.model.Comment;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemWithBookingDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
@@ -42,17 +40,17 @@ class ItemServiceIntegrationTest {
     private final ItemService itemService;
     private final UserService userService;
     private final BookingRepository bookingRepository;
-    private final UserRepository userRepository;
-    private final ItemRepository itemRepository;
 
     Item item1;
     Item item2;
+    Item item3;
     User user1;
     User user2;
     UserDto userDto1;
     UserDto userDto2;
     ItemDto itemDto1;
     ItemDto itemDto2;
+    ItemDto itemDto3;
     Comment comment;
     BookingDto bookingDto;
 
@@ -70,7 +68,11 @@ class ItemServiceIntegrationTest {
         itemDto2 = ItemDto.builder().id(2L).name("itemDto2").description("description2").available(true).build();
         item2 = toItem(itemDto2);
 
+        itemDto3 = ItemDto.builder().id(3L).name("itemDto3").description("description3").available(true).build();
+        item3 = toItem(itemDto3);
+
         comment = Comment.builder().text("comment").created(LocalDateTime.now()).build();
+
     }
 
     @Test
@@ -386,15 +388,6 @@ class ItemServiceIntegrationTest {
 
         assertNotNull(listItemsDtoFromBd);
         assertEquals(0, listItemsDtoFromBd.size());
-    }
-
-    @Test
-    void checkingIsAvailable_WhenIsAvailableFalse_ThenReturnedValidateException() {
-        User user1FromBd = userService.addUser(user1);
-        Item item1FromDb = itemService.addItem(item1, user1FromBd.getId());
-        item1FromDb.setAvailable(false);
-        assertThrows(ValidateException.class,
-                () -> itemService.checkingIsAvailable(item1FromDb));
     }
 
     @Test

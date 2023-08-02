@@ -20,7 +20,5 @@ public interface ItemService {
 
     List<ItemDto> getSearchItems(String text, Integer from, Integer size);
 
-    void checkingIsAvailable(Item item);
-
     Comment addComment(Comment comment, Long ownerId, Long itemId);
 }

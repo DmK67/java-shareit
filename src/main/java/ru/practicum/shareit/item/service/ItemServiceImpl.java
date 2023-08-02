@@ -12,7 +12,6 @@ import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.ForbiddenException;
 import ru.practicum.shareit.exceptions.NotFoundException;
-import ru.practicum.shareit.exceptions.ValidateException;
 import ru.practicum.shareit.item.comment.dto.CommentDto;
 import ru.practicum.shareit.item.comment.model.Comment;
 import ru.practicum.shareit.item.comment.repositiry.CommentRepository;
@@ -33,7 +32,7 @@ import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingForItem
 import static ru.practicum.shareit.item.comment.mapper.CommentMapper.convertListCommentsToListCommentsDto;
 import static ru.practicum.shareit.item.mapper.ItemMapper.*;
 import static ru.practicum.shareit.item.mapper.ItemWithBookingDtoMapper.toItemWithBookingDto;
-import static ru.practicum.shareit.utility.ValidationClass.*;
+import static ru.practicum.shareit.utility.ValidationUtil.*;
 
 @Service
 @AllArgsConstructor
@@ -177,13 +176,6 @@ public class ItemServiceImpl implements ItemService {
         }
         log.info("Осуществляем поиск вещи содержащее текст: {}.", text);
         return convertListItemsToListItemsDto(repository.searchItemsByNameContaining(text, page));
-    }
-
-    @Override
-    public void checkingIsAvailable(Item item) { // Метод проверки статуса бронирования
-        if (!item.getAvailable()) {
-            throw new ValidateException("Вещь нельзя забронировать, поскольку available = false.");
-        }
     }
 
     @Transactional

@@ -32,7 +32,7 @@ import static ru.practicum.shareit.user.mapper.UserMapper.toUserDto;
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-class BookingServiceIntegrationTest {
+class BookingServiceTest {
     private BookingService bookingService;
     @Mock
     private BookingRepository bookingRepository;

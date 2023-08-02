@@ -19,9 +19,7 @@ import ru.practicum.shareit.itemRequest.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.user.service.UserService;
 
-import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,18 +36,14 @@ import static ru.practicum.shareit.user.mapper.UserMapper.toUser;
         webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @ExtendWith(MockitoExtension.class)
-class ItemRequestServiceIntegrationTest {
+class ItemRequestServiceTest {
     @Mock
     private ItemRequestRepository itemRequestRepository;
-
     private ItemRequestService itemRequestService;
-    @Mock
-    private UserService userService;
     @Mock
     private UserRepository userRepository;
     @Mock
     private ItemRepository itemRepository;
-    private final EntityManager entityManager;
 
     UserDto ownerDto;
     User owner;

@@ -17,9 +17,9 @@ import java.util.List;
 
 @UtilityClass
 @Slf4j
-public class ValidationClass {
+public class ValidationUtil {
 
-    public static void checkUniqueEmailUserAdd(User user) { // Метод проверки поля e-mail на пустые строки
+    public void checkUniqueEmailUserAdd(User user) { // Метод проверки поля e-mail на пустые строки
         // и пробелы при добавлении
         if (user.getEmail() == null || user.getEmail().isBlank()) {
             log.error("Ошибка! Пользователь с пустым e-mail не может быть добавлен!");
@@ -27,7 +27,7 @@ public class ValidationClass {
         }
     }
 
-    public static void checkBookerIsTheOwner(Item itemDB, Long bookerId) { // Метод проверки: является ли арендодатель
+    public void checkBookerIsTheOwner(Item itemDB, Long bookerId) { // Метод проверки: является ли арендодатель
         // - владельцем вещи
         if (itemDB.getOwner().getId().equals(bookerId)) {
             log.error("Ошибка! Невозможно добавить бронирование, пользователь по id={} " +
@@ -36,7 +36,7 @@ public class ValidationClass {
         }
     }
 
-    public static void checkItemDtoWhenAdd(ItemDto itemDto) { // Метод проверки полей объекта ItemDto перед добавлением
+    public void checkItemDtoWhenAdd(ItemDto itemDto) { // Метод проверки полей объекта ItemDto перед добавлением
         if (itemDto.getAvailable() == null
                 || itemDto.getName() == null || itemDto.getName().isBlank()
                 || itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
@@ -45,7 +45,7 @@ public class ValidationClass {
         }
     }
 
-    public static void checkBookingDtoWhenAdd(BookingDto bookingDto) {
+    public void checkBookingDtoWhenAdd(BookingDto bookingDto) {
         // Метод проверки полей объекта BookingDto перед добавлением
         if (bookingDto.getStart() == null || bookingDto.getEnd() == null) {
             log.error("Ошибка! Поля начала и окончания бронирования не могут быть пустыми!");
@@ -70,7 +70,7 @@ public class ValidationClass {
         }
     }
 
-    public static void checkStatusState(String state) {
+    public void checkStatusState(String state) {
         if (state.equalsIgnoreCase(StatusState.ALL.name())) {
             return;
         }
@@ -93,7 +93,7 @@ public class ValidationClass {
         throw new StateStatusValidateException();
     }
 
-    public static void checkTheUserRentedTheItem(Long userId, Item item) {
+    public void checkTheUserRentedTheItem(Long userId, Item item) {
         List<Booking> bookings = item.getBookings();
         boolean isBooker = false;
         for (Booking booking : bookings) {
@@ -109,7 +109,7 @@ public class ValidationClass {
         }
     }
 
-    public static void checkCommentText(String text) { // Метод проверки поля text
+    public void checkCommentText(String text) { // Метод проверки поля text
         if (text == null || text.isBlank()) {
             throw new ValidateException("Текст комментария не может быть пустым.");
         }

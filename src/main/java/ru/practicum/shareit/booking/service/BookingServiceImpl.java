@@ -23,7 +23,7 @@ import java.util.List;
 
 import static ru.practicum.shareit.booking.mapper.BookingMapper.*;
 import static ru.practicum.shareit.user.mapper.UserMapper.toUser;
-import static ru.practicum.shareit.utility.ValidationClass.*;
+import static ru.practicum.shareit.utility.ValidationUtil.*;
 
 @Service
 @AllArgsConstructor

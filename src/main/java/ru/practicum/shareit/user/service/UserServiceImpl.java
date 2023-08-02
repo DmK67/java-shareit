@@ -11,7 +11,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.util.List;
 
 import static ru.practicum.shareit.user.mapper.UserMapper.toListUserDto;
-import static ru.practicum.shareit.utility.ValidationClass.checkUniqueEmailUserAdd;
+import static ru.practicum.shareit.utility.ValidationUtil.checkUniqueEmailUserAdd;
 
 @Service
 @AllArgsConstructor
