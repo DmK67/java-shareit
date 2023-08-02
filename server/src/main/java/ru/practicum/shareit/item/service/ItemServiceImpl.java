@@ -159,6 +159,7 @@ public class ItemServiceImpl implements ItemService {
                 List<CommentDto> commentDtoList = convertListCommentsToListCommentsDto(listComments);
                 itemWithBookingDto.setComments(commentDtoList);
                 itemWithBookingDtoList.add(itemWithBookingDto);
+                Collections.reverse(itemWithBookingDtoList);
             }
         }
         return itemWithBookingDtoList;
