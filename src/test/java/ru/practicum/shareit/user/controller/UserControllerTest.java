@@ -1,7 +1,6 @@
 package ru.practicum.shareit.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +17,7 @@ import ru.practicum.shareit.user.service.UserService;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -51,19 +51,13 @@ public class UserControllerTest {
         user = toUser(userDto);
     }
 
-    @AfterEach
-    void tearDown() {
-    }
-
     @Test
     void addUser_WhenAllIsOk_ReturnUserDto() throws Exception {
-
-        when(userService.addUser(any())).thenReturn(toUser(userDto));
+        when(userService.addUser(any())).thenReturn(user);
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userDto)))
-
+                        .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(user.getId()))
                 .andExpect(jsonPath("$.name").value(user.getName()))
@@ -82,7 +76,7 @@ public class UserControllerTest {
         when(userService.updateUser(any(), anyLong()))
                 .thenReturn(updateUser);
 
-        mockMvc.perform(patch("/users/{id}", 1L)
+        String result = mockMvc.perform(patch("/users/{id}", 1L)
                         .header("X-Sharer-User-Id", 1L)
                         .content(objectMapper.writeValueAsString(updateUserDto))
                         .contentType(MediaType.APPLICATION_JSON))
@@ -91,8 +85,7 @@ public class UserControllerTest {
                 .getResponse()
                 .getContentAsString();
 
-        verify(userService).updateUser(updateUser, 1L);
-
+        assertEquals(objectMapper.writeValueAsString(updateUserDto), result);
     }
 
     @Test
@@ -132,7 +125,7 @@ public class UserControllerTest {
     @Test
     void getListUsers() throws Exception {
         when(userService.getListUsers())
-                .thenReturn(List.of(user));
+                .thenReturn(List.of(userDto));
 
         String result = mockMvc.perform(get("/users"))
                 .andExpect(status().isOk())

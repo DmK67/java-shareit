@@ -1,49 +1,22 @@
-package ru.practicum.shareit.validation;
+package ru.practicum.shareit.utility;
 
-import lombok.AllArgsConstructor;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.StatusState;
-import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.StateStatusValidateException;
 import ru.practicum.shareit.exceptions.ValidateException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Service
-@AllArgsConstructor
+@UtilityClass
 @Slf4j
-public class ValidationService {
-
-    private final ItemRepository itemRepository;
-    private final BookingRepository bookingRepository;
-
-    public void checkUniqueEmailUserAdd(User user) { // Метод проверки поля e-mail на пустые строки
-        // и пробелы при добавлении
-        if (user.getEmail() == null || user.getEmail().isBlank()) {
-            log.error("Ошибка! Пользователь с пустым e-mail не может быть добавлен!");
-            throw new ValidateException("Ошибка! Пользователь с пустым e-mail не может быть добавлен!");
-        }
-    }
-
-    public void checkOwnerItemAndBooker(Long itemId, Long ownerId, Long bookingId) {
-        // Метод проверки соответствия владельца вещи
-        Item item = itemRepository.findById(itemId).get();
-        Booking booking = bookingRepository.findById(bookingId).get();
-        if (booking.getBooker().getId().equals(ownerId)) {
-            log.error("Ошибка! Пользователь по Id: {} является арендатором вещи! " +
-                    "Изменение статуса вещи ЗАПРЕЩЕНО!", ownerId);
-            throw new NotFoundException("Вносить изменения в параметры вещи может только владелец!");
-        }
-    }
+public class ValidationUtil {
 
     public void checkBookerIsTheOwner(Item itemDB, Long bookerId) { // Метод проверки: является ли арендодатель
         // - владельцем вещи
@@ -52,21 +25,6 @@ public class ValidationService {
                     "является владельцем вещи", bookerId);
             throw new NotFoundException("Ошибка! Невозможно добавить бронирование!");
         }
-    }
-
-    public void checkBookerOrOwner(Long userId, Long bookingId) {
-        // Метод проверки владельца вещи и клиента бронирования перед просмотром
-        Booking booking = bookingRepository.findById(bookingId).get();
-        Item item = booking.getItem();
-        if (item.getOwner().getId().equals(userId)) {
-            return;
-        } else if (booking.getBooker().getId().equals(userId)) {
-            return;
-        }
-        log.error("Просмотр запрещен! Пользователь по Id: {} не является ни владельцем вещи ни клиентом " +
-                "бронирования!", userId);
-        throw new NotFoundException("Просматривать информацию о бронированнии вещи может только владелец " +
-                "или клиент бронирования!");
     }
 
     public void checkItemDtoWhenAdd(ItemDto itemDto) { // Метод проверки полей объекта ItemDto перед добавлением

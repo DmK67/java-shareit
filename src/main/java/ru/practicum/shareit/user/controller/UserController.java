@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
@@ -55,7 +54,7 @@ public class UserController {
     }
 
     @GetMapping
-    public List<User> getListUsers() { // Эндпоинт получения списка всех пользователей
+    public List<UserDto> getListUsers() { // Эндпоинт получения списка всех пользователей
         log.info("Получаем список всех пользователей.");
         return userService.getListUsers();
     }

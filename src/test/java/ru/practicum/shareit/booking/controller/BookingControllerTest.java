@@ -2,7 +2,6 @@ package ru.practicum.shareit.booking.controller;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
@@ -33,7 +31,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.practicum.shareit.booking.mapper.BookingMapper.toBooking;
 import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
 import static ru.practicum.shareit.user.mapper.UserMapper.toUserDto;
 
@@ -93,10 +90,6 @@ public class BookingControllerTest {
                 .build();
     }
 
-    @AfterEach
-    void tearDown() {
-    }
-
     @Test
     void addBooking_WhenAllIsOk_ReturnBookingDto() throws Exception {
         BookingDto bookingDtoForResponse = BookingDto.builder()
@@ -107,10 +100,8 @@ public class BookingControllerTest {
                 .booker(toUserDto(booker))
                 .item(toItemDto(Item.builder().id(item1.getId()).build()))
                 .status(Status.WAITING).build();
-        Booking booking = toBooking(bookingDtoForResponse);
-        booking.setBooker(booker);
 
-        when(bookingService.addBooking(any(), any())).thenReturn(booking);
+        when(bookingService.addBooking(any(), any())).thenReturn(bookingDtoForResponse);
 
         String result = mockMvc.perform(post("/bookings")
                         .header("X-Sharer-User-Id", booker.getId())
@@ -146,11 +137,9 @@ public class BookingControllerTest {
                 .booker(toUserDto(booker))
                 .item(toItemDto(Item.builder().id(item1.getId()).build()))
                 .status(Status.WAITING).build();
-        Booking booking = toBooking(bookingDtoForResponse);
-        booking.setBooker(booker);
 
         when(bookingService.updateBooking(any(), any(), any()))
-                .thenReturn(booking);
+                .thenReturn(bookingDtoForResponse);
 
         String result = mockMvc.perform(patch("/bookings/{bookingId}", bookingDtoForResponse.getId())
                         .param("approved", "true")
@@ -165,7 +154,6 @@ public class BookingControllerTest {
         assertEquals(objectMapper.writeValueAsString(bookingDtoForResponse), result);
     }
 
-
     @Test
     void getBookingByIdAndStatus_WhenAllOk_ReturnBooking() throws Exception {
         BookingDto bookingDtoForResponse = BookingDto.builder()
@@ -176,10 +164,8 @@ public class BookingControllerTest {
                 .booker(toUserDto(booker))
                 .item(toItemDto(Item.builder().id(item1.getId()).build()))
                 .status(Status.WAITING).build();
-        Booking booking = toBooking(bookingDtoForResponse);
-        booking.setBooker(booker);
 
-        when(bookingService.getBookingByIdAndStatus(any(), any())).thenReturn(booking);
+        when(bookingService.getBookingByIdAndStatus(any(), any())).thenReturn(bookingDtoForResponse);
         String result = mockMvc.perform(MockMvcRequestBuilders.get("/bookings/{bookingId}",
                                 bookingDtoForResponse.getId())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -201,10 +187,8 @@ public class BookingControllerTest {
                 .booker(toUserDto(booker))
                 .item(toItemDto(Item.builder().id(item1.getId()).build()))
                 .status(Status.WAITING).build();
-        Booking booking = toBooking(bookingDtoForResponse);
-        booking.setBooker(booker);
 
-        when(bookingService.getListBookingsUserById(any(), any(), any(), any())).thenReturn(List.of(booking));
+        when(bookingService.getListBookingsUserById(any(), any(), any(), any())).thenReturn(List.of(bookingDtoForResponse));
 
         String result = mockMvc.perform(MockMvcRequestBuilders.get("/bookings")
                         .header("X-Sharer-User-Id", booker.getId())
@@ -216,7 +200,7 @@ public class BookingControllerTest {
                 .getResponse()
                 .getContentAsString();
 
-        assertEquals(objectMapper.writeValueAsString(List.of(booking)), result);
+        assertEquals(objectMapper.writeValueAsString(List.of(bookingDtoForResponse)), result);
     }
 
     @Test
@@ -228,10 +212,8 @@ public class BookingControllerTest {
                 .booker(toUserDto(booker))
                 .item(toItemDto(Item.builder().id(item1.getId()).build()))
                 .status(Status.WAITING).build();
-        Booking booking = toBooking(bookingDtoForResponse);
-        booking.setBooker(booker);
 
-        when(bookingService.getListBookingsUserById(any(), any(), any(), any())).thenReturn(List.of(booking));
+        when(bookingService.getListBookingsUserById(any(), any(), any(), any())).thenReturn(List.of(bookingDtoForResponse));
 
         String result = mockMvc.perform(MockMvcRequestBuilders.get("/bookings")
                         .header("X-Sharer-User-Id", booker.getId())
@@ -243,7 +225,7 @@ public class BookingControllerTest {
                 .getResponse()
                 .getContentAsString();
 
-        assertEquals(objectMapper.writeValueAsString(List.of(booking)), result);
+        assertEquals(objectMapper.writeValueAsString(List.of(bookingDtoForResponse)), result);
     }
 
     @Test
@@ -255,11 +237,9 @@ public class BookingControllerTest {
                 .booker(toUserDto(booker))
                 .item(toItemDto(Item.builder().id(item1.getId()).build()))
                 .status(Status.WAITING).build();
-        Booking booking = toBooking(bookingDtoForResponse);
-        booking.setBooker(booker);
 
         when(bookingService.getListBookingsOwnerById(any(), any(), any(), any()))
-                .thenReturn(List.of(booking));
+                .thenReturn(List.of(bookingDtoForResponse));
 
         String result = mockMvc.perform(MockMvcRequestBuilders.get("/bookings/owner")
                         .header("X-Sharer-User-Id", owner1.getId())
@@ -272,6 +252,6 @@ public class BookingControllerTest {
                 .getResponse()
                 .getContentAsString();
 
-        assertEquals(objectMapper.writeValueAsString(List.of(booking)), result);
+        assertEquals(objectMapper.writeValueAsString(List.of(bookingDtoForResponse)), result);
     }
 }
