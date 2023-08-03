@@ -2,7 +2,6 @@ package ru.practicum.shareit.utility;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -12,16 +11,11 @@ import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.StateStatusValidateException;
 import ru.practicum.shareit.exceptions.ValidateException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.when;
 import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingDto;
 import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
 import static ru.practicum.shareit.utility.ValidationUtil.*;
@@ -30,10 +24,6 @@ import static ru.practicum.shareit.utility.ValidationUtil.*;
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class ValidationUtilTest {
-    @Mock
-    private UserRepository userRepository;
-    @Mock
-    private ItemRepository itemRepository;
 
     private String textStatus;
     private final User user1 = new User(1L, "User1", "user1@email.com");
@@ -58,9 +48,6 @@ class ValidationUtilTest {
 
     @Test
     void checkBookerIsTheOwner_WhenBookerIsOwnerItem_ThenReturnedNotFoundException() {
-        when(itemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
-        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user1));
-
         assertThrows(NotFoundException.class,
                 () -> checkBookerIsTheOwner(item, user1.getId()));
     }
@@ -68,7 +55,6 @@ class ValidationUtilTest {
     @Test
     void checkItemDtoWhenAdd_WhereAreTheEmptyFields_ThenReturnedNotFoundException() {
         item.setAvailable(null);
-        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
 
         assertThrows(ValidateException.class,
                 () -> checkItemDtoWhenAdd(toItemDto(item)));
@@ -100,7 +86,6 @@ class ValidationUtilTest {
 
     @Test
     void checkBookingDtoWhenAdd_WhereInvalidTimeAndDate_ThenReturnedValidateException() {
-
         BookingDto bookingDtoBadTime = toBookingDto(booking);
         bookingDtoBadTime.setStart(null);
 
@@ -147,9 +132,6 @@ class ValidationUtilTest {
 
     @Test
     void checkTheUserRentedTheItem_WhereIsNotRentedItem_ThenReturnedValidateException() {
-        when(itemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
-        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user1));
-
         assertThrows(ValidateException.class,
                 () -> checkTheUserRentedTheItem(user1.getId(), item));
     }
