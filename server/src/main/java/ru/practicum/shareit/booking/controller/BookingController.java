@@ -5,12 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
 
+import javax.validation.Valid;
+import javax.validation.constraints.*;
 import java.util.List;
-
-import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingDto;
 
 /**
  * TODO Sprint add-bookings.
@@ -30,9 +29,9 @@ public class BookingController {
      */
     @PostMapping // Эндпоинт добавления бронирования
     public BookingDto addBooking(@RequestHeader("X-Sharer-User-Id") Long bookerId,
-                                 @RequestBody BookingDto bookingDto) {
+                                 @Valid @RequestBody BookingDto bookingDto) {
         log.info("Добавляем бронирования пользователем по id={}.", bookerId);
-        return toBookingDto(bookingService.addBooking(bookingDto, bookerId));
+        return bookingService.addBooking(bookingDto, bookerId);
     }
 
     /**
@@ -42,12 +41,12 @@ public class BookingController {
      * параметр approved может принимать значения true или false.
      */
     @PatchMapping("/{bookingId}") // Эндпоинт обновления бронирования
-    public BookingDto updateBooking(@RequestHeader(value = "X-Sharer-User-Id",
+    public BookingDto updateBooking(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id",
             required = false) Long ownerId,
                                     @RequestParam(value = "approved", required = false) Boolean approved,
                                     @PathVariable Long bookingId) {
         log.info("Выполняем подтверждение или отклонение запроса на бронирование владельцем вещи по Id={}.", ownerId);
-        return toBookingDto(bookingService.updateBooking(ownerId, approved, bookingId));
+        return bookingService.updateBooking(ownerId, approved, bookingId);
     }
 
     /**
@@ -56,10 +55,11 @@ public class BookingController {
      * Эндпоинт — GET /bookings/{bookingId}.
      */
     @GetMapping("/{bookingId}") // Эндпоинт получение данных о конкретном бронировании (включая его статус)
-    public BookingDto getBookingByIdAndStatus(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
+    public BookingDto getBookingByIdAndStatus(@Min(1) @NotNull
+                                              @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
                                               @PathVariable(required = false) Long bookingId) {
         log.info("Выполняем получение данных о конкретном бронировании по Id={} (включая его статус).", bookingId);
-        return toBookingDto(bookingService.getBookingByIdAndStatus(ownerId, bookingId));
+        return bookingService.getBookingByIdAndStatus(ownerId, bookingId);
     }
 
     /**
@@ -71,11 +71,11 @@ public class BookingController {
      * Бронирования должны возвращаться отсортированными по дате от более новых к более старым.
      */
     @GetMapping // Эндпоинт получения списка всех бронирований пользователя по id
-    public List<Booking> getListBookingsUserById(
-            @RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
+    public List<BookingDto> getListBookingsUserById(
+            @Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
             @RequestParam(value = "state", required = false, defaultValue = "ALL") String state,
-            @RequestParam(defaultValue = "0") Integer from,
-            @RequestParam(defaultValue = "10") Integer size) {
+            @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+            @Positive @RequestParam(defaultValue = "10") Integer size) {
         log.info("Получаем список всех бронирований пользователя по id={}", userId);
         return bookingService.getListBookingsUserById(userId, state, from, size);
     }
@@ -86,11 +86,11 @@ public class BookingController {
      * Работа параметра state аналогична его работе в предыдущем сценарии.
      */
     @GetMapping("/owner") // Эндпоинт получения списка всех бронирований пользователя по id
-    public List<Booking> getListBookingsOwnerById(
-            @RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
-            @RequestParam(value = "state", required = false, defaultValue = "ALL") String state,
-            @RequestParam(defaultValue = "0") Integer from,
-            @RequestParam(defaultValue = "10") Integer size) {
+    public List<BookingDto> getListBookingsOwnerById(
+            @Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
+            @NotNull @NotBlank @RequestParam(value = "state", required = false, defaultValue = "ALL") String state,
+            @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+            @Positive @RequestParam(defaultValue = "10") Integer size) {
         log.info("Получаем список всех бронирований пользователя по id={}", userId);
         return bookingService.getListBookingsOwnerById(userId, state, from, size);
     }

@@ -1,33 +1,25 @@
 package ru.practicum.shareit.itemRequest.service;
 
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.booking.service.BookingServiceImpl;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidateException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.itemRequest.dto.ItemRequestDto;
 import ru.practicum.shareit.itemRequest.dto.ItemRequestDtoWithAnswers;
 import ru.practicum.shareit.itemRequest.model.ItemRequest;
 import ru.practicum.shareit.itemRequest.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.user.service.UserService;
-import ru.practicum.shareit.validation.ValidationService;
 
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,51 +31,50 @@ import static org.mockito.Mockito.when;
 import static ru.practicum.shareit.itemRequest.mapper.ItemRequestMapper.*;
 import static ru.practicum.shareit.user.mapper.UserMapper.toUser;
 
-@Transactional
+
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@ExtendWith(MockitoExtension.class)
 class ItemRequestServiceTest {
-    @InjectMocks
-    private ItemRequestServiceImpl itemRequestService;
     @Mock
     private ItemRequestRepository itemRequestRepository;
+    private ItemRequestService itemRequestService;
     @Mock
-    private BookingServiceImpl bookingService;
+    private UserRepository userRepository;
     @Mock
-    private UserService userService;
-    @Mock
-    private BookingRepository bookingRepository;
-    @Mock
-    UserRepository userRepository;
-    @Mock
-    ItemRepository itemRepository;
-    @Mock
-    ItemService itemService;
-    @Mock
-    private ValidationService validationService;
-    private final EntityManager entityManager;
+    private ItemRepository itemRepository;
 
-    TypedQuery<ItemRequest> query;
     UserDto ownerDto;
+    User owner;
     UserDto requesterDto;
+    User requester;
     ItemRequest itemRequest;
     ItemRequestDto itemRequestDto;
     Item item;
 
+
     @BeforeEach
     void setUp() {
+
+        itemRequestService = new ItemRequestServiceImpl(userRepository,
+                itemRequestRepository, itemRepository);
+
         ownerDto = UserDto.builder()
                 .id(1L)
                 .name("OwnerDto")
                 .email("OwnerDto@ya.ru")
                 .build();
 
+        owner = toUser(ownerDto);
+
         requesterDto = UserDto.builder()
-                .id(1L)
+                .id(2L)
                 .name("RequesterDto")
                 .email("requesterDto@ya.ru")
                 .build();
+
+        requester = toUser(requesterDto);
 
         item = Item.builder()
                 .id(1L)
@@ -100,18 +91,13 @@ class ItemRequestServiceTest {
                 .created(null)
                 .build();
         itemRequest = toItemRequest(itemRequestDto);
-        itemRequest.setItems(null);
-
-    }
-
-    @AfterEach
-    void tearDown() {
     }
 
     @Test
     void addItemRequest_WhenAllIsOk_ThenReturnItemRequest() {
-        when(userService.getUserById(anyLong())).thenReturn(toUser(ownerDto));
-        when(itemRequestRepository.save(any())).thenReturn(itemRequest);
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(requester));
+        when(itemRequestService.addItemRequest(itemRequest, requester.getId())).thenReturn(itemRequest);
 
         ItemRequest itemRequestFromBd = itemRequestService.addItemRequest(itemRequest, 1L);
 
@@ -120,59 +106,70 @@ class ItemRequestServiceTest {
 
     @Test
     void addItemRequest_WhenRequesterIsNull_ReturnValidateException() {
-        Long requesterId = null;
         assertThrows(ValidateException.class,
+                () -> itemRequestService.addItemRequest(itemRequest, null));
+    }
+
+    @Test
+    void addItemRequest_WhenRequesterNotFound_ReturnNotFoundException() {
+        Long requesterId = 1001L;
+        assertThrows(NotFoundException.class,
                 () -> itemRequestService.addItemRequest(itemRequest, requesterId));
     }
 
     @Test
-    void getItemRequestsByUserId() {
-        when(userService.getUserById(anyLong())).thenReturn(toUser(ownerDto));
-        when(itemRequestRepository.getAllByRequestorIdOrderByCreatedDesc(anyLong())).thenReturn(List.of(itemRequest));
-        when(itemRepository.findAllByRequestId(anyLong())).thenReturn(new ArrayList<>());
+    void getItemRequestsByUserId_WhenAllIsOk_ThenReturnListItemRequest() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(requester));
+        when(itemRequestRepository.getAllByRequestorIdOrderByCreatedDesc(anyLong()))
+                .thenReturn(List.of(itemRequest));
 
-        assertEquals(itemRequestService.getItemRequestsByUserId(1L),
-                List.of(toItemRequestDtoWithAnswers(itemRequest)));
+        List<ItemRequestDtoWithAnswers> result = itemRequestService.getItemRequestsByUserId(2L);
 
+        assertEquals(1, result.size());
+        assertEquals(itemRequest.getId(), result.get(0).getId());
+        assertEquals(itemRequest.getDescription(), result.get(0).getDescription());
     }
+
 
     @Test
     void getListRequestsCreatedByOtherUsers_WhenAllIsOk_ThenReturnListItemRequestDtoWithAnswers() {
-        when(userService.getUserById(anyLong())).thenReturn(toUser(ownerDto));
-        when(itemRequestRepository.findAll()).thenReturn(new ArrayList<>());
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(requester));
         when(itemRequestRepository.getItemRequestByRequesterIdIsNotOrderByCreated(anyLong(), any()))
                 .thenReturn(List.of(itemRequest));
 
-        assertEquals(itemRequestService.getListRequestsCreatedByOtherUsers(1L, 1, 1),
-                List.of(toItemRequestDtoWithAnswers(itemRequest)));
+        List<ItemRequestDtoWithAnswers> result =
+                itemRequestService.getListRequestsCreatedByOtherUsers(2L, 1, 1);
+
+        assertEquals(1, result.size());
+        assertEquals(itemRequest.getId(), result.get(0).getId());
+        assertEquals(itemRequest.getDescription(), result.get(0).getDescription());
     }
 
     @Test
     void getItemRequestById_WhenAllIsOk_ThenReturnItemRequestDtoWithAnswers() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(toUser(ownerDto)));
-
         when(itemRequestRepository.findById(anyLong())).thenReturn(Optional.ofNullable(itemRequest));
 
-        when(itemRequestRepository.findAll()).thenReturn(new ArrayList<>());
+        ItemRequestDtoWithAnswers itemRequestDtoWithAnswersFromBd =
+                itemRequestService.getItemRequestById(1L, 1L);
 
-        assertEquals(itemRequestService.getItemRequestById(1L, 1L), toItemRequestDtoWithAnswers(itemRequest));
+        assertEquals(itemRequest.getDescription(), itemRequestDtoWithAnswersFromBd.getDescription());
+        assertEquals(itemRequest.getCreated(), itemRequestDtoWithAnswersFromBd.getCreated());
     }
 
     @Test
     void getItemRequestById_WhenItemRequestNotFound_ThenReturnNotFoundException() {
-        when(itemRequestRepository.findById(anyLong()))
-                .thenThrow(new NotFoundException(String.format("Запрос на вещь по id=%d не существует!", 1L)));
 
-        Exception e = assertThrows(NotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> itemRequestService.getItemRequestById(1L, 1L));
-
-        assertEquals(e.getMessage(), String.format("Запрос на вещь по id=%d не существует!", 1L));
     }
 
     @Test
     void getItemRequestById_WhenItemRequestIdIsNull_ThenReturnValidateException() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(requester));
+
         assertThrows(ValidateException.class,
-                () -> itemRequestService.getItemRequestById(1L, null));
+                () -> itemRequestService.getItemRequestById(requester.getId(), null));
     }
 
     @Test

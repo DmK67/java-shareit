@@ -12,7 +12,7 @@ import ru.practicum.shareit.exceptions.ValidateException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
-import javax.transaction.Transactional;
+import javax.validation.ConstraintViolationException;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -21,12 +21,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static ru.practicum.shareit.user.mapper.UserMapper.toUser;
 import static ru.practicum.shareit.user.mapper.UserMapper.toUserDto;
 
-@Transactional
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @AutoConfigureTestDatabase
-class UserServiceImplTest {
-    private final UserServiceImpl userService;
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+class UserServiceIntegrationTest {
+    private final UserService userService;
 
     User user1;
     User user2;
@@ -62,17 +62,16 @@ class UserServiceImplTest {
 
     }
 
-    @DirtiesContext
     @Test
     void addUser_WhenAllIsOk_ThenReturnedAddedUser() {
         userService.addUser(user1);
 
-        List<User> users = userService.getListUsers();
+        List<UserDto> users = userService.getListUsers();
 
         Long id = users.stream()
                 .filter(u -> u.getEmail().equals(user1.getEmail()))
                 .findFirst()
-                .map(User::getId).orElse(null);
+                .map(UserDto::getId).orElse(null);
 
         User userFromDb = userService.getUserById(id);
 
@@ -81,16 +80,30 @@ class UserServiceImplTest {
         assertEquals(user1.getEmail(), userFromDb.getEmail());
     }
 
-    @DirtiesContext
+    @Test
+    void addUser_WhenEmailIsNull_ThenReturnedValidateException() {
+        user1.setEmail(null);
+
+        assertThrows(ValidateException.class,
+                () -> userService.addUser(user1));
+    }
+
+    @Test
+    void addUser_WhenEmailIsBlank_ThenReturnedValidateException() {
+        user1.setEmail("");
+
+        assertThrows(ValidateException.class,
+                () -> userService.addUser(user1));
+    }
+
     @Test
     void addUser_WhenEmailInvalid_ThenReturnConstraintViolationException() {
         user1.setEmail("wrong email");
 
-//        assertThrows(ConstraintViolationException.class,
-//                () -> userService.addUser(user1));
+        assertThrows(ConstraintViolationException.class,
+                () -> userService.addUser(user1));
     }
 
-    @DirtiesContext
     @Test
     void addUser_WhenEmailIsBlank_ThenReturnValidateException() {
         user1.setEmail("");
@@ -99,7 +112,6 @@ class UserServiceImplTest {
                 () -> userService.addUser(user1));
     }
 
-    @DirtiesContext
     @Test
     void addUser_WhenEmailIsNull_ThenReturnValidateException() {
         user1.setEmail(null);
@@ -108,7 +120,6 @@ class UserServiceImplTest {
                 () -> userService.addUser(user1));
     }
 
-    @DirtiesContext
     @Test
     void getUserById_WhenUserIsOk() {
         User savedUser = userService.addUser(user1);
@@ -120,7 +131,6 @@ class UserServiceImplTest {
         assertEquals(user.getEmail(), user1.getEmail());
     }
 
-    @DirtiesContext
     @Test
     void getUserById_WhenUserIsNotFound_ThenReturnedNotFoundException() {
 
@@ -128,16 +138,15 @@ class UserServiceImplTest {
                 () -> userService.getUserById(9000L));
     }
 
-    @DirtiesContext
     @Test
     void updateUser_WhenUserNameIsNull_ThenReturnedUpdatedUser() {
         User addedUser = userService.addUser(user1);
 
-        List<User> beforeUpdateUser = userService.getListUsers();
+        List<UserDto> beforeUpdateUser = userService.getListUsers();
         Long id = beforeUpdateUser.stream()
                 .filter(u -> u.getEmail().equals(user1.getEmail()))
                 .findFirst()
-                .map(User::getId).orElse(null);
+                .map(UserDto::getId).orElse(null);
         assertNotNull(id);
         assertEquals(id, addedUser.getId());
 
@@ -157,16 +166,15 @@ class UserServiceImplTest {
         assertEquals(userFromDbAfterUpdate.getEmail(), user2.getEmail());
     }
 
-    @DirtiesContext
     @Test
     void updateUser_WhenUserEmailIsNull_ThenReturnedUpdatedUser() {
         User addedUser = userService.addUser(user1);
 
-        List<User> beforeUpdateUsers = userService.getListUsers();
+        List<UserDto> beforeUpdateUsers = userService.getListUsers();
         Long id = beforeUpdateUsers.stream()
                 .filter(u -> u.getEmail().equals(user1.getEmail()))
                 .findFirst()
-                .map(User::getId).orElse(null);
+                .map(UserDto::getId).orElse(null);
         assertNotNull(id);
         assertEquals(id, addedUser.getId());
 
@@ -186,16 +194,15 @@ class UserServiceImplTest {
         assertEquals(userDtoFromDbAfterUpdate.getEmail(), user1.getEmail());
     }
 
-    @DirtiesContext
     @Test
     void updateUser_WhenAllIsOk_ThenReturnUpdatedUser() {
         User addedUser = userService.addUser(user1);
 
-        List<User> beforeUpdateUsers = userService.getListUsers();
+        List<UserDto> beforeUpdateUsers = userService.getListUsers();
         Long id = beforeUpdateUsers.stream()
                 .filter(u -> u.getEmail().equals(user1.getEmail()))
                 .findFirst()
-                .map(User::getId).orElse(null);
+                .map(UserDto::getId).orElse(null);
         assertNotNull(id);
         assertEquals(id, addedUser.getId());
 
@@ -214,7 +221,6 @@ class UserServiceImplTest {
         assertEquals(userFromDbAfterUpdate.getEmail(), userDto2.getEmail());
     }
 
-    @DirtiesContext
     @Test
     void getListUsers() {
         List<User> listUsers = List.of(user1, user2);
@@ -222,7 +228,7 @@ class UserServiceImplTest {
         userService.addUser(user1);
         userService.addUser(user2);
 
-        List<User> result = userService.getListUsers();
+        List<UserDto> result = userService.getListUsers();
 
         for (User user : listUsers) {
             assertThat(result, hasItem(allOf(
@@ -233,7 +239,6 @@ class UserServiceImplTest {
         }
     }
 
-    @DirtiesContext
     @Test
     void userMapperTest_ToUser_WhenAllIsOk() {
         user1 = toUser(userDto1);
@@ -242,7 +247,6 @@ class UserServiceImplTest {
         assertEquals(userDto1.getEmail(), user1.getEmail());
     }
 
-    @DirtiesContext
     @Test
     void userMapperTest_ToUser_WhenAllFieldsUserDtoAreNull() {
         userNull = toUser(userDtoAllFieldsNull);
@@ -251,7 +255,6 @@ class UserServiceImplTest {
         assertEquals(userDtoAllFieldsNull.getEmail(), userNull.getEmail());
     }
 
-    @DirtiesContext
     @Test
     void userMapperTest_ToUserDto_whenAllIsOk() {
         userDto1 = toUserDto(user1);
@@ -260,7 +263,6 @@ class UserServiceImplTest {
         assertEquals(user1.getEmail(), userDto1.getEmail());
     }
 
-    @DirtiesContext
     @Test
     void userMapperTest_ToUserDto_whenAllFieldsAreNull() {
         userDtoNull = toUserDto(userAllFieldsNull);
@@ -268,5 +270,4 @@ class UserServiceImplTest {
         assertEquals(userAllFieldsNull.getName(), userDtoNull.getName());
         assertEquals(userAllFieldsNull.getEmail(), userDtoNull.getEmail());
     }
-
 }

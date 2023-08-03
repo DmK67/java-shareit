@@ -46,7 +46,7 @@ class ItemRequestControllerTest {
         when(itemRequestService.addItemRequest(any(), anyLong()))
                 .thenReturn(toItemRequest(itemRequestDto));
 
-        mockMvc.perform(post("/requests")
+        String result = mockMvc.perform(post("/requests")
                         .header("X-Sharer-User-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(itemRequestDto)))
@@ -55,7 +55,7 @@ class ItemRequestControllerTest {
                 .getResponse()
                 .getContentAsString();
 
-        verify(itemRequestService).addItemRequest(toItemRequest(itemRequestDto), 1L);
+        assertEquals(objectMapper.writeValueAsString(itemRequestDto), result);
     }
 
     @Test

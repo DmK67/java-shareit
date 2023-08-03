@@ -1,15 +1,14 @@
 package ru.practicum.shareit.user.dto;
 
-import lombok.*;
-import org.springframework.validation.annotation.Validated;
-
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
 @AllArgsConstructor
-@Validated
 @Builder
-@EqualsAndHashCode
 public class UserForResponseDto {
     private Long id;
     private String name;

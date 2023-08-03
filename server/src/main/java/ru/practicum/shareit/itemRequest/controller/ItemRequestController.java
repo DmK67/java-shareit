@@ -8,6 +8,11 @@ import ru.practicum.shareit.itemRequest.dto.ItemRequestDto;
 import ru.practicum.shareit.itemRequest.dto.ItemRequestDtoWithAnswers;
 import ru.practicum.shareit.itemRequest.service.ItemRequestService;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 import static ru.practicum.shareit.itemRequest.mapper.ItemRequestMapper.toItemRequest;
@@ -34,9 +39,9 @@ public class ItemRequestController {
      * какая именно вещь ему нужна.
      */
     @PostMapping // Эндпоинт добавления запроса на вещь
-    public ItemRequestDto addItemRequest(@RequestHeader(value = "X-Sharer-User-Id", required = false)
+    public ItemRequestDto addItemRequest(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false)
                                          Long requestorId,
-                                         @RequestBody ItemRequestDto itemRequestDto) {
+                                         @Valid @RequestBody ItemRequestDto itemRequestDto) {
         log.info("Добавление нового запроса на вещь. Запрос на = {}", itemRequestDto);
         return toItemRequestDto(itemRequestService.addItemRequest(toItemRequest(itemRequestDto), requestorId));
     }
@@ -56,7 +61,8 @@ public class ItemRequestController {
 
     /**
      * GET /requests/all?from={from}&size={size}` — получить список запросов, созданных другими пользователями.
-     * С помощью этого эндпоинта пользователи смогут просматривать существующие запросы, на которые они могли бы ответить.
+     * С помощью этого эндпоинта пользователи смогут просматривать существующие запросы,
+     * на которые они могли бы ответить.
      * Запросы сортируются по дате создания: от более новых к более старым. Результаты должны возвращаться постранично.
      * Для этого нужно передать два параметра: `from` — индекс первого элемента, начиная с 0, и `size` — количество
      * элементов для отображения.
@@ -64,8 +70,8 @@ public class ItemRequestController {
     @GetMapping("/all") // Эндпоинт получения списока запросов, созданных другими пользователями
     public List<ItemRequestDtoWithAnswers> getAllRequests(
             @RequestHeader("X-Sharer-User-Id") Long requesterId,
-            @RequestParam(name = "from", defaultValue = "0") Integer from,
-            @RequestParam(name = "size", defaultValue = "20") Integer size) {
+            @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
+            @Positive @RequestParam(name = "size", defaultValue = "20") Integer size) {
         log.info("Получение списка запросов, созданных другими пользователями кроме Id ={}.", requesterId);
         return itemRequestService.getListRequestsCreatedByOtherUsers(requesterId, from, size);
     }

@@ -12,10 +12,8 @@ import java.util.List;
 @Builder
 @RequiredArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
 public class ItemRequestDtoWithAnswers {
     Long id;                //уникальный идентификатор запроса;
-
     private String description;     //текст запроса, содержащий описание требуемой вещи;
     private UserForResponseDto requester;         //пользователь, создавший запрос;
     private LocalDateTime created;  //дата и время создания запроса.
