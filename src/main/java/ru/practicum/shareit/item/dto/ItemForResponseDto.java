@@ -7,7 +7,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class ItemDtoForBooking {
+public class ItemForResponseDto {
     private Long id;
     private String name;
+    private String description;
+    private Boolean available;
+    private Long requestId;
 }

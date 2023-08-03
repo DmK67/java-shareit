@@ -1,17 +1,13 @@
 package ru.practicum.shareit.user.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.validation.annotation.Validated;
+import lombok.*;
 
 import javax.validation.constraints.Email;
 
 @Getter
 @Setter
 @AllArgsConstructor
-@Validated
+@NoArgsConstructor
 @Builder
 public class UserDto {
 

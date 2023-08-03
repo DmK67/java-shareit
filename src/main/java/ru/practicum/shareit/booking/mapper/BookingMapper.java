@@ -7,10 +7,12 @@ import ru.practicum.shareit.booking.dto.BookingForItemDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static ru.practicum.shareit.user.mapper.UserMapper.toUserDto;
 
 @Component
 @AllArgsConstructor
@@ -22,10 +24,10 @@ public class BookingMapper {
                 .id(booking.getId())
                 .start(booking.getStart())
                 .end(booking.getEnd())
-                .itemId(booking.getItem().getId())
-                .booker(UserDto.builder().id(booking.getBooker().getId()).build())
                 .status(booking.getStatus())
                 .item(ItemDto.builder().id(booking.getItem().getId()).name(booking.getItem().getName()).build())
+                .itemId(booking.getItem().getId())
+                .booker(toUserDto(booking.getBooker()))
                 .build();
     }
 
@@ -66,5 +68,23 @@ public class BookingMapper {
             booking.setBooker(User.builder().id(user.getId()).build());
         }
         return listResult;
+    }
+
+    public static List<BookingDto> toListBookingDto(List<Booking> bookingList) {
+        // Метод перевода объекта booking в объект bookingDto
+        List<BookingDto> bookingDtoList = new ArrayList<>();
+        for (Booking booking : bookingList) {
+            BookingDto bookingDto = BookingDto.builder()
+                    .id(booking.getId())
+                    .start(booking.getStart())
+                    .end(booking.getEnd())
+                    .status(booking.getStatus())
+                    .item(ItemDto.builder().id(booking.getItem().getId()).name(booking.getItem().getName()).build())
+                    .itemId(booking.getItem().getId())
+                    .booker(toUserDto(booking.getBooker()))
+                    .build();
+            bookingDtoList.add(bookingDto);
+        }
+        return bookingDtoList;
     }
 }

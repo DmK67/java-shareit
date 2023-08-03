@@ -24,10 +24,8 @@ public class BookingDto {
     private LocalDateTime end;
     @NotNull
     private Long itemId;
-
     private UserDto booker;
     private Status status;
-
     private ItemDto item;
 
 }

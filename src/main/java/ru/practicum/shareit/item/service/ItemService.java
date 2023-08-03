@@ -16,11 +16,9 @@ public interface ItemService {
 
     Item updateItem(Item item, Long id, Long ownerId);
 
-    List<ItemWithBookingDto> getListItemsUserById(Long ownerId);
+    List<ItemWithBookingDto> getListItemsUserById(Long ownerId, Integer from, Integer size);
 
-    List<ItemDto> getSearchItems(String text);
-
-    void checkingIsAvailable(Item item);
+    List<ItemDto> getSearchItems(String text, Integer from, Integer size);
 
     Comment addComment(Comment comment, Long ownerId, Long itemId);
 }

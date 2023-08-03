@@ -12,6 +12,8 @@ import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 import static ru.practicum.shareit.item.comment.mapper.CommentMapper.toCommentDto;
@@ -70,10 +72,12 @@ public class ItemController {
      * Просмотр владельцем списка всех его вещей с указанием названия и описания для каждой. Эндпойнт GET /items.
      */
     @GetMapping //Эндпоинт получения списка вещей владельца
-    public List<ItemWithBookingDto> getListItems(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id",
-            required = false) Long ownerId) {
+    public List<ItemWithBookingDto> getListItems(
+            @Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
+            @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+            @Positive @RequestParam(defaultValue = "10") Integer size) {
         log.info("Просмотр вещей пользователя по Id={}", ownerId);
-        return itemService.getListItemsUserById(ownerId);
+        return itemService.getListItemsUserById(ownerId, from, size);
     }
 
     /**
@@ -82,10 +86,11 @@ public class ItemController {
      * в text передаётся текст для поиска. Проверьте, что поиск возвращает только доступные для аренды вещи.
      */
     @GetMapping("/search") // Эндпоинт поиска по подстроке
-    public List<ItemDto> getSearchItems(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false)
-                                        Long ownerId,
-                                        @RequestParam(value = "text", required = false) String text) {
-        return itemService.getSearchItems(text);
+    public List<ItemDto> getSearchItems(
+            @RequestParam(value = "text", required = false) String text,
+            @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+            @Positive @RequestParam(defaultValue = "10") Integer size) {
+        return itemService.getSearchItems(text, from, size);
     }
 
     /**

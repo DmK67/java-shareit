@@ -3,14 +3,15 @@ package ru.practicum.shareit.item.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingForItemDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.ForbiddenException;
 import ru.practicum.shareit.exceptions.NotFoundException;
-import ru.practicum.shareit.exceptions.ValidateException;
 import ru.practicum.shareit.item.comment.dto.CommentDto;
 import ru.practicum.shareit.item.comment.model.Comment;
 import ru.practicum.shareit.item.comment.repositiry.CommentRepository;
@@ -20,10 +21,8 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.ItemWithBooking;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
-import ru.practicum.shareit.validation.ValidationService;
+import ru.practicum.shareit.user.repository.UserRepository;
 
-import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,27 +32,28 @@ import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingForItem
 import static ru.practicum.shareit.item.comment.mapper.CommentMapper.convertListCommentsToListCommentsDto;
 import static ru.practicum.shareit.item.mapper.ItemMapper.*;
 import static ru.practicum.shareit.item.mapper.ItemWithBookingDtoMapper.toItemWithBookingDto;
+import static ru.practicum.shareit.utility.ValidationUtil.*;
 
 @Service
 @AllArgsConstructor
 @Slf4j
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository repository;
-    private final UserService userService;
-    private final ValidationService validationService;
+    private final UserRepository userRepository;
     private final CommentRepository commentRepository;
-
     private final BookingRepository bookingRepository;
 
     @Transactional
     @Override
     public Item addItem(Item item, Long ownerId) {
-        validationService.checkItemDtoWhenAdd(toItemDto(item)); // Проверяем поля объекта itemDto перед добавлением
-        item.setOwner(userService.getUserById(ownerId));
+        checkItemDtoWhenAdd(toItemDto(item)); // Проверяем поля объекта itemDto перед добавлением
+        User userFromBd = userRepository.findById(ownerId)
+                .orElseThrow(() -> new NotFoundException("Пользователь по id=" + ownerId + " не существует!"));
+        item.setOwner(userFromBd);
         return repository.save(item);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public Item getItemById(Long id) { // Метод получения вещи по id
         Item item = repository.findById(id)
@@ -61,12 +61,13 @@ public class ItemServiceImpl implements ItemService {
         return item;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public ItemWithBookingDto getItemByIdWithBooking(Long itemId, Long owner) {
         // Метод получения вещи по id с бронированием
         Item itemFromBD = getItemById(itemId);
-        userService.getUserById(owner);
+        userRepository.findById(owner) // Проверяем пользователя по id на существование в БД
+                .orElseThrow(() -> new NotFoundException("Пользователь по id=" + owner + " не существует!"));
         ItemWithBooking itemWithBooking = itemWithBooking(itemFromBD);
         List<Booking> allBookings = itemFromBD.getBookings();
         Booking lastBooking = null;
@@ -89,7 +90,6 @@ public class ItemServiceImpl implements ItemService {
             itemWithBookingDto.setLastBooking(lastBookingForItemDto);
             List<CommentDto> commentDtoList = convertListCommentsToListCommentsDto(listComments);
             itemWithBookingDto.setComments(commentDtoList);
-
             return itemWithBookingDto;
         }
     }
@@ -98,7 +98,8 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Item updateItem(Item item, Long itemId, Long ownerId) { // Метод обновления вещи
         Item updateItem = getItemById(itemId); // Проверяем вещь по id на существование в БД
-        User owner = userService.getUserById(ownerId); // Проверяем пользователя по id на существование в БД
+        User owner = userRepository.findById(ownerId) // Проверяем пользователя по id на существование в БД
+                .orElseThrow(() -> new NotFoundException("Пользователь по id=" + ownerId + " не существует!"));
         item.setOwner(owner);
         if (!updateItem.getOwner().getId().equals(ownerId)) { // Проверяем соответствие владельца вещи
             log.error("Ошибка! Пользователь по Id: {} не является владельцем вещи! " +
@@ -129,12 +130,14 @@ public class ItemServiceImpl implements ItemService {
         return repository.save(updateItem);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
-    public List<ItemWithBookingDto> getListItemsUserById(Long ownerId) {
+    public List<ItemWithBookingDto> getListItemsUserById(Long ownerId, Integer from, Integer size) {
         // Метод получения списка вещей по id пользователя
-        userService.getUserById(ownerId); // Проверяем владельца вещи по id на существование в памяти
-        List<Item> itemList = repository.findAllByOwnerId(ownerId);
+        userRepository.findById(ownerId) // Проверяем пользователя по id на существование в БД
+                .orElseThrow(() -> new NotFoundException("Пользователь по id=" + ownerId + " не существует!"));
+        Pageable page = PageRequest.of(from / size, size);
+        List<Item> itemList = repository.findAllByOwnerId(ownerId, page);
         List<ItemWithBookingDto> itemWithBookingDtoList = new ArrayList<>();
         for (Item item : itemList) {
             ItemWithBooking itemWithBooking = itemWithBooking(item);
@@ -163,37 +166,33 @@ public class ItemServiceImpl implements ItemService {
         return itemWithBookingDtoList;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
-    public List<ItemDto> getSearchItems(String text) { // Метод поиска вещей по подстроке
+    public List<ItemDto> getSearchItems(String text, Integer from, Integer size) { // Метод поиска вещей по подстроке
+        Pageable page = PageRequest.of(from / size, size);
         if (text == null || text.isBlank()) { // Проверка на пустою строку и на null
             log.error("В поиск передано пустое значение {}!", text);
             return Collections.emptyList();
         }
         log.info("Осуществляем поиск вещи содержащее текст: {}.", text);
-        return convertListItemsToListItemsDto(repository.searchItemsByNameContaining(text));
-    }
-
-    @Transactional
-    @Override
-    public void checkingIsAvailable(Item item) { // Метод проверки статуса бронирования
-        if (!item.getAvailable()) {
-            throw new ValidateException("Вещь нельзя забронировать, поскольку available = false.");
-        }
+        return convertListItemsToListItemsDto(repository.searchItemsByNameContaining(text, page));
     }
 
     @Transactional
     @Override
     public Comment addComment(Comment comment, Long ownerId, Long itemId) { // Метод добавления комментария
         Item item = getItemById(itemId); // Проверяем вещь по id на существование в БД
-        User user = userService.getUserById(ownerId); // Проверяем пользователя по id на существование в БД
-        validationService.checkCommentText(comment.getText()); // Проверяем поле text
-        validationService.checkTheUserRentedTheItem(ownerId, item); // Проверяем что пользователь действительно брал
+        User user = userRepository.findById(ownerId) // Проверяем пользователя по id на существование в БД
+                .orElseThrow(() -> new NotFoundException("Пользователь по id=" + ownerId + " не существует!"));
+        checkCommentText(comment.getText()); // Проверяем поле text
+        checkTheUserRentedTheItem(ownerId, item); // Проверяем что пользователь действительно брал
         // вещь в аренду
         comment.setItem(item);
         comment.setAuthor(user);
         comment.setCreated(LocalDateTime.now());
-        return commentRepository.save(comment);
+        Comment commentFromBd = commentRepository.save(comment);
+        item.setComments(List.of(commentFromBd));
+        return commentFromBd;
     }
 
     private Booking findNextBookingByDate(Long itemId) {

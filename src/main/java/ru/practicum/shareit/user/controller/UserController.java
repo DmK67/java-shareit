@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
@@ -43,7 +42,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}") // Эндпоинт получения пользователя по его id
-    public UserDto updateUser(@Min(1) @PathVariable Long userId) {
+    public UserDto getUserById(@Min(1) @PathVariable Long userId) {
         log.info("Получаем пользователя по Id={}.", userId);
         return toUserDto(userService.getUserById(userId));
     }
@@ -55,7 +54,7 @@ public class UserController {
     }
 
     @GetMapping
-    public List<User> getListUsers() { // Эндпоинт получения списка всех пользователей
+    public List<UserDto> getListUsers() { // Эндпоинт получения списка всех пользователей
         log.info("Получаем список всех пользователей.");
         return userService.getListUsers();
     }
