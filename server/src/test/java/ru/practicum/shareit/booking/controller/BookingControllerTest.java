@@ -12,7 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.model.Status;
+import ru.practicum.shareit.booking.dto.StatusDto;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exceptions.ValidateException;
@@ -80,7 +80,7 @@ public class BookingControllerTest {
                 .start(LocalDateTime.now().plusHours(10))
                 .end(LocalDateTime.now().plusHours(20))
                 .item(toItemDto(item1))
-                .status(Status.WAITING)
+                .status(StatusDto.WAITING)
                 .build();
 
         owner1 = User.builder()
@@ -99,7 +99,7 @@ public class BookingControllerTest {
                 .itemId(item1.getId())
                 .booker(toUserDto(booker))
                 .item(toItemDto(Item.builder().id(item1.getId()).build()))
-                .status(Status.WAITING).build();
+                .status(StatusDto.WAITING).build();
 
         when(bookingService.addBooking(any(), any())).thenReturn(bookingDtoForResponse);
 
@@ -136,7 +136,7 @@ public class BookingControllerTest {
                 .itemId(item1.getId())
                 .booker(toUserDto(booker))
                 .item(toItemDto(Item.builder().id(item1.getId()).build()))
-                .status(Status.WAITING).build();
+                .status(StatusDto.WAITING).build();
 
         when(bookingService.updateBooking(any(), any(), any()))
                 .thenReturn(bookingDtoForResponse);
@@ -163,7 +163,7 @@ public class BookingControllerTest {
                 .itemId(item1.getId())
                 .booker(toUserDto(booker))
                 .item(toItemDto(Item.builder().id(item1.getId()).build()))
-                .status(Status.WAITING).build();
+                .status(StatusDto.WAITING).build();
 
         when(bookingService.getBookingByIdAndStatus(any(), any())).thenReturn(bookingDtoForResponse);
         String result = mockMvc.perform(MockMvcRequestBuilders.get("/bookings/{bookingId}",
@@ -186,7 +186,7 @@ public class BookingControllerTest {
                 .end(bookingDtoForAdd.getEnd())
                 .booker(toUserDto(booker))
                 .item(toItemDto(Item.builder().id(item1.getId()).build()))
-                .status(Status.WAITING).build();
+                .status(StatusDto.WAITING).build();
 
         when(bookingService.getListBookingsUserById(any(), any(), any(), any())).thenReturn(List.of(bookingDtoForResponse));
 
@@ -211,7 +211,7 @@ public class BookingControllerTest {
                 .end(bookingDtoForAdd.getEnd())
                 .booker(toUserDto(booker))
                 .item(toItemDto(Item.builder().id(item1.getId()).build()))
-                .status(Status.WAITING).build();
+                .status(StatusDto.WAITING).build();
 
         when(bookingService.getListBookingsUserById(any(), any(), any(), any())).thenReturn(List.of(bookingDtoForResponse));
 
@@ -236,7 +236,7 @@ public class BookingControllerTest {
                 .end(bookingDtoForAdd.getEnd())
                 .booker(toUserDto(booker))
                 .item(toItemDto(Item.builder().id(item1.getId()).build()))
-                .status(Status.WAITING).build();
+                .status(StatusDto.WAITING).build();
 
         when(bookingService.getListBookingsOwnerById(any(), any(), any(), any()))
                 .thenReturn(List.of(bookingDtoForResponse));

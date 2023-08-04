@@ -1,6 +1,6 @@
-package ru.practicum.shareit.booking.model;
+package ru.practicum.shareit.booking.dto;
 
-public enum StatusState {
+public enum StateDto {
     ALL,
     CURRENT,
     REJECTED,

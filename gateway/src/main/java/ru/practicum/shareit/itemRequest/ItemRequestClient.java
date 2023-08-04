@@ -1,5 +1,6 @@
 package ru.practicum.shareit.itemRequest;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -8,11 +9,13 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.shareit.client.BaseClient;
+import ru.practicum.shareit.exceptions.ValidateException;
 import ru.practicum.shareit.itemRequest.dto.ItemRequestDto;
 
 import java.util.Map;
 
 @Service
+@Slf4j
 public class ItemRequestClient extends BaseClient {
     private static final String API_PREFIX = "/requests";
 
@@ -31,6 +34,9 @@ public class ItemRequestClient extends BaseClient {
      * описывает, какая именно вещь ему нужна.
      */
     public ResponseEntity<Object> addItemRequest(Long userId, ItemRequestDto itemRequestDto) {
+        if (userId == null) { // Проверка аргумента requesterId на null
+            throw new ValidateException("Неверный параметр пользователя (Id = " + null + ").");
+        }
         return post("", userId, itemRequestDto);
     }
 
@@ -64,6 +70,10 @@ public class ItemRequestClient extends BaseClient {
      * в том же формате, что и в эндпоинте GET /requests. Посмотреть данные об отдельном запросе может любой пользователь.
      */
     public ResponseEntity<Object> getItemRequestById(Long userId, Long requestId) {
+        if (requestId == null) {
+            log.info("Ошибка! Значение Id= {} не может быть пустым!", requestId);
+            throw new ValidateException("Передан не верный Id=" + requestId);
+        }
         return get("/" + requestId, userId);
     }
 }

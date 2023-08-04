@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.model;
 
 import lombok.*;
+import ru.practicum.shareit.booking.dto.StatusDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -46,6 +47,6 @@ public class Booking {
     private User booker;
     @Column(name = "booking_status")
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private StatusDto status;
 }
 

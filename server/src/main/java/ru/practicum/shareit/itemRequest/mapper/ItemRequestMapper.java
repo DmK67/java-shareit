@@ -1,7 +1,5 @@
 package ru.practicum.shareit.itemRequest.mapper;
 
-import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Component;
 import ru.practicum.shareit.itemRequest.dto.ItemRequestDto;
 import ru.practicum.shareit.itemRequest.dto.ItemRequestDtoWithAnswers;
 import ru.practicum.shareit.itemRequest.model.ItemRequest;
@@ -12,8 +10,7 @@ import java.util.List;
 
 import static ru.practicum.shareit.item.mapper.ItemMapper.convertListItemsToListIItemForResponseDto;
 
-@Component
-@AllArgsConstructor
+
 public class ItemRequestMapper {
 
     public static ItemRequestDto toItemRequestDto(ItemRequest itemRequest) {

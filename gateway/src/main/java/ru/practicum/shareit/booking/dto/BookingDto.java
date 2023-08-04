@@ -1,7 +1,6 @@
 package ru.practicum.shareit.booking.dto;
 
 import lombok.*;
-import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.dto.UserDto;
 
@@ -26,7 +25,7 @@ public class BookingDto {
     @NotNull
     private Long itemId;
     private UserDto booker;
-    private Status status;
+    private StatusDto status;
     private ItemDto item;
 
 }

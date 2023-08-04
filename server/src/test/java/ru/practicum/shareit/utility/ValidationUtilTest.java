@@ -4,11 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.StatusDto;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.exceptions.NotFoundException;
-import ru.practicum.shareit.exceptions.StateStatusValidateException;
 import ru.practicum.shareit.exceptions.ValidateException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
@@ -16,9 +14,8 @@ import ru.practicum.shareit.user.model.User;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingDto;
-import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
-import static ru.practicum.shareit.utility.ValidationUtil.*;
+import static ru.practicum.shareit.utility.ValidationUtil.checkBookerIsTheOwner;
+import static ru.practicum.shareit.utility.ValidationUtil.checkTheUserRentedTheItem;
 
 
 @SpringBootTest
@@ -43,7 +40,7 @@ class ValidationUtilTest {
             .end(LocalDateTime.now().plusHours(1))
             .item(item)
             .booker(user2)
-            .status(Status.WAITING)
+            .status(StatusDto.WAITING)
             .build();
 
     @Test
@@ -53,97 +50,9 @@ class ValidationUtilTest {
     }
 
     @Test
-    void checkItemDtoWhenAdd_WhereAreTheEmptyFields_ThenReturnedNotFoundException() {
-        item.setAvailable(null);
-
-        assertThrows(ValidateException.class,
-                () -> checkItemDtoWhenAdd(toItemDto(item)));
-
-        item.setAvailable(true);
-        item.setName(null);
-
-        assertThrows(ValidateException.class,
-                () -> checkItemDtoWhenAdd(toItemDto(item)));
-
-        item.setName("");
-
-        assertThrows(ValidateException.class,
-                () -> checkItemDtoWhenAdd(toItemDto(item)));
-
-        item.setName("itemDto");
-        item.setDescription(null);
-
-        assertThrows(ValidateException.class,
-                () -> checkItemDtoWhenAdd(toItemDto(item)));
-
-        item.setDescription("");
-
-        assertThrows(ValidateException.class,
-                () -> checkItemDtoWhenAdd(toItemDto(item)));
-
-        item.setDescription(item.getDescription());
-    }
-
-    @Test
-    void checkBookingDtoWhenAdd_WhereInvalidTimeAndDate_ThenReturnedValidateException() {
-        BookingDto bookingDtoBadTime = toBookingDto(booking);
-        bookingDtoBadTime.setStart(null);
-
-        assertThrows(ValidateException.class,
-                () -> checkBookingDtoWhenAdd(bookingDtoBadTime));
-
-        bookingDtoBadTime.setStart(LocalDateTime.now());
-        bookingDtoBadTime.setEnd(null);
-
-        assertThrows(ValidateException.class,
-                () -> checkBookingDtoWhenAdd(bookingDtoBadTime));
-
-        bookingDtoBadTime.setStart(LocalDateTime.now());
-        bookingDtoBadTime.setEnd(LocalDateTime.now().minusHours(1));
-
-        assertThrows(ValidateException.class,
-                () -> checkBookingDtoWhenAdd(bookingDtoBadTime));
-
-        bookingDtoBadTime.setStart(LocalDateTime.now());
-        bookingDtoBadTime.setEnd(LocalDateTime.now());
-
-        assertThrows(ValidateException.class,
-                () -> checkBookingDtoWhenAdd(bookingDtoBadTime));
-
-        bookingDtoBadTime.setStart(LocalDateTime.now().minusHours(1));
-        bookingDtoBadTime.setEnd(LocalDateTime.now());
-
-        assertThrows(ValidateException.class,
-                () -> checkBookingDtoWhenAdd(bookingDtoBadTime));
-
-        bookingDtoBadTime.setStart(LocalDateTime.now());
-        bookingDtoBadTime.setEnd(LocalDateTime.now().minusHours(1));
-
-        assertThrows(ValidateException.class,
-                () -> checkBookingDtoWhenAdd(bookingDtoBadTime));
-    }
-
-    @Test
-    void checkStatusState_WhereInvalidStatus_ThenReturnedStateStatusValidateException() {
-        textStatus = "Ok";
-        assertThrows(StateStatusValidateException.class,
-                () -> checkStatusState(textStatus));
-    }
-
-    @Test
     void checkTheUserRentedTheItem_WhereIsNotRentedItem_ThenReturnedValidateException() {
         assertThrows(ValidateException.class,
                 () -> checkTheUserRentedTheItem(user1.getId(), item));
     }
 
-    @Test
-    void checkCommentText_WhereCommentTextIsNotValid_ThenReturnedValidateException() {
-        textStatus = "";
-        assertThrows(ValidateException.class,
-                () -> checkCommentText(textStatus));
-
-        textStatus = null;
-        assertThrows(ValidateException.class,
-                () -> checkCommentText(textStatus));
-    }
 }

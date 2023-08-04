@@ -35,9 +35,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Transactional
     @Override
     public ItemRequest addItemRequest(ItemRequest itemRequest, Long requesterId) { // Метод добавления запроса на вещь
-        if (requesterId == null) { // Проверка аргумента requesterId на null
-            throw new ValidateException("Неверный параметр пользователя (Id = " + null + ").");
-        }
         userRepository.findById(requesterId) // Проверяем пользователя по id на существование в БД
                 .orElseThrow(() -> new NotFoundException("Пользователь по id=" + requesterId + " не существует!"));
         itemRequest.setRequestor(User.builder().id(requesterId).build());
@@ -82,10 +79,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public ItemRequestDtoWithAnswers getItemRequestById(Long userId, Long itemRequestId) {
         userRepository.findById(userId) // Проверяем пользователя по id на существование в БД
                 .orElseThrow(() -> new NotFoundException("Пользователь по id=" + userId + " не существует!"));
-        if (itemRequestId == null) {
-            log.info("Ошибка! Значение Id= {} не может быть пустым!", itemRequestId);
-            throw new ValidateException("Передан не верный Id=" + itemRequestId);
-        }
         ItemRequest itemRequest = itemRequestRepository.findById(itemRequestId).orElseThrow(
                 () -> new NotFoundException("Запрос на вещь по id=" + itemRequestId + " не существует!"));
         log.info("Получен запрос на вещь по Id ={} ", itemRequestId);

@@ -23,11 +23,6 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public User addUser(User user) {
-        // Проверка поля email объекта user на пустые строки и пробелы
-        if (user.getEmail() == null || user.getEmail().isBlank()) {
-            log.error("Ошибка! Пользователь с пустым e-mail не может быть добавлен!");
-            throw new ValidateException("Ошибка! Пользователь с пустым e-mail не может быть добавлен!");
-        }
         return repository.save(user);
     }
 

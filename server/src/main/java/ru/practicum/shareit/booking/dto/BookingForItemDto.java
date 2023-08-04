@@ -1,7 +1,6 @@
 package ru.practicum.shareit.booking.dto;
 
 import lombok.*;
-import ru.practicum.shareit.booking.model.Status;
 
 import java.time.LocalDateTime;
 
@@ -15,5 +14,5 @@ public class BookingForItemDto {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private Long bookerId;
-    private Status status;
+    private StatusDto status;
 }

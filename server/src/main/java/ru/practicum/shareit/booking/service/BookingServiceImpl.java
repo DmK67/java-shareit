@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.Status;
-import ru.practicum.shareit.booking.model.StatusState;
+import ru.practicum.shareit.booking.dto.StatusDto;
+import ru.practicum.shareit.booking.dto.StateDto;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidateException;
@@ -45,9 +45,8 @@ public class BookingServiceImpl implements BookingService {
         }
         User booker = userRepository.findById(bookerId)
                 .orElseThrow(() -> new NotFoundException("Пользователь по id=" + bookerId + " не существует!"));
-        checkBookingDtoWhenAdd(bookingDto); // Проверка полей объекта BookingDto перед добавлением
         checkBookerIsTheOwner(itemDB, bookerId); // Проверка является ли арендодатель-владельцем вещи
-        bookingDto.setStatus(Status.WAITING);
+        bookingDto.setStatus(StatusDto.WAITING);
         Booking booking = toBooking(bookingDto);
         booking.setBooker(booker);
         booking.setItem(itemDB);
@@ -76,25 +75,24 @@ public class BookingServiceImpl implements BookingService {
         // Метод получения списка всех бронированний пользователя по id
         userRepository.findById(userId) // Проверяем существование пользователя в БД
                 .orElseThrow(() -> new NotFoundException("Пользователь по id=" + userId + " не существует!"));
-        checkStatusState(state); // Проверка statusState
         Pageable page = PageRequest.of(from / size, size);
-        StatusState statusState = StatusState.valueOf(state);
+        StateDto statusState = StateDto.valueOf(state);
         List<Booking> listResult = new ArrayList<>();
         switch (statusState) {
             case CURRENT:
                 listResult = bookingRepository.findAllByBookerIdAndStateCurrent(userId, page);
                 break;
             case PAST:
-                listResult = bookingRepository.findAllByBookerIdAndStatePast(userId, Status.APPROVED, page);
+                listResult = bookingRepository.findAllByBookerIdAndStatePast(userId, StatusDto.APPROVED, page);
                 break;
             case FUTURE:
                 listResult = bookingRepository.findAllByBookerIdAndStateFuture(userId, page);
                 break;
             case WAITING:
-                listResult = bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING, page);
+                listResult = bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(userId, StatusDto.WAITING, page);
                 break;
             case REJECTED:
-                listResult = bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED, page);
+                listResult = bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(userId, StatusDto.REJECTED, page);
                 break;
             case ALL:
                 listResult = bookingRepository.findAllByBookerIdOrderByStartDesc(userId, page);
@@ -137,14 +135,14 @@ public class BookingServiceImpl implements BookingService {
                     "Изменение статуса вещи ЗАПРЕЩЕНО!", ownerId);
             throw new NotFoundException("Вносить изменения в параметры вещи может только владелец!");
         }
-        if (!bookingFromBD.getStatus().equals(Status.WAITING)) {
+        if (!bookingFromBD.getStatus().equals(StatusDto.WAITING)) {
             throw new ValidateException("Статус изменить не возможно.");
         }
         if (approved) {
-            bookingFromBD.setStatus(Status.APPROVED);
+            bookingFromBD.setStatus(StatusDto.APPROVED);
             return toBookingDto(bookingRepository.save(bookingFromBD));
         } else {
-            bookingFromBD.setStatus(Status.REJECTED);
+            bookingFromBD.setStatus(StatusDto.REJECTED);
             return toBookingDto(bookingRepository.save(bookingFromBD));
         }
     }
@@ -154,9 +152,8 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDto> getListBookingsOwnerById(Long owner, String state, Integer from, Integer size) {
         userRepository.findById(owner) // Проверяем существование пользователя в БД
                 .orElseThrow(() -> new NotFoundException("Пользователь по id=" + owner + " не существует!"));
-        checkStatusState(state); // Проверка statusState
         Pageable page = PageRequest.of(from / size, size);
-        StatusState statusState = StatusState.valueOf(state);
+        StateDto statusState = StateDto.valueOf(state);
         List<Booking> listResult = new ArrayList<>();
         switch (statusState) {
             case ALL: {
@@ -168,21 +165,21 @@ public class BookingServiceImpl implements BookingService {
                 break;
             }
             case PAST: {
-                listResult = bookingRepository.findAllByItemOwnerIdAndStatePast(owner, Status.APPROVED, page);
+                listResult = bookingRepository.findAllByItemOwnerIdAndStatePast(owner, StatusDto.APPROVED, page);
                 break;
             }
             case FUTURE: {
-                listResult = bookingRepository.findAllByItemOwnerIdAndStateFuture(owner, Status.REJECTED, page);
+                listResult = bookingRepository.findAllByItemOwnerIdAndStateFuture(owner, StatusDto.REJECTED, page);
                 break;
             }
             case WAITING: {
                 listResult = bookingRepository.findAllByItemOwnerIdAndStatusOrderByStartDesc(owner,
-                        Status.WAITING, page);
+                        StatusDto.WAITING, page);
                 break;
             }
             case REJECTED: {
                 listResult = bookingRepository.findAllByItemOwnerIdAndStatusOrderByStartDesc(owner,
-                        Status.REJECTED, page);
+                        StatusDto.REJECTED, page);
                 break;
             }
         }

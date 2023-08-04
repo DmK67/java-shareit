@@ -4,7 +4,7 @@ import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.StatusState;
+import ru.practicum.shareit.booking.dto.StateDto;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.StateStatusValidateException;
 import ru.practicum.shareit.exceptions.ValidateException;
@@ -27,63 +27,6 @@ public class ValidationUtil {
         }
     }
 
-    public void checkItemDtoWhenAdd(ItemDto itemDto) { // Метод проверки полей объекта ItemDto перед добавлением
-        if (itemDto.getAvailable() == null
-                || itemDto.getName() == null || itemDto.getName().isBlank()
-                || itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
-            log.error("Ошибка! Вещь с пустыми полями не может быть добавлена!");
-            throw new ValidateException("Ошибка! Вещь с пустыми полями не может быть добавлена!");
-        }
-    }
-
-    public void checkBookingDtoWhenAdd(BookingDto bookingDto) {
-        // Метод проверки полей объекта BookingDto перед добавлением
-        if (bookingDto.getStart() == null || bookingDto.getEnd() == null) {
-            log.error("Ошибка! Поля начала и окончания бронирования не могут быть пустыми!");
-            throw new ValidateException("Ошибка! Указано неправильно дата или время бронирования!");
-        }
-        if (bookingDto.getEnd().isBefore(bookingDto.getStart())) {
-            log.error("Ошибка! Дата и время окончания бронирования не может предшествовать дате и времени начала " +
-                    "бронирования!");
-            throw new ValidateException("Ошибка! Указано неправильно дата или время бронирования!");
-        }
-        if (bookingDto.getStart().isEqual(bookingDto.getEnd())) {
-            log.error("Ошибка! Дата и время начала бронирования равно дате и времени окончания бронирования!");
-            throw new ValidateException("Ошибка! Указано неправильно дата или время бронирования!");
-        }
-        if (bookingDto.getStart().isBefore(LocalDateTime.now())) {
-            log.error("Ошибка! Указано неправильно дата/время начала бронирования!");
-            throw new ValidateException("Ошибка! Указано неправильно дата или время бронирования!");
-        }
-        if (bookingDto.getEnd().isBefore(LocalDateTime.now())) {
-            log.error("Ошибка! Указано неправильно дата/время окончания бронирования!");
-            throw new ValidateException("Ошибка! Указано неправильно дата или время бронирования!");
-        }
-    }
-
-    public void checkStatusState(String state) {
-        if (state.equalsIgnoreCase(StatusState.ALL.name())) {
-            return;
-        }
-        if (state.equalsIgnoreCase(StatusState.CURRENT.name())) {
-            return;
-        }
-        if (state.equalsIgnoreCase(StatusState.PAST.name())) {
-            return;
-        }
-        if (state.equalsIgnoreCase(StatusState.FUTURE.name())) {
-            return;
-        }
-        if (state.equalsIgnoreCase(StatusState.WAITING.name())) {
-            return;
-        }
-        if (state.equalsIgnoreCase(StatusState.REJECTED.name())) {
-            return;
-        }
-        log.error("Ошибка! Указан неправильно статус бронирования!");
-        throw new StateStatusValidateException();
-    }
-
     public void checkTheUserRentedTheItem(Long userId, Item item) {
         List<Booking> bookings = item.getBookings();
         boolean isBooker = false;
@@ -97,12 +40,6 @@ public class ValidationUtil {
         if (!isBooker) {
             log.error("Ошибка! Cохранение комментария к вещи с id ={}", item.getId());
             throw new ValidateException("Пользователь по id=" + userId + " не арендовал эту вещь");
-        }
-    }
-
-    public void checkCommentText(String text) { // Метод проверки поля text
-        if (text == null || text.isBlank()) {
-            throw new ValidateException("Текст комментария не может быть пустым.");
         }
     }
 

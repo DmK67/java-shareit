@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item.mapper;
 
-import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.dto.ItemWithBookingDto;
 import ru.practicum.shareit.item.model.ItemWithBooking;
 
@@ -9,7 +8,6 @@ import java.util.ArrayList;
 import static ru.practicum.shareit.item.comment.mapper.CommentMapper.convertListCommentsToListCommentsDto;
 
 
-@Component
 public class ItemWithBookingDtoMapper {
 
     public static ItemWithBookingDto toItemWithBookingDto(ItemWithBooking itemWithBooking) {

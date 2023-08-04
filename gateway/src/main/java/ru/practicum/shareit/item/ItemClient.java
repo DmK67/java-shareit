@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
@@ -7,12 +8,14 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.shareit.client.BaseClient;
-import ru.practicum.shareit.item.comment.dto.CommentDto;
+import ru.practicum.shareit.exceptions.ValidateException;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
 import java.util.Map;
 
 @Service
+@Slf4j
 public class ItemClient extends BaseClient {
     private static final String API_PREFIX = "/items";
 
@@ -26,6 +29,7 @@ public class ItemClient extends BaseClient {
     }
 
     public ResponseEntity<Object> addItem(ItemDto itemDto, Long ownerId) {
+        checkItemDtoWhenAdd(itemDto); // Проверяем поля объекта itemDto перед добавлением
         return post("", ownerId, itemDto);
     }
 
@@ -55,6 +59,21 @@ public class ItemClient extends BaseClient {
     }
 
     public ResponseEntity<Object> addComment(Long itemId, Long userId, CommentDto commentDto) {
+        checkCommentText(commentDto.getText());
         return post("/" + itemId + "/comment", userId, commentDto);
+    }
+    private void checkItemDtoWhenAdd(ItemDto itemDto) { // Метод проверки полей объекта ItemDto перед добавлением
+        if (itemDto.getAvailable() == null
+                || itemDto.getName() == null || itemDto.getName().isBlank()
+                || itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
+            log.error("Ошибка! Вещь с пустыми полями не может быть добавлена!");
+            throw new ValidateException("Ошибка! Вещь с пустыми полями не может быть добавлена!");
+        }
+    }
+
+    public void checkCommentText(String text) { // Метод проверки поля text
+        if (text == null || text.isBlank()) {
+            throw new ValidateException("Текст комментария не может быть пустым.");
+        }
     }
 }

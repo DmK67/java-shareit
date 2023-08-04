@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.Status;
+import ru.practicum.shareit.booking.dto.StatusDto;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidateException;
@@ -67,7 +67,7 @@ class BookingServiceTest {
 
         bookingDto = BookingDto.builder().id(1L).start(LocalDateTime.now().plusHours(1))
                 .end(LocalDateTime.now().plusHours(3)).item(toItemDto(item)).booker(toUserDto(booker))
-                .status(Status.WAITING).build();
+                .status(StatusDto.WAITING).build();
         booking = toBooking(bookingDto);
         bookingDto.setBooker(toUserDto(booker));
         bookingDto.setItem(toItemDto(item));
@@ -155,7 +155,7 @@ class BookingServiceTest {
         booking.setBooker(booker);
         booking.setStart(LocalDateTime.now().minusHours(10));
         booking.setEnd(LocalDateTime.now().minusHours(9));
-        booking.setStatus(Status.APPROVED);
+        booking.setStatus(StatusDto.APPROVED);
         booking.setItem(item);
         item.setBookings(List.of(booking));
 
@@ -179,7 +179,7 @@ class BookingServiceTest {
         booking.setItem(item);
         booking.setStart(LocalDateTime.now().minusHours(9));
         booking.setEnd(LocalDateTime.now().minusHours(10));
-        booking.setStatus(Status.APPROVED);
+        booking.setStatus(StatusDto.APPROVED);
         item.setBookings(List.of(booking));
 
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
@@ -202,7 +202,7 @@ class BookingServiceTest {
         booking.setItem(item);
         booking.setStart(LocalDateTime.now().minusHours(1));
         booking.setEnd(LocalDateTime.now().minusHours(2));
-        booking.setStatus(Status.WAITING);
+        booking.setStatus(StatusDto.WAITING);
         item.setBookings(List.of(booking));
 
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
@@ -225,7 +225,7 @@ class BookingServiceTest {
         booking.setItem(item);
         booking.setStart(LocalDateTime.now().minusHours(1));
         booking.setEnd(LocalDateTime.now().minusHours(2));
-        booking.setStatus(Status.REJECTED);
+        booking.setStatus(StatusDto.REJECTED);
         item.setBookings(List.of(booking));
 
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
@@ -280,7 +280,7 @@ class BookingServiceTest {
 
     @Test
     void updateBooking_WhenStatusIsApproved_ReturnValidateException() {
-        booking.setStatus(Status.APPROVED);
+        booking.setStatus(StatusDto.APPROVED);
         when(bookingRepository.findById(any())).thenReturn(Optional.of(booking));
         when(userRepository.findById(owner.getId())).thenReturn(Optional.of(owner));
         when(userRepository.findById(booker.getId())).thenReturn(Optional.of(booker));
@@ -315,7 +315,7 @@ class BookingServiceTest {
         booking.setBooker(booker);
         booking.setStart(LocalDateTime.now().minusHours(1));
         booking.setEnd(LocalDateTime.now().minusHours(1));
-        booking.setStatus(Status.APPROVED);
+        booking.setStatus(StatusDto.APPROVED);
         booking.setItem(item);
         item.setBookings(List.of(booking));
 
@@ -338,7 +338,7 @@ class BookingServiceTest {
         booking.setBooker(booker);
         booking.setStart(LocalDateTime.now().minusHours(9));
         booking.setEnd(LocalDateTime.now().minusHours(10));
-        booking.setStatus(Status.APPROVED);
+        booking.setStatus(StatusDto.APPROVED);
         booking.setItem(item);
         item.setBookings(List.of(booking));
 
@@ -361,7 +361,7 @@ class BookingServiceTest {
         booking.setBooker(booker);
         booking.setStart(LocalDateTime.now().minusHours(9));
         booking.setEnd(LocalDateTime.now().minusHours(10));
-        booking.setStatus(Status.APPROVED);
+        booking.setStatus(StatusDto.APPROVED);
         booking.setItem(item);
         item.setBookings(List.of(booking));
 
@@ -384,7 +384,7 @@ class BookingServiceTest {
         booking.setBooker(booker);
         booking.setStart(LocalDateTime.now().minusHours(9));
         booking.setEnd(LocalDateTime.now().minusHours(10));
-        booking.setStatus(Status.WAITING);
+        booking.setStatus(StatusDto.WAITING);
         booking.setItem(item);
         item.setBookings(List.of(booking));
 
@@ -407,7 +407,7 @@ class BookingServiceTest {
         booking.setBooker(booker);
         booking.setStart(LocalDateTime.now().minusHours(9));
         booking.setEnd(LocalDateTime.now().minusHours(10));
-        booking.setStatus(Status.REJECTED);
+        booking.setStatus(StatusDto.REJECTED);
         booking.setItem(item);
         item.setBookings(List.of(booking));
 

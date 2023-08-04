@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingForItemDto;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.Status;
+import ru.practicum.shareit.booking.dto.StatusDto;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.ForbiddenException;
 import ru.practicum.shareit.exceptions.NotFoundException;
@@ -46,7 +46,6 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     @Override
     public Item addItem(Item item, Long ownerId) {
-        checkItemDtoWhenAdd(toItemDto(item)); // Проверяем поля объекта itemDto перед добавлением
         User userFromBd = userRepository.findById(ownerId)
                 .orElseThrow(() -> new NotFoundException("Пользователь по id=" + ownerId + " не существует!"));
         item.setOwner(userFromBd);
@@ -185,7 +184,6 @@ public class ItemServiceImpl implements ItemService {
         Item item = getItemById(itemId); // Проверяем вещь по id на существование в БД
         User user = userRepository.findById(ownerId) // Проверяем пользователя по id на существование в БД
                 .orElseThrow(() -> new NotFoundException("Пользователь по id=" + ownerId + " не существует!"));
-        checkCommentText(comment.getText()); // Проверяем поле text
         checkTheUserRentedTheItem(ownerId, item); // Проверяем что пользователь действительно брал
         // вещь в аренду
         comment.setItem(item);
@@ -199,8 +197,8 @@ public class ItemServiceImpl implements ItemService {
     private Booking findNextBookingByDate(Long itemId) {
         // Метод поиска следующего бронирования после указанной даты
         Booking nextBooking = null;
-        List<Booking> listNextBookings = bookingRepository.findNextBookingByDate(itemId, Status.APPROVED,
-                Status.WAITING, PageRequest.of(0, 1));
+        List<Booking> listNextBookings = bookingRepository.findNextBookingByDate(itemId, StatusDto.APPROVED,
+                StatusDto.WAITING, PageRequest.of(0, 1));
         if (!listNextBookings.isEmpty()) {
             nextBooking = listNextBookings.get(0);
         }
@@ -210,8 +208,8 @@ public class ItemServiceImpl implements ItemService {
     private Booking findLastBookingByDate(Long itemId) {
         // Метод поиска последнего бронирования после указанной даты
         Booking lastBooking = null;
-        List<Booking> listNextBookings = bookingRepository.findLastBookingByDate(itemId, Status.APPROVED,
-                Status.WAITING, PageRequest.of(0, 1));
+        List<Booking> listNextBookings = bookingRepository.findLastBookingByDate(itemId, StatusDto.APPROVED,
+                StatusDto.WAITING, PageRequest.of(0, 1));
         if (!listNextBookings.isEmpty()) {
             lastBooking = listNextBookings.get(0);
         }

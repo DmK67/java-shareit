@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.comment.dto.CommentDto;
 import ru.practicum.shareit.item.comment.model.Comment;
@@ -10,10 +9,6 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemWithBookingDto;
 import ru.practicum.shareit.item.service.ItemService;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 import static ru.practicum.shareit.item.comment.mapper.CommentMapper.toCommentDto;
@@ -27,7 +22,6 @@ import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
 @Slf4j
 @RequestMapping("/items")
 @AllArgsConstructor
-@Validated
 public class ItemController {
     private final ItemService itemService;
 
@@ -39,7 +33,7 @@ public class ItemController {
      */
 
     @PostMapping // Эндпоинт добавления вещи
-    public ItemDto addItem(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
+    public ItemDto addItem(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
                            @RequestBody ItemDto itemDto) {
         log.info("Добавляем вещь: {}", itemDto.getName());
         return toItemDto(itemService.addItem(toItem(itemDto), ownerId));
@@ -50,9 +44,9 @@ public class ItemController {
      * Редактировать вещь может только её владелец.
      */
     @PatchMapping("/{itemId}") // Эндпоинт обновления вещи по id
-    public ItemDto updateItem(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false)
+    public ItemDto updateItem(@RequestHeader(value = "X-Sharer-User-Id", required = false)
                               Long ownerId,
-                              @Min(1) @NotNull @PathVariable Long itemId, @RequestBody ItemDto itemDto) {
+                              @PathVariable Long itemId, @RequestBody ItemDto itemDto) {
         log.info("Обновляем вещь по Id={}", itemId);
         return toItemDto(itemService.updateItem(toItem(itemDto), itemId, ownerId));
     }
@@ -62,8 +56,8 @@ public class ItemController {
      * Информацию о вещи может просмотреть любой пользователь.
      */
     @GetMapping("/{itemId}") // Эндпоинт получения вещи по ее id
-    public ItemWithBookingDto getItemByIdWithBooking(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id",
-            required = false) Long ownerId, @Min(1) @NotNull @PathVariable Long itemId) {
+    public ItemWithBookingDto getItemByIdWithBooking(@RequestHeader(value = "X-Sharer-User-Id",
+            required = false) Long ownerId, @PathVariable Long itemId) {
         log.info("Просмотр вещи по Id={} с информацией о бронировании", itemId);
         return itemService.getItemByIdWithBooking(itemId, ownerId);
     }
@@ -73,9 +67,9 @@ public class ItemController {
      */
     @GetMapping //Эндпоинт получения списка вещей владельца
     public List<ItemWithBookingDto> getListItems(
-            @Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
-            @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
-            @Positive @RequestParam(defaultValue = "10") Integer size) {
+            @RequestHeader(value = "X-Sharer-User-Id", required = false) Long ownerId,
+            @RequestParam(defaultValue = "0") Integer from,
+            @RequestParam(defaultValue = "10") Integer size) {
         log.info("Просмотр вещей пользователя по Id={}", ownerId);
         return itemService.getListItemsUserById(ownerId, from, size);
     }
@@ -88,8 +82,8 @@ public class ItemController {
     @GetMapping("/search") // Эндпоинт поиска по подстроке
     public List<ItemDto> getSearchItems(
             @RequestParam(value = "text", required = false) String text,
-            @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
-            @Positive @RequestParam(defaultValue = "10") Integer size) {
+            @RequestParam(defaultValue = "0") Integer from,
+            @RequestParam(defaultValue = "10") Integer size) {
         return itemService.getSearchItems(text, from, size);
     }
 
@@ -100,9 +94,9 @@ public class ItemController {
      * комментария будет происходить по эндпоинту POST /items/{itemId}/comment
      */
     @PostMapping("/{itemId}/comment")// Эндпоинт добавления комментария
-    public CommentDto addComment(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false)
+    public CommentDto addComment(@RequestHeader(value = "X-Sharer-User-Id", required = false)
                                  Long ownerId,
-                                 @RequestBody Comment comment, @Min(1) @NotNull @PathVariable Long itemId) {
+                                 @RequestBody Comment comment, @PathVariable Long itemId) {
         return toCommentDto(itemService.addComment(comment, ownerId, itemId));
     }
 }

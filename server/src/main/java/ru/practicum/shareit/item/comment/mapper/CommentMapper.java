@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item.comment.mapper;
 
-import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.comment.dto.CommentDto;
 import ru.practicum.shareit.item.comment.model.Comment;
 import ru.practicum.shareit.user.model.User;
@@ -8,7 +7,7 @@ import ru.practicum.shareit.user.model.User;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+
 public class CommentMapper {
     public static CommentDto toCommentDto(Comment comment) { // Метод перевода объекта item в объект itemDto
         return CommentDto.builder()

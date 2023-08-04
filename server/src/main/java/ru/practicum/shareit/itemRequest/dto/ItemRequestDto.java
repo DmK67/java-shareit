@@ -5,8 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import ru.practicum.shareit.user.model.User;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 /**
@@ -24,8 +22,7 @@ public class ItemRequestDto {
     /**
      * description — текст запроса, содержащий описание требуемой вещи;
      */
-    @NotBlank
-    @NotNull
+
     private String description;
     /**
      * requestor — пользователь, создавший запрос;
