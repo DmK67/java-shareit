@@ -9,6 +9,8 @@ import ru.practicum.shareit.item.ItemClient;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
+import javax.validation.Valid;
+import javax.validation.ValidationException;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -35,7 +37,7 @@ public class ItemController {
 
     @PostMapping // Эндпоинт добавления вещи
     public ResponseEntity<Object> addItem(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id", required = false)
-                                          Long ownerId, @RequestBody ItemDto itemDto) {
+                                          Long ownerId, @Valid @RequestBody ItemDto itemDto) {
         log.info("Добавляем вещь: {}", itemDto.getName());
         return itemClient.addItem(itemDto, ownerId);
     }
@@ -46,8 +48,14 @@ public class ItemController {
      */
     @PatchMapping("/{itemId}") // Эндпоинт обновления вещи по id
     public ResponseEntity<Object> updateItem(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id",
-            required = false) Long ownerId, @Min(1) @NotNull @PathVariable Long itemId,
-                                             @RequestBody ItemDto itemDto) {
+            required = false) Long ownerId, @RequestBody ItemDto itemDto,
+                                             @Min(1) @NotNull @PathVariable Long itemId) {
+//        if (itemDto.getName() != null && itemDto.getName().isBlank()) {
+//            throw new ValidationException("поле имени не может быть пустым");
+//        }
+//        if (itemDto.getDescription() != null && itemDto.getDescription().isBlank()) {
+//            throw new ValidationException("поле описания не может быть пустым");
+//        }
         log.info("Обновляем вещь по Id={}", itemId);
         return itemClient.updateItem(itemDto, itemId, ownerId);
     }

@@ -44,7 +44,8 @@ public class BookingController {
     @PatchMapping("/{bookingId}") // Эндпоинт обновления бронирования
     public ResponseEntity<Object> updateBooking(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id",
             required = false) Long ownerId,
-                                                @RequestParam(value = "approved", required = false) Boolean approved,
+                                                @RequestParam(value = "approved", required = false)
+                                                @NotNull Boolean approved,
                                                 @PathVariable Long bookingId) {
         log.info("Выполняем подтверждение или отклонение запроса на бронирование владельцем вещи по Id={}.", ownerId);
         return bookingClient.updateBooking(ownerId, approved, bookingId);

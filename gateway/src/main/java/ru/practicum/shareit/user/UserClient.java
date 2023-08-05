@@ -29,11 +29,6 @@ public class UserClient extends BaseClient {
     }
 
     public ResponseEntity<Object> addUser(UserDto userDto) {
-        if (userDto.getEmail() == null || userDto.getEmail().isBlank()) { // Проверка поля email объекта userDto
-                                                                          // на пустые строки и пробелы
-            log.error("Ошибка! Пользователь с пустым e-mail не может быть добавлен!");
-            throw new ValidateException("Ошибка! Пользователь с пустым e-mail не может быть добавлен!");
-        }
         return post("", userDto);
     }
 
