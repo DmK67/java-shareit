@@ -10,7 +10,6 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
 import javax.validation.Valid;
-import javax.validation.ValidationException;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -50,12 +49,6 @@ public class ItemController {
     public ResponseEntity<Object> updateItem(@Min(1) @NotNull @RequestHeader(value = "X-Sharer-User-Id",
             required = false) Long ownerId, @RequestBody ItemDto itemDto,
                                              @Min(1) @NotNull @PathVariable Long itemId) {
-//        if (itemDto.getName() != null && itemDto.getName().isBlank()) {
-//            throw new ValidationException("поле имени не может быть пустым");
-//        }
-//        if (itemDto.getDescription() != null && itemDto.getDescription().isBlank()) {
-//            throw new ValidationException("поле описания не может быть пустым");
-//        }
         log.info("Обновляем вещь по Id={}", itemId);
         return itemClient.updateItem(itemDto, itemId, ownerId);
     }

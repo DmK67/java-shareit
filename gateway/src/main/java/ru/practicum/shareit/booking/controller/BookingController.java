@@ -59,7 +59,7 @@ public class BookingController {
     @GetMapping("/{bookingId}") // Эндпоинт получение данных о конкретном бронировании (включая его статус)
     public ResponseEntity<Object> getBookingByIdAndStatus(@Min(1) @NotNull
                                                           @RequestHeader(value = "X-Sharer-User-Id", required = false)
-                                                              Long ownerId,
+                                                          Long ownerId,
                                                           @PathVariable(required = false) Long bookingId) {
         log.info("Выполняем получение данных о конкретном бронировании по Id={} (включая его статус).", bookingId);
         return bookingClient.getBookingByIdAndStatus(ownerId, bookingId);

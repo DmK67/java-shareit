@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 
 @RestControllerAdvice
@@ -26,21 +25,10 @@ public class CustomGlobalExceptionHandler {
                 .build();
     }
 
-    @ExceptionHandler({EmailDuplicateException.class})
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public CustomErrorResponse handlerEmailDuplicateException(final RuntimeException e) {
-        log.debug("Получен статус 409 Conflict {}", e.getMessage(), e);
-        return CustomErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .error(e.getMessage())
-                .status(HttpStatus.CONFLICT.value())
-                .build();
-    }
-
     @ExceptionHandler({MissingRequestHeaderException.class, MethodArgumentNotValidException.class,
-            ValidateException.class, CommentException.class})
+            ValidateException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public CustomErrorResponse badRequest(final Exception e) {
+    public CustomErrorResponse handlerBadRequest(final Exception e) {
         log.debug("Получен статус 400 Bad Request {}", e.getMessage(), e);
         return CustomErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
@@ -51,7 +39,7 @@ public class CustomGlobalExceptionHandler {
 
     @ExceptionHandler({MethodArgumentTypeMismatchException.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public CustomErrorResponse statusError(final Throwable e) {
+    public CustomErrorResponse handlerServerError(final Throwable e) {
         log.debug("Получен статус 500 Internal Server Error {}", e.getMessage(), e);
         return CustomErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
@@ -62,7 +50,7 @@ public class CustomGlobalExceptionHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public CustomErrorResponse internalServerError(final Throwable e) {
+    public CustomErrorResponse handlerInternalServerError(final Throwable e) {
         log.debug("Получен статус 500 Internal Server Error {}", e.getMessage(), e);
         return CustomErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
